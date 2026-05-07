@@ -13,7 +13,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   app:
-    build: .  # << 이 줄을 추가해야 로컬에서 빌드가 됩니다!
+    build: ./backend
     image: inkug/rememory-app:latest
     container_name: rememory-app
     depends_on:
