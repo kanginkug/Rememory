@@ -36,6 +36,7 @@ public class Place {
 
     private String longitude;
 
+    // 별점 평균
     private DecimalFormat avgRating;
 
     private LocalDateTime createdAt;
