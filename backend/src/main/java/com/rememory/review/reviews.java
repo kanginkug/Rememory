@@ -21,6 +21,7 @@ public class reviews {
     @OneToMany
     private Long placeId;
 
+    // 별점
     private DecimalFormat rating;
 
     private String content;
