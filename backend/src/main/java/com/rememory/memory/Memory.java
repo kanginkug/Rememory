@@ -1,9 +1,10 @@
 package com.rememory.memory;
 
+import com.rememory.member.Member;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,15 +16,13 @@ public class Memory {
     @Column(name = "memory_id")
     private Long id;
 
-    @OneToOne
-    private Long groupId;
-
-    @ManyToOne
-    private Long memberId;
+    @OneToMany
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     private String name;
 
-    private DecimalFormat avtRating;
+    private BigDecimal avtRating;
 
     private int memoryReviewCount;
 
