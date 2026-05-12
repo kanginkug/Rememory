@@ -14,8 +14,9 @@ public class MemoryPhoto {
     @Column(name = "memory_photo_id")
     private Long id;
 
-    @OneToMany
-    private Long memoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "memory_id")
+    private Memory memory;
 
     private String imageUrl;
 

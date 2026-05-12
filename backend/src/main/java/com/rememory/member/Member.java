@@ -1,16 +1,19 @@
 package com.rememory.member;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
-import org.springframework.context.annotation.Description;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(
+    name = "member",
+    uniqueConstraints = @UniqueConstraint(
+            name = "uk_oauth",
+            columnNames = {"oauth_provider", "oauth_id"}
+    )
+)
 public class Member {
 
     @Id
@@ -20,6 +23,7 @@ public class Member {
 
     private String name;
 
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String profileImageUrl;

@@ -1,13 +1,23 @@
 package com.rememory.place;
 
+import com.rememory.member.Member;
+import com.rememory.memory.Memory;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.text.DecimalFormat;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(
+        name = "place",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_place_kakao",
+                columnNames = {"memory_id", "kakao_place_id"}
+        )
+)
 public class Place {
 
     @Id
@@ -15,11 +25,13 @@ public class Place {
     @Column(name = "place_id")
     private Long id;
 
-    @ManyToOne
-    private Long memoryId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "memory_id")
+    private Memory memory;
 
-    @ManyToOne
-    private Long creatorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
+    private Member creator;
 
     private String name;
 
@@ -30,14 +42,19 @@ public class Place {
 
     private String address;
 
-    private String kakaoPlaceId;
+    @Column(nullable = true)
+    private String kakaoPlaceId; // 해외는 NULL 가능
 
-    private String latitude;
+    private BigDecimal latitude;
 
-    private String longitude;
+    private BigDecimal longitude;
 
     // 별점 평균
-    private DecimalFormat avgRating;
+    private BigDecimal avgRating;
+
+    private int reviewCount;
+
+    private LocalDate visitedAt;
 
     private LocalDateTime createdAt;
 
