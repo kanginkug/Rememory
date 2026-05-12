@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,23 +17,25 @@ public class Memory {
     @Column(name = "memory_id")
     private Long id;
 
-    @OneToMany
-    @JoinColumn(name = "member_id")
-    private Member member;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
+    private Member creator;
 
     private String name;
 
-    private BigDecimal avtRating;
+    private BigDecimal avgRating;
 
-    private int memoryReviewCount;
+    private int placeCount;
 
-    private int starReviewCount;
+    // 신규 멤버에게 과거 공개 여부
+    @Column(nullable = false)
+    private Boolean showHistoryToNew = true;
 
     private String description;
 
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     private LocalDateTime createdAt;
 

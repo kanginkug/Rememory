@@ -29,5 +29,15 @@ public class Invitation {
     @Column(unique = true, nullable = false)
     private String inviteCode;
 
+    // 최대 사용 횟수 (NULL = 무제한)
+    @Column(nullable = true)
+    private Integer maxUses;
+
+    // 현재 사용 횟수
+    @Column(nullable = false)
+    private Integer usedCount = 0;
+
+    private LocalDateTime createdAt;
+
     private LocalDateTime expiresAt;
 }
