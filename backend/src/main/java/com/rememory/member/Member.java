@@ -1,7 +1,9 @@
 package com.rememory.member;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
             columnNames = {"oauth_provider", "oauth_id"}
     )
 )
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
     @Id
@@ -39,4 +42,23 @@ public class Member {
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
+
+    public static Member create(String name, String email, String profileImageUrl, String oauthProvider, String oauthId) {
+        Member member = new Member();
+        member.name = name;
+        member.email = email;
+        member.profileImageUrl = profileImageUrl;
+        member.oauthProvider = oauthProvider;
+        member.oauthId = oauthId;
+        return member;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }
