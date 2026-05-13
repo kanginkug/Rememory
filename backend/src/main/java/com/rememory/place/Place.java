@@ -54,6 +54,12 @@ public class Place {
 
     private int reviewCount;
 
+    // (시/도) ex : 서울
+    private String region_depth1;
+
+    // (시/군/구) ex : 마포구
+    private String region_depth2;
+
     private LocalDate visitedAt;
 
     private LocalDateTime createdAt;
