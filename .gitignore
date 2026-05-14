@@ -44,6 +44,7 @@ node_modules/
 /package-lock.json
 
 CLAUDE.md
+CONVENTIONS.md
 .claude/
 todo.md
 firebase-service-account.json
