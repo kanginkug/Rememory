@@ -1,5 +1,7 @@
 package com.rememory.member;
 
+import com.rememory.common.exception.BusinessException;
+import com.rememory.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +35,7 @@ public class MemberService {
     @Transactional
     public void delete(Long id) {
         Member member = memberRepository.findOne(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         member.delete();
     }
 }
