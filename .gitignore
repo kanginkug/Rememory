@@ -50,5 +50,8 @@ CONVENTIONS.md
 todo.md
 firebase-service-account.json
 
+### QueryDSL Generated ###
+src/main/generated/
+
 ### Test ###
 backend/src/test/resources/application.properties
