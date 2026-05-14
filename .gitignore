@@ -38,6 +38,7 @@ out/
 
 .env
 docker/.env
+backend/.env
 
 node_modules/
 /package.json
@@ -48,3 +49,9 @@ CONVENTIONS.md
 .claude/
 todo.md
 firebase-service-account.json
+
+### QueryDSL Generated ###
+src/main/generated/
+
+### Test ###
+backend/src/test/resources/application.properties
