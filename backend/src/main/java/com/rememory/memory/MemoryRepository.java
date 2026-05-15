@@ -58,5 +58,4 @@ public class MemoryRepository {
         return Optional.ofNullable(em.find(Memory.class, memoryId));
     }
 
-
 }

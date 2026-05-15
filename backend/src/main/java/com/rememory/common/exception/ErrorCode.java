@@ -15,6 +15,7 @@ public enum ErrorCode {
     MEMORY_NOT_FOUND("MM001", "존재하지 않는 메모리입니다."),
     MEMORY_ACCESS_DENIED("MM002", "접근 권한이 없습니다."),
     MEMORY_NOT_CREATOR("MM003", "메모리 생성자만 가능합니다."),
+    MEMORY_PHOTO_NOT_FOUND("MM004", "메모리 사진이 존재하지 않습니다."),
 
     // ===== MemberMemory =====
     MEMBER_MEMORY_ALREADY_EXISTS("MME001", "이미 참가한 메모리입니다."),

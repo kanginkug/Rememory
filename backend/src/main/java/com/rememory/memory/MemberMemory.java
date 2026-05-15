@@ -2,12 +2,15 @@ package com.rememory.memory;
 
 import com.rememory.member.Member;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MemberMemory {
 
     @Id
@@ -27,4 +30,15 @@ public class MemberMemory {
 
     private LocalDateTime leftAt;
 
+    public static MemberMemory create(Member member, Memory memory) {
+        MemberMemory memberMemory = new MemberMemory();
+        memberMemory.member = member;
+        memberMemory.memory = memory;
+        memberMemory.joinedAt = LocalDateTime.now();
+        return memberMemory;
+    }
+
+    public void leftMemory() {
+        this.leftAt = LocalDateTime.now();
+    }
 }
