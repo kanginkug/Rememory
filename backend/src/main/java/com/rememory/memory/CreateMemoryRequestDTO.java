@@ -20,6 +20,8 @@ public class CreateMemoryRequestDTO {
     @NotBlank
     private String description;
 
+    private int invitedCnt;
+
     private String photoUrl;
 
     private LocalDate startDate;

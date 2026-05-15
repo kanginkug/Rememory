@@ -50,7 +50,7 @@ public class MemoryRepository {
                         QMemory.memory.deletedAt.isNull(),
                         keyword != null ? QMemory.memory.name.containsIgnoreCase(keyword) : null
                 )
-                .orderBy(orderSpecifier)
+                .orderBy(orderSpecifier, QMemory.memory.id.desc())
                 .fetch();
     }
 

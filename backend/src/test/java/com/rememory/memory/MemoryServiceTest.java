@@ -345,7 +345,7 @@ class MemoryServiceTest {
     // ===== 헬퍼 메서드 =====
 
     private CreateMemoryRequestDTO createMemoryDto(String name, String description, String photoUrl) {
-        return new CreateMemoryRequestDTO(name, description, photoUrl,
+        return new CreateMemoryRequestDTO(name, description, 0, photoUrl,
                 LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5));
     }
 

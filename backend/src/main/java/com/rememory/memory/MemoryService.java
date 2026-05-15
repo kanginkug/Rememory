@@ -3,6 +3,7 @@ package com.rememory.memory;
 import com.rememory.common.commonEnum.SortType;
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
+import com.rememory.invitation.InvitationService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class MemoryService {
     private final MemberRepository memberRepository;
     private final MemoryPhotoRepository mpRepository;
     private final MemberMemoryRepository mmRepository;
+    private final InvitationService invitationService;
 
     @Transactional
     public void createMemory(Long creatorId, CreateMemoryRequestDTO memory) {
@@ -34,6 +36,10 @@ public class MemoryService {
         if (memory.getPhotoUrl() != null && !memory.getPhotoUrl().isEmpty()) {
             MemoryPhoto memoryPhoto = MemoryPhoto.create(createMemory, creator, memory.getPhotoUrl());
             mpRepository.save(memoryPhoto);
+        }
+
+        if(memory.getInvitedCnt() > 0) {
+            invitationService.save(createMemory.getId(), creatorId, memory.getInvitedCnt());
         }
     }
 
