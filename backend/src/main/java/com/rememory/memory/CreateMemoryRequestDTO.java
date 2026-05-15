@@ -2,10 +2,12 @@ package com.rememory.memory;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Valid
 @Getter
@@ -17,6 +19,8 @@ public class CreateMemoryRequestDTO {
 
     @NotBlank
     private String description;
+
+    private String photoUrl;
 
     private LocalDate startDate;
 
