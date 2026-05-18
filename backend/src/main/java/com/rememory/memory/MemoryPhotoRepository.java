@@ -27,8 +27,7 @@ public class MemoryPhotoRepository {
      */
     public Optional<MemoryPhoto> findOne(Long memoryId) {
         List<MemoryPhoto> result = em.createQuery(
-                "select mp from MemoryPhoto mp where mp.memory.id = :memoryId and mp.deletedAt is null",
-                MemoryPhoto.class)
+                "select mp from MemoryPhoto mp where mp.memory.id = :memoryId and mp.deletedAt is null", MemoryPhoto.class)
                 .setParameter("memoryId", memoryId)
                 .getResultList();
         return result.stream().findFirst();
