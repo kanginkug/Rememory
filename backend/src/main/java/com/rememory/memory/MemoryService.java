@@ -1,6 +1,5 @@
 package com.rememory.memory;
 
-import com.rememory.common.commonEnum.SortType;
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
 import com.rememory.invitation.InvitationService;
@@ -57,8 +56,8 @@ public class MemoryService {
         updateMemory.update(memory.getMemoryName(), memory.getShowHistoryToNew(), memory.getDescription(), memory.getStartDate(), memory.getEndDate());
     }
 
-    public List<Memory> findMemoryList(Long memberId, SortType sortType, String keyword) {
-        return memoryRepository.findAllByMemberId(memberId, sortType, keyword);
+    public List<Memory> findMemoryList(Long memberId, SortTypeMemory sortTypeMemory, String keyword) {
+        return memoryRepository.findAllByMemberId(memberId, sortTypeMemory, keyword);
     }
 
     @Transactional

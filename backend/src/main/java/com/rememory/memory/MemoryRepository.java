@@ -2,7 +2,6 @@ package com.rememory.memory;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.rememory.common.commonEnum.SortType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +25,12 @@ public class MemoryRepository {
 
     /**
      * 메모리 목록 조회
-     * @param sortType "DATE_DESC" 최신순 / "DATE_ASC" 오래된순
+     * @param sortTypeMemory "DATE_DESC" 최신순 / "DATE_ASC" 오래된순
      *                 "RATING_DESC" 별점높은순 / "RATING_ASC" 별점낮은순
      * @param keyword  키워드로 메모리명 검색
      */
-    public List<Memory> findAllByMemberId(Long memberId, SortType sortType, String keyword){
-        OrderSpecifier<?> orderSpecifier = switch (sortType) {
+    public List<Memory> findAllByMemberId(Long memberId, SortTypeMemory sortTypeMemory, String keyword){
+        OrderSpecifier<?> orderSpecifier = switch (sortTypeMemory) {
             case DATE_ASC -> QMemory.memory.createdAt.asc();
             case DATE_DESC -> QMemory.memory.createdAt.desc();
             case RATING_ASC -> QMemory.memory.avgRating.asc();
