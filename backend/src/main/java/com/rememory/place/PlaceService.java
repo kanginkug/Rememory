@@ -7,6 +7,8 @@ import com.rememory.member.MemberRepository;
 import com.rememory.memory.MemberMemoryRepository;
 import com.rememory.memory.Memory;
 import com.rememory.memory.MemoryRepository;
+import com.rememory.review.Review;
+import com.rememory.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ public class PlaceService {
     private final PlacePhotoRepository ppRepository;
     private final MemberRepository memberRepository;
     private final MemoryRepository memoryRepository;
+    private final ReviewRepository reviewRepository;
     private final MemberMemoryRepository mmRepository;
 
     @Transactional
@@ -39,6 +42,7 @@ public class PlaceService {
                 cpRequestDTO.getLatitude(), cpRequestDTO.getLongitude(), cpRequestDTO.getRegionDepth1(), cpRequestDTO.getRegionDepth2(), cpRequestDTO.getVisitedAt());
 
         placeRepository.save(place);
+        memoryRepository.updatePlaceCount(memoryId, 1);
     }
 
     public List<Place> findAll(Long memoryId) {
@@ -61,8 +65,11 @@ public class PlaceService {
 
         // PlacePhoto softDelete
         ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
+        reviewRepository.findAllByPlaceId(placeId).forEach(Review::delete);
 
         place.delete();
+        memoryRepository.updatePlaceCount(memoryId, -1);
+        memoryRepository.recalculateRating(memoryId);
     }
 
     @Transactional

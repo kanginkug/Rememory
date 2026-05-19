@@ -2,11 +2,13 @@ package com.rememory.memory;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.rememory.place.QPlace;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +57,28 @@ public class MemoryRepository {
 
     public Optional<Memory> findOne(Long memoryId) {
         return Optional.ofNullable(em.find(Memory.class, memoryId));
+    }
+
+    public void recalculateRating(Long memoryId) {
+        Double avg = queryFactory.select(QPlace.place.avgRating.avg())
+                .from(QPlace.place)
+                .where(
+                        QPlace.place.memory.id.eq(memoryId),
+                        QPlace.place.deletedAt.isNull()
+                )
+                .fetchOne();
+
+        queryFactory.update(QMemory.memory)
+                .set(QMemory.memory.avgRating, avg != null ? BigDecimal.valueOf(avg) : BigDecimal.ZERO)
+                .where(QMemory.memory.id.eq(memoryId))
+                .execute();
+    }
+
+    public void updatePlaceCount(Long memoryId, int delta) {
+        queryFactory.update(QMemory.memory)
+                .set(QMemory.memory.placeCount, QMemory.memory.placeCount.add(delta))
+                .where(QMemory.memory.id.eq(memoryId))
+                .execute();
     }
 
 }
