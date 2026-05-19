@@ -50,17 +50,38 @@ public class ReviewService {
     }
 
     public Review findMyReview(Long memoryId, Long memberId, Long placeId) {
-        certification(memoryId, memberId);
+        if(memoryRepository.findOne(memoryId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
+        }
+
+        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
+            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
+        }
+
         return reviewRepository.findByPlaceIdAndMemberId(placeId, memberId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
     }
 
     public List<Review> findAllByPlaceId(Long memoryId, Long memberId, Long placeId) {
-        certification(memoryId, memberId);
+        if(memoryRepository.findOne(memoryId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
+        }
+
+        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
+            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
+        }
+
         return reviewRepository.findAllByPlaceId(placeId);
     }
 
     public List<Review> sortByReviewType(Long memoryId, Long memberId, Long placeId, SortReviewRequestDTO srRequestDTO) {
-        certification(memoryId, memberId);
+        if(memoryRepository.findOne(memoryId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
+        }
+
+        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
+            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
+        }
+
         return reviewRepository.sortByType(placeId, srRequestDTO.getSortTypeReview());
     }
 
