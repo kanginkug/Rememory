@@ -27,7 +27,8 @@ public class MemberMemoryRepository {
                 .selectFrom(QMemberMemory.memberMemory)
                 .where(
                         QMemberMemory.memberMemory.memory.id.eq(memoryId),
-                        QMemberMemory.memberMemory.member.id.eq(memberId)
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull()
                 )
                 .fetchOne()
         );

@@ -28,9 +28,9 @@ public class UpdatePlaceRequestDTO {
 
     private BigDecimal longitude;
 
-    private String region_depth1;
+    private String regionDepth1;
 
-    private String region_depth2;
+    private String regionDepth2;
 
     private LocalDate visitedAt;
 }
