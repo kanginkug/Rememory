@@ -25,6 +25,10 @@ public class ReviewService {
     private final PlaceRepository placeRepository;
     private final ReviewRepository reviewRepository;
 
+    /**
+     * 후기 작성
+     * 1인 1후기 체크 → Review INSERT → Place avgRating 갱신 → Memory avgRating 재계산
+     */
     @Transactional
     public void save(Long memoryId, Long creatorId, Long placeId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
         Member creator = memberRepository.findOne(creatorId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
@@ -32,6 +36,7 @@ public class ReviewService {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
+        // 1인 1후기 중복 체크
         if(reviewRepository.findByPlaceIdAndMemberId(placeId, creatorId).isPresent()) {
             throw new BusinessException(ErrorCode.REVIEW_ALREADY_EXISTS);
         }

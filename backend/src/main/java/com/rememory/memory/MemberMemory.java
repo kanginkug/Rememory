@@ -38,6 +38,7 @@ public class MemberMemory {
         return memberMemory;
     }
 
+    /** leftAt이 null이면 활성 멤버, null이 아니면 나간 멤버 */
     public void leftMemory() {
         this.leftAt = LocalDateTime.now();
     }

@@ -57,13 +57,17 @@ public class PlaceService {
         return placeRepository.findByName(name, memoryId);
     }
 
+    /**
+     * 장소 삭제 — 연관 데이터 cascade softDelete 후 통계 갱신
+     * 순서: 사진 → 리뷰 softDelete → 장소 softDelete → placeCount-- → avgRating 재계산
+     * place.delete()가 flush된 뒤 recalculateRating이 실행되므로 삭제된 장소는 집계에서 제외됨
+     */
     @Transactional
     public void deletePlace(Long memoryId, Long memberId, Long placeId) {
         certification(memoryId, memberId);
 
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
 
-        // PlacePhoto softDelete
         ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
         reviewRepository.findAllByPlaceId(placeId).forEach(Review::delete);
 

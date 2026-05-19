@@ -80,7 +80,7 @@ public class Place {
         place.kakaoPlaceId = kakaoPlaceId;
         place.latitude = latitude;
         place.longitude = longitude;
-        place.avgRating = BigDecimal.ZERO;
+        place.avgRating = BigDecimal.ZERO; // null이면 첫 리뷰 추가 시 UPDATE 산술식(null*0)이 null이 되므로 반드시 초기화
         place.regionDepth1 = regionDepth1;
         place.regionDepth2 = regionDepth2;
         place.visitedAt = visitedAt;

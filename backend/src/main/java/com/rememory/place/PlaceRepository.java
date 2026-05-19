@@ -78,7 +78,11 @@ public class PlaceRepository {
                   .fetch();
     }
 
-    // 리뷰 추가 시 별점 평균 계산
+    /**
+     * 단일 UPDATE 문으로 읽기·계산·쓰기를 원자적으로 처리
+     * → SELECT FOR UPDATE 없이도 동시 요청이 직렬화됨 (PostgreSQL row-level lock)
+     * 공식: newAvg = (avgRating * reviewCount + newRating) / (reviewCount + 1)
+     */
     public void updateRatingOnCreate(Long placeId, BigDecimal newRating) {
         queryFactory.update(QPlace.place)
                 .set(QPlace.place.avgRating,
@@ -91,7 +95,7 @@ public class PlaceRepository {
                 .execute();
     }
 
-    // 리뷰 수정 시 별점 평균 계산
+    /** 공식: newAvg = (avgRating * reviewCount - oldRating + newRating) / reviewCount */
     public void updateRatingOnUpdate(Long placeId, BigDecimal newRating, BigDecimal oldRating) {
         queryFactory.update(QPlace.place)
                 .set(QPlace.place.avgRating,
@@ -104,7 +108,10 @@ public class PlaceRepository {
                 .execute();
     }
 
-    // 리뷰 삭제 시 별점 평균 계산
+    /**
+     * reviewCount == 1이면 마지막 리뷰 삭제이므로 0으로 초기화 (0으로 나누기 방지)
+     * 공식: newAvg = (avgRating * reviewCount - oldRating) / (reviewCount - 1)
+     */
     public void updateRatingOnDelete(Long placeId, BigDecimal oldRating) {
         queryFactory.update(QPlace.place)
                 .set(QPlace.place.avgRating,
