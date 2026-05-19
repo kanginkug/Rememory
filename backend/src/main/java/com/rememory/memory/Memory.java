@@ -64,6 +64,7 @@ public class Memory {
         this.endDate = endDate;
     }
 
+    /** MemoryRepository.recalculateRating()에서 전체 Place 집계 후 호출 */
     public void recalculateRating(BigDecimal avgRating, int placeCount){
         this.avgRating = avgRating;
         this.placeCount = placeCount;

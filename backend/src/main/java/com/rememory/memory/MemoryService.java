@@ -69,7 +69,7 @@ public class MemoryService {
     /**
      * 추억 나가기
      * - leftAt 세팅
-     * - 남은 멤버 0명이면 Memory 자동 softDelete
+     * - 마지막 멤버가 나가면 Memory 자동 softDelete (고아 추억 방지)
      */
     @Transactional
     public void leftMemory(Long memoryId, Long memberId) {
@@ -78,7 +78,6 @@ public class MemoryService {
 
         memberMemory.leftMemory();
 
-        // 남은 멤버 0명이면 Memory 자동 softDelete
         int remainCount = mmRepository.countActiveMembers(memoryId);
         if (remainCount == 0) {
             Memory memory = memoryRepository.findOne(memoryId)

@@ -21,6 +21,7 @@ public class MemberMemoryRepository {
         em.persist(memberMemory);
     }
 
+    /** leftAt.isNull() 조건으로 이미 나간 멤버는 활성 멤버로 인식되지 않도록 차단 */
     public Optional<MemberMemory> findByMemoryIdAndMemberId(Long memoryId, Long memberId) {
         return Optional.ofNullable(
                 queryFactory

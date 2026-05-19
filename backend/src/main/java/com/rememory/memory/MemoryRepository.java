@@ -59,6 +59,7 @@ public class MemoryRepository {
         return Optional.ofNullable(em.find(Memory.class, memoryId));
     }
 
+    /** 삭제되지 않은 전체 Place의 avgRating 평균을 Memory에 반영 — Review 변동 시마다 호출 */
     public void recalculateRating(Long memoryId) {
         Double avg = queryFactory.select(QPlace.place.avgRating.avg())
                 .from(QPlace.place)
@@ -68,12 +69,14 @@ public class MemoryRepository {
                 )
                 .fetchOne();
 
+        // 리뷰가 하나도 없는 경우(avg == null) 0으로 초기화
         queryFactory.update(QMemory.memory)
                 .set(QMemory.memory.avgRating, avg != null ? BigDecimal.valueOf(avg) : BigDecimal.ZERO)
                 .where(QMemory.memory.id.eq(memoryId))
                 .execute();
     }
 
+    /** delta: 장소 추가 시 +1, 삭제 시 -1 */
     public void updatePlaceCount(Long memoryId, int delta) {
         queryFactory.update(QMemory.memory)
                 .set(QMemory.memory.placeCount, QMemory.memory.placeCount.add(delta))

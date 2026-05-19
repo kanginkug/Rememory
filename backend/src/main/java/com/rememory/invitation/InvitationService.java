@@ -37,6 +37,11 @@ public class InvitationService {
         invitationRepository.save(invitation);
     }
 
+    /**
+     * 초대 수락
+     * 링크 유효성(만료·사용 횟수) 먼저 체크 후 중복 참여 검증
+     * 이미 참여 중인 멤버가 재클릭해도 MEMBER_MEMORY_ALREADY_EXISTS로 차단
+     */
     @Transactional
     public void agreeInvite(Long invitedMemberId, String inviteCode) {
         Invitation invitation = invitationRepository.findOneByInviteCode(inviteCode).orElseThrow(() -> new BusinessException(ErrorCode.INVITATION_NOT_FOUND));
