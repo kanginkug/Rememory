@@ -169,47 +169,10 @@ class MemoryServiceTest {
         assertThat(memories.get(0).getName()).isEqualTo("제주도 여행");
     }
 
-    // ===== deleteMemory =====
-
-    @Test
-    @DisplayName("추억 삭제 성공 - deletedAt 세팅")
-    void deleteMemory_성공() {
-        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
-        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
-
-        memoryService.deleteMemory(member.getId(), memory.getId());
-
-        Memory deleted = memoryRepository.findOne(memory.getId()).get();
-        assertThat(deleted.getDeletedAt()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("creator가 아닌 멤버가 삭제 시 BusinessException 발생")
-    void deleteMemory_권한없음_예외발생() {
-        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
-        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
-
-        assertThatThrownBy(() -> memoryService.deleteMemory(otherMember.getId(), memory.getId()))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorCode.MEMORY_NOT_CREATOR.getMessage());
-    }
-
-    @Test
-    @DisplayName("삭제된 추억은 목록에서 조회 안 됨")
-    void deleteMemory_삭제후_목록미조회() {
-        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
-        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
-
-        memoryService.deleteMemory(member.getId(), memory.getId());
-
-        List<Memory> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
-        assertThat(memories).isEmpty();
-    }
-
     // ===== leftMemory =====
 
     @Test
-    @DisplayName("추억 탈퇴 성공 - leftAt 세팅")
+    @DisplayName("추억 나가기 성공 - leftAt 세팅")
     void leftMemory_성공() {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
@@ -221,8 +184,38 @@ class MemoryServiceTest {
     }
 
     @Test
-    @DisplayName("탈퇴 후 추억 목록에서 조회 안 됨")
-    void leftMemory_탈퇴후_목록미조회() {
+    @DisplayName("마지막 멤버 나가면 Memory 자동 softDelete")
+    void leftMemory_마지막멤버_자동삭제() {
+        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
+        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
+
+        memoryService.leftMemory(memory.getId(), member.getId());
+
+        Memory deleted = memoryRepository.findOne(memory.getId()).get();
+        assertThat(deleted.getDeletedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("멤버가 남아있으면 나가도 Memory 유지")
+    void leftMemory_멤버남으면_Memory유지() {
+        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
+        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
+
+        // otherMember도 추억에 추가
+        MemberMemory otherMemberMemory = MemberMemory.create(otherMember, memory);
+        mmRepository.save(otherMemberMemory);
+
+        // member만 나가기
+        memoryService.leftMemory(memory.getId(), member.getId());
+
+        // Memory는 살아있어야 함
+        Memory found = memoryRepository.findOne(memory.getId()).get();
+        assertThat(found.getDeletedAt()).isNull();
+    }
+
+    @Test
+    @DisplayName("나간 후 추억 목록에서 조회 안 됨")
+    void leftMemory_나간후_목록미조회() {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
@@ -233,7 +226,7 @@ class MemoryServiceTest {
     }
 
     @Test
-    @DisplayName("참가하지 않은 추억 탈퇴 시 BusinessException 발생")
+    @DisplayName("참가하지 않은 추억 나가기 시 BusinessException 발생")
     void leftMemory_미참가_예외발생() {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);

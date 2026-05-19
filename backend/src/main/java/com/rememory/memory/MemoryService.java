@@ -37,7 +37,7 @@ public class MemoryService {
             mpRepository.save(memoryPhoto);
         }
 
-        if(memory.getInvitedCnt() > 0) {
+        if (memory.getInvitedCnt() > 0) {
             invitationService.save(createMemory.getId(), creatorId, memory.getInvitedCnt());
         }
     }
@@ -60,30 +60,31 @@ public class MemoryService {
         return memoryRepository.findAllByMemberId(memberId, sortTypeMemory, keyword);
     }
 
-    @Transactional
-    public void deleteMemory(Long memberId, Long memoryId) {
-        Member deleter = memberRepository.findOne(memberId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-        Memory deleteMemory = memoryRepository.findOne(memoryId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
-
-        if (!deleter.getId().equals(deleteMemory.getCreator().getId())) {
-            throw new BusinessException(ErrorCode.MEMORY_NOT_CREATOR);
-        }
-        deleteMemory.delete();
-    }
-
     /** 해당 메모리에 해당 회원이 존재하는지 체크 */
     public MemberMemory findOne(Long memoryId, Long memberId) {
         return mmRepository.findByMemoryIdAndMemberId(memoryId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND));
     }
 
+    /**
+     * 추억 나가기
+     * - leftAt 세팅
+     * - 남은 멤버 0명이면 Memory 자동 softDelete
+     */
     @Transactional
     public void leftMemory(Long memoryId, Long memberId) {
         MemberMemory memberMemory = mmRepository.findByMemoryIdAndMemberId(memoryId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND));
+
         memberMemory.leftMemory();
+
+        // 남은 멤버 0명이면 Memory 자동 softDelete
+        int remainCount = mmRepository.countActiveMembers(memoryId);
+        if (remainCount == 0) {
+            Memory memory = memoryRepository.findOne(memoryId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
+            memory.delete();
+        }
     }
 
     /**

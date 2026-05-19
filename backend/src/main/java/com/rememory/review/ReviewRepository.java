@@ -28,16 +28,22 @@ public class ReviewRepository {
         em.persist(review);
     }
 
-    public Review findOne(Long reviewId) {
-        return em.createQuery("select r from Review r where r.id = :reviewId", Review.class)
-                .setParameter("reviewId", reviewId)
-                .getSingleResult();
+    public Optional<Review> findOne(Long reviewId) {
+        try {
+            return Optional.ofNullable(
+                    em.createQuery("select r from Review r where r.id = :reviewId and r.deletedAt is null", Review.class)
+                            .setParameter("reviewId", reviewId)
+                            .getSingleResult()
+            );
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     public List<Review> findAllByPlaceId(Long placeId) {
             return em.createQuery("select r from Review r " +
                                       "where r.place.id = :placeId and r.deletedAt is null " +
-                                      "order by createdAt desc", Review.class)
+                                      "order by r.createdAt desc", Review.class)
                         .setParameter("placeId", placeId)
                         .getResultList();
     }
@@ -81,7 +87,8 @@ public class ReviewRepository {
                             .on(QReview.review.member.id.eq(QMember.member.id))
                             .where(
                                     QReview.review.place.id.eq(PlaceId),
-                                    QReview.review.member.id.eq(memberId)
+                                    QReview.review.member.id.eq(memberId),
+                                    QReview.review.deletedAt.isNull()
                             )
                             .fetchOne()
             );

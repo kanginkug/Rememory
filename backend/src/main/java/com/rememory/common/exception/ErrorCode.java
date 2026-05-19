@@ -29,6 +29,8 @@ public enum ErrorCode {
     // ===== Place =====
     PLACE_NOT_FOUND("P001", "존재하지 않는 장소입니다."),
     PLACE_ACCESS_DENIED("P002", "장소에 접근 권한이 없습니다."),
+    PLACE_PHOTO_NOT_FOUND("P003", "장소 사진이 존재하지 않습니다."),
+    PLACE_PHOTO_ACCESS_DENIED("P004", "장소 사진에 접근 권한이 없습니다."),
 
     // ===== Review =====
     REVIEW_NOT_FOUND("R001", "존재하지 않는 후기입니다."),
