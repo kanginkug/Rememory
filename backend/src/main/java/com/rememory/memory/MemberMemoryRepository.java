@@ -44,4 +44,17 @@ public class MemberMemoryRepository {
                 )
                 .fetch();
     }
+
+    /** 활성 멤버 수 조회 (탈퇴하지 않은 멤버) */
+    public int countActiveMembers(Long memoryId) {
+        Long count = queryFactory
+                .select(QMemberMemory.memberMemory.count())
+                .from(QMemberMemory.memberMemory)
+                .where(
+                        QMemberMemory.memberMemory.memory.id.eq(memoryId),
+                        QMemberMemory.memberMemory.leftAt.isNull()
+                )
+                .fetchOne();
+        return count != null ? count.intValue() : 0;
+    }
 }

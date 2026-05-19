@@ -2,12 +2,15 @@ package com.rememory.place;
 
 import com.rememory.member.Member;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PlacePhoto {
 
     @Id
@@ -25,9 +28,24 @@ public class PlacePhoto {
 
     private String imageUrl;
 
-    private int displayOrder;
-
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
+
+    public static PlacePhoto create(Place place, Member creator, String imageUrl) {
+        PlacePhoto placePhoto = new PlacePhoto();
+        placePhoto.place = place;
+        placePhoto.creator = creator;
+        placePhoto.imageUrl = imageUrl;
+        return placePhoto;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }

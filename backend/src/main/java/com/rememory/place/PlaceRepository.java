@@ -26,6 +26,22 @@ public class PlaceRepository {
         em.persist(place);
     }
 
+    public Optional<Place> findOne(Long memoryId, Long placeId) {
+        try {
+            return Optional.ofNullable(
+                    queryFactory.selectFrom(QPlace.place)
+                            .where(
+                                    QPlace.place.deletedAt.isNull(),
+                                    QPlace.place.memory.id.eq(memoryId),
+                                    QPlace.place.id.eq(placeId)
+                            )
+                            .fetchOne()
+            );
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
     public List<Place> findAllByMemoryId(Long memoryId) {
             return queryFactory.selectFrom(QPlace.place)
                     .where(

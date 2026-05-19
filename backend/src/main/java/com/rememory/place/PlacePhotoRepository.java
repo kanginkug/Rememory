@@ -30,4 +30,16 @@ public class PlacePhotoRepository {
                     .setParameter("placeId", placeId)
                     .getResultList();
     }
+
+    public Optional<PlacePhoto> findOne(Long placePhotoId) {
+        try {
+            return Optional.ofNullable(
+                    em.createQuery("select pp from PlacePhoto pp where pp.id = :placePhotoId", PlacePhoto.class)
+                            .setParameter("placePhotoId" ,placePhotoId)
+                            .getSingleResult()
+            );
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
 }
