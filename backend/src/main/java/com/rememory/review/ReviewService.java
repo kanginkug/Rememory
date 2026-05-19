@@ -41,6 +41,7 @@ public class ReviewService {
         Review review = Review.create(creator, place, cuReviewRequestDTO.getRating(), cuReviewRequestDTO.getContent(), cuReviewRequestDTO.getVisitedAt());
         reviewRepository.save(review);
         placeRepository.updateRatingOnCreate(placeId, cuReviewRequestDTO.getRating());
+        memoryRepository.recalculateRating(memoryId);
     }
 
     public Review findMyReview(Long memoryId, Long memberId, Long placeId) {
@@ -68,6 +69,7 @@ public class ReviewService {
         BigDecimal oldRating = review.getRating();
         review.update(cuReviewRequestDTO.getRating(), cuReviewRequestDTO.getContent(), cuReviewRequestDTO.getVisitedAt());
         placeRepository.updateRatingOnUpdate(PlaceId, cuReviewRequestDTO.getRating(), oldRating);
+        memoryRepository.recalculateRating(memoryId);
     }
 
     @Transactional
@@ -80,6 +82,7 @@ public class ReviewService {
         BigDecimal oldRating = review.getRating();
         review.delete();
         placeRepository.updateRatingOnDelete(placeId, oldRating);
+        memoryRepository.recalculateRating(memoryId);
     }
 
     private void certification(Long memoryId, Long memberId){
