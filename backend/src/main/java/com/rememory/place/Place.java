@@ -58,10 +58,10 @@ public class Place {
     private int reviewCount;
 
     // (시/도) ex : 서울
-    private String region_depth1;
+    private String regionDepth1;
 
     // (시/군/구) ex : 마포구
-    private String region_depth2;
+    private String regionDepth2;
 
     private LocalDate visitedAt;
 
@@ -70,7 +70,7 @@ public class Place {
     private LocalDateTime deletedAt;
 
     public static Place create(Memory memory, Member creator, String name, Category category, String address, String kakaoPlaceId,
-                           BigDecimal latitude, BigDecimal longitude, BigDecimal avgRating, int reviewCount, String region_depth1, String region_depth2, LocalDate visitedAt) {
+                           BigDecimal latitude, BigDecimal longitude, String regionDepth1, String regionDepth2, LocalDate visitedAt) {
         Place place = new Place();
         place.memory = memory;
         place.creator = creator;
@@ -80,24 +80,22 @@ public class Place {
         place.kakaoPlaceId = kakaoPlaceId;
         place.latitude = latitude;
         place.longitude = longitude;
-        place.avgRating = avgRating;
-        place.reviewCount = reviewCount;
-        place.region_depth1 = region_depth1;
-        place.region_depth2 = region_depth2;
+        place.regionDepth1 = regionDepth1;
+        place.regionDepth2 = regionDepth2;
         place.visitedAt = visitedAt;
         return place;
     }
 
     public void update(String name, Category category, String address, String kakaoPlaceId,
-                       BigDecimal latitude, BigDecimal longitude, String region_depth1, String region_depth2, LocalDate visitedAt) {
+                       BigDecimal latitude, BigDecimal longitude, String regionDepth1, String regionDepth2, LocalDate visitedAt) {
         this.name = name;
         this.category = category;
         this.address = address;
         this.kakaoPlaceId = kakaoPlaceId;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.region_depth1 = region_depth1;
-        this.region_depth2 = region_depth2;
+        this.regionDepth1 = regionDepth1;
+        this.regionDepth2 = regionDepth2;
         this.visitedAt = visitedAt;
     }
 

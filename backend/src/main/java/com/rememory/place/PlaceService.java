@@ -36,8 +36,7 @@ public class PlaceService {
 
 
         Place place = Place.create(memory, creator, cpRequestDTO.getName(), cpRequestDTO.getCategory(), cpRequestDTO.getAddress(), cpRequestDTO.getKakaoPlaceId(),
-                cpRequestDTO.getLatitude(), cpRequestDTO.getLongitude(), BigDecimal.valueOf(0), 0,
-                cpRequestDTO.getRegion_depth1(), cpRequestDTO.getRegion_depth2(), cpRequestDTO.getVisitedAt());
+                cpRequestDTO.getLatitude(), cpRequestDTO.getLongitude(), cpRequestDTO.getRegionDepth1(), cpRequestDTO.getRegionDepth2(), cpRequestDTO.getVisitedAt());
 
         placeRepository.save(place);
     }
@@ -72,7 +71,7 @@ public class PlaceService {
 
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
         place.update(upReuqestDTO.getName(), upReuqestDTO.getCategory(), upReuqestDTO.getAddress(), upReuqestDTO.getKakaoPlaceId(),
-                upReuqestDTO.getLatitude(), upReuqestDTO.getLongitude(), upReuqestDTO.getRegion_depth1(), upReuqestDTO.getRegion_depth2(), upReuqestDTO.getVisitedAt());
+                upReuqestDTO.getLatitude(), upReuqestDTO.getLongitude(), upReuqestDTO.getRegionDepth1(), upReuqestDTO.getRegionDepth2(), upReuqestDTO.getVisitedAt());
     }
 
     @Transactional
@@ -101,7 +100,7 @@ public class PlaceService {
         placePhoto.delete();
     }
 
-    public void certification(Long memoryId, Long memberId){
+    private void certification(Long memoryId, Long memberId){
         if(memberRepository.findOne(memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
         }

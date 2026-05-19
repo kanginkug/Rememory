@@ -34,7 +34,7 @@ public class PlacePhotoRepository {
     public Optional<PlacePhoto> findOne(Long placePhotoId) {
         try {
             return Optional.ofNullable(
-                    em.createQuery("select pp from PlacePhoto pp where pp.id = :placePhotoId", PlacePhoto.class)
+                    em.createQuery("select pp from PlacePhoto pp where pp.id = :placePhotoId and pp.deletedAt is null", PlacePhoto.class)
                             .setParameter("placePhotoId" ,placePhotoId)
                             .getSingleResult()
             );
