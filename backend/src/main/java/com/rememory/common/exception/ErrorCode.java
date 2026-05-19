@@ -36,6 +36,12 @@ public enum ErrorCode {
     REVIEW_ALREADY_EXISTS("R002", "이미 후기를 작성했습니다."),
     REVIEW_NOT_OWNER("R003", "후기 작성자만 가능합니다."),
 
+    // ===== Token =====
+    TOKEN_EXPIRED("T001", "만료된 토큰입니다."),
+    TOKEN_INVALID("T002", "유효하지 않은 토큰입니다."),
+    TOKEN_MALFORMED("T003", "잘못된 형식의 토큰입니다."),
+    TOKEN_EMPTY("T004", "토큰이 없습니다."),
+
     // ===== Server =====
     INTERNAL_SERVER_ERROR("S001", "서버 오류가 발생했습니다.");
 
