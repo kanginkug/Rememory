@@ -41,4 +41,31 @@ public class Review {
     private LocalDateTime updatedAt;
 
     private LocalDateTime deletedAt;
+
+    public static Review create(Member member, Place place, BigDecimal rating, String content, LocalDate visitedAt) {
+        Review review = new Review();
+        review.member = member;
+        review.place = place;
+        review.rating = rating;
+        review.content = content;
+        review.visitedAt = visitedAt;
+
+        return review;
+    }
+
+    public void update(BigDecimal rating, String content, LocalDate visitedAt) {
+        this.rating = rating;
+        this.content = content;
+        this.visitedAt = visitedAt;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }
