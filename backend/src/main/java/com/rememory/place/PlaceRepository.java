@@ -60,8 +60,8 @@ public class PlaceRepository {
                             QPlace.place.memory.id.eq(memoryId),
                             QPlace.place.deletedAt.isNull(),
                             category != null ? QPlace.place.category.eq(category) : null,
-                            regionDepth1 != null ? QPlace.place.region_depth1.eq(regionDepth1) : null,
-                            regionDepth2 != null ? QPlace.place.region_depth2.eq(regionDepth2) : null
+                            regionDepth1 != null ? QPlace.place.regionDepth1.eq(regionDepth1) : null,
+                            regionDepth2 != null ? QPlace.place.regionDepth2.eq(regionDepth2) : null
                     )
                     .orderBy(QPlace.place.createdAt.desc())
                     .fetch();
