@@ -4,6 +4,8 @@ import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,7 @@ class MemoryServiceTest {
     @Autowired MemberMemoryRepository mmRepository;
     @Autowired MemoryPhotoRepository mpRepository;
     @Autowired MemberRepository memberRepository;
+    @PersistenceContext EntityManager em;
 
     private Member member;
     private Member otherMember;
@@ -179,7 +182,14 @@ class MemoryServiceTest {
 
         memoryService.leftMemory(memory.getId(), member.getId());
 
-        MemberMemory memberMemory = mmRepository.findByMemoryIdAndMemberId(memory.getId(), member.getId()).get();
+        // leftAt.isNull() 조건 없이 직접 조회
+        MemberMemory memberMemory = em.createQuery(
+                "select mm from MemberMemory mm where mm.memory.id = :memoryId and mm.member.id = :memberId",
+                MemberMemory.class)
+                .setParameter("memoryId", memory.getId())
+                .setParameter("memberId", member.getId())
+                .getSingleResult();
+
         assertThat(memberMemory.getLeftAt()).isNotNull();
     }
 
@@ -201,14 +211,11 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행", null));
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
-        // otherMember도 추억에 추가
         MemberMemory otherMemberMemory = MemberMemory.create(otherMember, memory);
         mmRepository.save(otherMemberMemory);
 
-        // member만 나가기
         memoryService.leftMemory(memory.getId(), member.getId());
 
-        // Memory는 살아있어야 함
         Memory found = memoryRepository.findOne(memory.getId()).get();
         assertThat(found.getDeletedAt()).isNull();
     }

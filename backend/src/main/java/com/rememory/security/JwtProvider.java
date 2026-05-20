@@ -1,12 +1,14 @@
 package com.rememory.security;
 
 import com.rememory.common.exception.BusinessException;
+import io.jsonwebtoken.security.SignatureException;
 import com.rememory.common.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -25,7 +27,7 @@ public class JwtProvider {
         if (secret.getBytes().length < 32) {
             throw new IllegalArgumentException("JWT_SECRET은 32바이트 이상이어야 합니다. 현재: " + secret.getBytes().length + "바이트");
         }
-        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationsMs;
     }
 
@@ -40,25 +42,24 @@ public class JwtProvider {
     }
 
     // 토큰 파싱: 서명을 검증하고 Claims(페이로드)를 반환한다
+    // 토큰 유효성 검사: 파싱 성공 여부로 유효성을 판단하며 예외는 false로 변환한다
     // 서명 불일치·만료 등 이상이 있으면 JwtException을 던진다
     public Claims parseToken(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                // 받은 토큰을 분해하고 서명키로 재서명 후 비교
-                // + 만료시각도 체크 (만료되면 ExpiredJwtException 던짐)
-                // + 형식이 잘못되면 MalformedJwtException 던짐
-                .parseClaimsJws(token)
-                .getBody();
-    }
-
-    // 토큰 유효성 검사: 파싱 성공 여부로 유효성을 판단하며 예외는 false로 변환한다
-    public void validateToken(String token) {
         try {
-            parseToken(token);
+            Claims claims =  Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    // 받은 토큰을 분해하고 서명키로 재서명 후 비교
+                    // + 만료시각도 체크 (만료되면 ExpiredJwtException 던짐)
+                    // + 형식이 잘못되면 MalformedJwtException 던짐
+                    .parseClaimsJws(token)
+                    .getBody();
+            // subject가 숫자가 아니면 우리가 발급한 토큰이 아니기 때문에 숫자타입 확인
+            Long.parseLong(claims.getSubject());
+            return claims;
         } catch (ExpiredJwtException e) {
             throw new BusinessException(ErrorCode.TOKEN_EXPIRED);
-        } catch (SecurityException e) {
+        } catch (SignatureException | SecurityException | NumberFormatException e) {
             throw new BusinessException(ErrorCode.TOKEN_INVALID);
         } catch (MalformedJwtException e) {
             throw new BusinessException(ErrorCode.TOKEN_MALFORMED);
