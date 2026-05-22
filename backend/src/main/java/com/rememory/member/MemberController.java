@@ -1,0 +1,28 @@
+package com.rememory.member;
+
+
+import com.rememory.common.exception.BusinessException;
+import com.rememory.common.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/members")
+@RequiredArgsConstructor
+public class MemberController {
+
+    private final MemberService memberService;
+
+    @GetMapping("/me")
+    public ResponseEntity<MemberResponseDTO> getMyInfo(@RequestAttribute("memberId") Long memberId) {
+        Member member = memberService.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        return ResponseEntity.ok(MemberResponseDTO.from(member));
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> delete(@RequestAttribute("memberId") Long memberId) {
+        memberService.delete(memberId);
+        return ResponseEntity.ok().build();
+    }
+}
