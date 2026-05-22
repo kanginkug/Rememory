@@ -2,6 +2,7 @@ package com.rememory.memory;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,6 +12,9 @@ import java.time.LocalDate;
 @Getter
 @AllArgsConstructor
 public class UpdateMemoryRequestDTO {
+
+    @NotNull
+    private Long memoryId;
 
     @NotBlank
     private String memoryName;

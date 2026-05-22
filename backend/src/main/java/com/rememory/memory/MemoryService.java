@@ -6,10 +6,19 @@ import com.rememory.invitation.InvitationService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,9 +29,12 @@ public class MemoryService {
     private final MemoryPhotoRepository mpRepository;
     private final MemberMemoryRepository mmRepository;
     private final InvitationService invitationService;
+    // 프로필 이미지 저장 디렉터리 경로
+    @Value("${upload.profile-dir:uploads/profile}")
+    private String profileUploadDir;
 
     @Transactional
-    public void createMemory(Long creatorId, CreateMemoryRequestDTO memory) {
+    public void createMemory(Long creatorId, CreateMemoryRequestDTO memory, MultipartFile file) {
         Member creator = memberRepository.findOne(creatorId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -32,8 +44,13 @@ public class MemoryService {
         MemberMemory createMemberMemory = MemberMemory.create(creator, createMemory);
         mmRepository.save(createMemberMemory);
 
-        if (memory.getPhotoUrl() != null && !memory.getPhotoUrl().isEmpty()) {
-            MemoryPhoto memoryPhoto = MemoryPhoto.create(createMemory, creator, memory.getPhotoUrl());
+        String photoUrl = "";
+        if(file != null && !file.isEmpty()){
+            photoUrl = madePhotoUrl(file);
+        }
+
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            MemoryPhoto memoryPhoto = MemoryPhoto.create(createMemory, creator, photoUrl);
             mpRepository.save(memoryPhoto);
         }
 
@@ -43,10 +60,10 @@ public class MemoryService {
     }
 
     @Transactional
-    public void updateMemory(Long memberId, Long memoryId, UpdateMemoryRequestDTO memory) {
+    public void updateMemory(Long memberId, UpdateMemoryRequestDTO memory) {
         Member updater = memberRepository.findOne(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-        Memory updateMemory = memoryRepository.findOne(memoryId)
+        Memory updateMemory = memoryRepository.findOne(memory.getMemoryId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
         if (!updater.getId().equals(updateMemory.getCreator().getId())) {
@@ -125,5 +142,28 @@ public class MemoryService {
         MemoryPhoto memoryPhoto = mpRepository.findOne(memoryId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_PHOTO_NOT_FOUND));
         memoryPhoto.delete();
+    }
+
+    // MIME 타입 검증 후 UUID 파일명 리턴
+    // MIME 타입 기반 검증만 수행하며 Magic Bytes 검증은 미구현 (TODO S8)
+    public String madePhotoUrl(MultipartFile file) {
+
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BusinessException(ErrorCode.INVALID_FILE_TYPE);
+        }
+
+        String ext = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String savedFileName = UUID.randomUUID() + (ext != null ? "." + ext : "");
+        Path savePath = Paths.get(profileUploadDir, savedFileName).toAbsolutePath();
+
+        try {
+            Files.createDirectories(savePath.getParent());
+            Files.copy(file.getInputStream(), savePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
+        }
+
+        return "/uploads/profile/" + savedFileName;
     }
 }
