@@ -6,18 +6,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class OAuth2UserService extends DefaultOAuth2UserService {
-
     private final MemberRepository memberRepository;
 
     @Override
@@ -58,20 +55,13 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // DB 조회 → 없으면 회원가입
-        Member member = memberRepository.findByOauthProviderAndOauthId(provider, oauthId)
+        memberRepository.findByOauthProviderAndOauthId(provider, oauthId)
                 .orElseGet(() -> {
                     Member newMember = Member.create(name, email, profileImageUrl, provider, oauthId);
                     memberRepository.save(newMember);
                     return newMember;
                 });
 
-        // memberId를 attributes에 추가해서 반환
-        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
-        attributes.put("memberId", member.getId());
-
-        String userNameAttr = userRequest.getClientRegistration()
-                .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-
-        return new DefaultOAuth2User(oAuth2User.getAuthorities(), attributes, userNameAttr);
+        return oAuth2User;
     }
 }
