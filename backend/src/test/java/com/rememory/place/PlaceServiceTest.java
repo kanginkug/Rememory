@@ -106,7 +106,7 @@ class PlaceServiceTest {
         placeService.save(memory.getId(), member.getId(), createPlaceDto("흑돼지 맛집", Category.RESTAURANT), null);
         placeService.save(memory.getId(), member.getId(), createPlaceDto("제주 호텔", Category.ACCOMMODATION), null);
 
-        List<PlaceDetailResponseDTO> places = placeService.findAllByMemoryId(memory.getId());
+        List<PlaceDetailResponseDTO> places = placeService.findAllByMemoryId(member.getId(), memory.getId());
         assertThat(places).hasSize(2);
     }
 
@@ -118,8 +118,16 @@ class PlaceServiceTest {
 
         placeService.deletePlace(memory.getId(), member.getId(), place.getId());
 
-        List<PlaceDetailResponseDTO> places = placeService.findAllByMemoryId(memory.getId());
+        List<PlaceDetailResponseDTO> places = placeService.findAllByMemoryId(member.getId(), memory.getId());
         assertThat(places).isEmpty();
+    }
+
+    @Test
+    @DisplayName("추억 멤버가 아닌 사람이 목록 조회 시 BusinessException 발생")
+    void findAll_비멤버_예외발생() {
+        assertThatThrownBy(() -> placeService.findAllByMemoryId(otherMember.getId(), memory.getId()))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
     }
 
     // ===== sortPlaceByType =====
@@ -131,7 +139,7 @@ class PlaceServiceTest {
         placeService.save(memory.getId(), member.getId(), createPlaceDto("제주 호텔", Category.ACCOMMODATION), null);
         placeService.save(memory.getId(), member.getId(), createPlaceDto("성산 일출봉", Category.ATTRACTION), null);
 
-        List<PlaceDetailResponseDTO> places = placeService.sortPlaceByType(memory.getId(), Category.RESTAURANT, null, null);
+        List<PlaceDetailResponseDTO> places = placeService.sortPlaceByType(member.getId(), memory.getId(), Category.RESTAURANT, null, null);
         assertThat(places).hasSize(1);
         assertThat(places.get(0).getName()).isEqualTo("흑돼지 맛집");
     }
@@ -142,7 +150,7 @@ class PlaceServiceTest {
         placeService.save(memory.getId(), member.getId(), createPlaceDto("흑돼지 맛집", Category.RESTAURANT, "제주", "제주시"), null);
         placeService.save(memory.getId(), member.getId(), createPlaceDto("중문 리조트", Category.ACCOMMODATION, "제주", "서귀포시"), null);
 
-        List<PlaceDetailResponseDTO> places = placeService.sortPlaceByType(memory.getId(), null, "제주", "제주시");
+        List<PlaceDetailResponseDTO> places = placeService.sortPlaceByType(member.getId(), memory.getId(), null, "제주", "제주시");
         assertThat(places).hasSize(1);
         assertThat(places.get(0).getName()).isEqualTo("흑돼지 맛집");
     }
@@ -153,9 +161,17 @@ class PlaceServiceTest {
         placeService.save(memory.getId(), member.getId(), createPlaceDto("흑돼지 맛집", Category.RESTAURANT, "제주", "제주시"), null);
         placeService.save(memory.getId(), member.getId(), createPlaceDto("제주 식당", Category.RESTAURANT, "제주", "서귀포시"), null);
 
-        List<PlaceDetailResponseDTO> places = placeService.sortPlaceByType(memory.getId(), Category.RESTAURANT, "제주", "제주시");
+        List<PlaceDetailResponseDTO> places = placeService.sortPlaceByType(member.getId(), memory.getId(), Category.RESTAURANT, "제주", "제주시");
         assertThat(places).hasSize(1);
         assertThat(places.get(0).getName()).isEqualTo("흑돼지 맛집");
+    }
+
+    @Test
+    @DisplayName("추억 멤버가 아닌 사람이 카테고리 조회 시 BusinessException 발생")
+    void sortPlaceByType_비멤버_예외발생() {
+        assertThatThrownBy(() -> placeService.sortPlaceByType(otherMember.getId(), memory.getId(), null, null, null))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
     }
 
     // ===== searchByName =====
@@ -167,9 +183,65 @@ class PlaceServiceTest {
         placeService.save(memory.getId(), member.getId(), createPlaceDto("제주 호텔", Category.ACCOMMODATION), null);
         placeService.save(memory.getId(), member.getId(), createPlaceDto("성산 일출봉", Category.ATTRACTION), null);
 
-        List<PlaceDetailResponseDTO> places = placeService.searchByName(memory.getId(), "제주");
+        List<PlaceDetailResponseDTO> places = placeService.searchByName(member.getId(), memory.getId(), "제주");
         assertThat(places).hasSize(1);
         assertThat(places.get(0).getName()).isEqualTo("제주 호텔");
+    }
+
+    @Test
+    @DisplayName("추억 멤버가 아닌 사람이 검색 시 BusinessException 발생")
+    void searchByName_비멤버_예외발생() {
+        assertThatThrownBy(() -> placeService.searchByName(otherMember.getId(), memory.getId(), "제주"))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
+    }
+
+    // ===== detailPlace =====
+
+    @Test
+    @DisplayName("장소 단건 조회 성공")
+    void detailPlace_성공() {
+        placeService.save(memory.getId(), member.getId(), createPlaceDto("흑돼지 맛집", Category.RESTAURANT), null);
+        Place place = placeRepository.findAllByMemoryId(memory.getId()).get(0);
+
+        PlaceDetailResponseDTO result = placeService.detailPlace(member.getId(), memory.getId(), place.getId());
+
+        assertThat(result.getName()).isEqualTo("흑돼지 맛집");
+        assertThat(result.getCategory()).isEqualTo(Category.RESTAURANT);
+        assertThat(result.getPlacePhotoList()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("장소 단건 조회 - 사진 목록 포함")
+    void detailPlace_사진목록_포함() {
+        placeService.save(memory.getId(), member.getId(), createPlaceDto("흑돼지 맛집", Category.RESTAURANT), null);
+        Place place = placeRepository.findAllByMemoryId(memory.getId()).get(0);
+        placeService.savePlacePhoto(memory.getId(), member.getId(), place.getId(), mockImageFile());
+        placeService.savePlacePhoto(memory.getId(), member.getId(), place.getId(), mockImageFile());
+
+        PlaceDetailResponseDTO result = placeService.detailPlace(member.getId(), memory.getId(), place.getId());
+
+        assertThat(result.getPlacePhotoList()).hasSize(2);
+        assertThat(result.getPlacePhotoList().get(0).getImageUrl()).startsWith("/uploads/profile/");
+    }
+
+    @Test
+    @DisplayName("추억 멤버가 아닌 사람이 단건 조회 시 BusinessException 발생")
+    void detailPlace_비멤버_예외발생() {
+        placeService.save(memory.getId(), member.getId(), createPlaceDto("흑돼지 맛집", Category.RESTAURANT), null);
+        Place place = placeRepository.findAllByMemoryId(memory.getId()).get(0);
+
+        assertThatThrownBy(() -> placeService.detailPlace(otherMember.getId(), memory.getId(), place.getId()))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("없는 장소 단건 조회 시 BusinessException 발생")
+    void detailPlace_없는장소_예외발생() {
+        assertThatThrownBy(() -> placeService.detailPlace(member.getId(), memory.getId(), 999999L))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.PLACE_NOT_FOUND.getMessage());
     }
 
     // ===== updatePlace =====
