@@ -2,6 +2,7 @@ package com.rememory.common.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
@@ -35,6 +36,10 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND("R001", "존재하지 않는 후기입니다."),
     REVIEW_ALREADY_EXISTS("R002", "이미 후기를 작성했습니다."),
     REVIEW_NOT_OWNER("R003", "후기 작성자만 가능합니다."),
+
+    // ===== Photo =====
+    INVALID_FILE_TYPE("PT001", "이미지 파일만 업로드할 수 있습니다."),
+    FILE_UPLOAD_FAILED("PT002", "파일 업로드에 실패했습니다."),
 
     // ===== Token =====
     TOKEN_EXPIRED("T001", "만료된 토큰입니다."),
