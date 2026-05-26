@@ -13,9 +13,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UpdateMemoryRequestDTO {
 
-    @NotNull
-    private Long memoryId;
-
     @NotBlank
     private String memoryName;
 

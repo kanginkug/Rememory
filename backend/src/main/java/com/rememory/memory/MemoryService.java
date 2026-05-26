@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,10 +61,10 @@ public class MemoryService {
     }
 
     @Transactional
-    public void updateMemory(Long memberId, UpdateMemoryRequestDTO memory) {
+    public void updateMemory(Long memberId, Long memoryId, UpdateMemoryRequestDTO memory) {
         Member updater = memberRepository.findOne(memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-        Memory updateMemory = memoryRepository.findOne(memory.getMemoryId())
+        Memory updateMemory = memoryRepository.findOne(memoryId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
         if (!updater.getId().equals(updateMemory.getCreator().getId())) {
@@ -73,14 +74,31 @@ public class MemoryService {
         updateMemory.update(memory.getMemoryName(), memory.getShowHistoryToNew(), memory.getDescription(), memory.getStartDate(), memory.getEndDate());
     }
 
-    public List<Memory> findMemoryList(Long memberId, SortTypeMemory sortTypeMemory, String keyword) {
-        return memoryRepository.findAllByMemberId(memberId, sortTypeMemory, keyword);
+    public List<MemoryDetailResponseDTO> findMemoryList(Long memberId, SortTypeMemory sortTypeMemory, String keyword) {
+
+        List<Memory> memoryList = memoryRepository.findAllByMemberId(memberId, sortTypeMemory, keyword);
+        List<MemoryDetailResponseDTO> mDResponseDTOList = new ArrayList<>();
+        for(Memory memory : memoryList) {
+            mDResponseDTOList.add(MemoryDetailResponseDTO.from(memory));
+        }
+        return mDResponseDTOList;
     }
 
     /** 해당 메모리에 해당 회원이 존재하는지 체크 */
-    public MemberMemory findOne(Long memoryId, Long memberId) {
+    public MemberMemory findMemberMemory (Long memoryId, Long memberId) {
         return mmRepository.findByMemoryIdAndMemberId(memoryId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND));
+    }
+
+    public MemoryDetailResponseDTO findMemory(Long memberId, Long memoryId){
+        if(memberRepository.findOne(memberId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
+        }
+        Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
+        return MemoryDetailResponseDTO.from(memory);
     }
 
     /**
@@ -108,7 +126,7 @@ public class MemoryService {
      * 기존 사진 softDelete 후 새 사진 INSERT (이력 보존)
      */
     @Transactional
-    public void updateMemoryPhoto(Long memoryId, Long updaterId, String imageUrl) {
+    public void updateMemoryPhoto(MultipartFile file, Long memoryId, Long updaterId) {
         Member updater = memberRepository.findOne(updaterId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         Memory memory = memoryRepository.findOne(memoryId)
@@ -118,6 +136,7 @@ public class MemoryService {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
+        String imageUrl = madePhotoUrl(file);
         // 기존 사진 softDelete
         mpRepository.findOne(memoryId).ifPresent(MemoryPhoto::delete);
 

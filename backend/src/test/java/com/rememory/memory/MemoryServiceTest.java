@@ -110,11 +110,24 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), null);
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
-        memoryService.updateMemory(member.getId(), updateMemoryDto("부산 여행", "맛있는 여행"));
+        memoryService.updateMemory(member.getId(), memory.getId(), updateMemoryDto("부산 여행", "맛있는 여행"));
 
         Memory updated = memoryRepository.findOne(memory.getId()).get();
         assertThat(updated.getName()).isEqualTo("부산 여행");
         assertThat(updated.getDescription()).isEqualTo("맛있는 여행");
+    }
+
+    @Test
+    @DisplayName("추억 수정 시 showHistoryToNew 변경")
+    void updateMemory_showHistoryToNew_변경() {
+        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), null);
+        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
+
+        memoryService.updateMemory(member.getId(), memory.getId(), new UpdateMemoryRequestDTO("부산 여행", "맛있는 여행",
+                LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5), false));
+
+        Memory updated = memoryRepository.findOne(memory.getId()).get();
+        assertThat(updated.getShowHistoryToNew()).isFalse();
     }
 
     @Test
@@ -123,7 +136,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), null);
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
-        assertThatThrownBy(() -> memoryService.updateMemory(otherMember.getId(), updateMemoryDto("부산 여행", "맛있는 여행")))
+        assertThatThrownBy(() -> memoryService.updateMemory(otherMember.getId(), memory.getId(), updateMemoryDto("부산 여행", "맛있는 여행")))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.MEMORY_NOT_CREATOR.getMessage());
     }
@@ -131,7 +144,7 @@ class MemoryServiceTest {
     @Test
     @DisplayName("없는 추억 수정 시 BusinessException 발생")
     void updateMemory_없는추억_예외발생() {
-        assertThatThrownBy(() -> memoryService.updateMemory(member.getId(), wrongUpdateMemoryDto("부산 여행", "맛있는 여행")))
+        assertThatThrownBy(() -> memoryService.updateMemory(member.getId(), 9999L, updateMemoryDto("부산 여행", "맛있는 여행")))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.MEMORY_NOT_FOUND.getMessage());
     }
@@ -144,7 +157,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("첫번째 여행", "설명1"), null);
         memoryService.createMemory(member.getId(), createMemoryDto("두번째 여행", "설명2"), null);
 
-        List<Memory> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
+        List<MemoryDetailResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
 
         assertThat(memories).hasSize(2);
         assertThat(memories.get(0).getName()).isEqualTo("두번째 여행");
@@ -157,7 +170,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("부산 여행", "설명2"), null);
         memoryService.createMemory(member.getId(), createMemoryDto("서울 나들이", "설명3"), null);
 
-        List<Memory> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, "여행");
+        List<MemoryDetailResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, "여행");
 
         assertThat(memories).hasSize(2);
     }
@@ -168,7 +181,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "설명1"), null);
         memoryService.createMemory(otherMember.getId(), createMemoryDto("부산 여행", "설명2"), null);
 
-        List<Memory> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
+        List<MemoryDetailResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
 
         assertThat(memories).hasSize(1);
         assertThat(memories.get(0).getName()).isEqualTo("제주도 여행");
@@ -230,7 +243,7 @@ class MemoryServiceTest {
 
         memoryService.leftMemory(memory.getId(), member.getId());
 
-        List<Memory> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
+        List<MemoryDetailResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
         assertThat(memories).isEmpty();
     }
 
@@ -245,15 +258,15 @@ class MemoryServiceTest {
                 .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
     }
 
-    // ===== findOne =====
+    // ===== findMemberMemory =====
 
     @Test
     @DisplayName("MemberMemory 조회 성공")
-    void findOne_성공() {
+    void findMemberMemory_성공() {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), null);
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
-        MemberMemory memberMemory = memoryService.findOne(memory.getId(), member.getId());
+        MemberMemory memberMemory = memoryService.findMemberMemory(memory.getId(), member.getId());
 
         assertThat(memberMemory).isNotNull();
         assertThat(memberMemory.getMember().getId()).isEqualTo(member.getId());
@@ -261,11 +274,47 @@ class MemoryServiceTest {
 
     @Test
     @DisplayName("참가하지 않은 멤버 조회 시 BusinessException 발생")
-    void findOne_미참가_예외발생() {
+    void findMemberMemory_미참가_예외발생() {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), null);
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
-        assertThatThrownBy(() -> memoryService.findOne(memory.getId(), otherMember.getId()))
+        assertThatThrownBy(() -> memoryService.findMemberMemory(memory.getId(), otherMember.getId()))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
+    }
+
+    // ===== findMemory =====
+
+    @Test
+    @DisplayName("추억 단건 조회 성공")
+    void findMemory_성공() {
+        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), null);
+        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
+
+        MemoryDetailResponseDTO found = memoryService.findMemory(member.getId(), memory.getId());
+
+        assertThat(found).isNotNull();
+        assertThat(found.getName()).isEqualTo("제주도 여행");
+    }
+
+    @Test
+    @DisplayName("없는 멤버로 추억 단건 조회 시 BusinessException 발생")
+    void findMemory_없는멤버_예외발생() {
+        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), null);
+        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
+
+        assertThatThrownBy(() -> memoryService.findMemory(999999L, memory.getId()))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage(ErrorCode.MEMBER_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    @DisplayName("참가하지 않은 멤버가 추억 단건 조회 시 BusinessException 발생")
+    void findMemory_미참가멤버_예외발생() {
+        memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), null);
+        Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
+
+        assertThatThrownBy(() -> memoryService.findMemory(otherMember.getId(), memory.getId()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
     }
@@ -278,10 +327,10 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), mockImageFile());
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
-        memoryService.updateMemoryPhoto(memory.getId(), member.getId(), "http://new.img/1");
+        memoryService.updateMemoryPhoto(mockImageFile(), memory.getId(), member.getId());
 
         MemoryPhoto photo = mpRepository.findOne(memory.getId()).get();
-        assertThat(photo.getImageUrl()).isEqualTo("http://new.img/1");
+        assertThat(photo.getImageUrl()).startsWith("/uploads/profile/");
         assertThat(photo.getMember().getId()).isEqualTo(member.getId());
     }
 
@@ -292,7 +341,7 @@ class MemoryServiceTest {
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
         MemoryPhoto oldPhoto = mpRepository.findOne(memory.getId()).get();
 
-        memoryService.updateMemoryPhoto(memory.getId(), member.getId(), "http://new.img/1");
+        memoryService.updateMemoryPhoto(mockImageFile(), memory.getId(), member.getId());
 
         assertThat(oldPhoto.getDeletedAt()).isNotNull();
     }
@@ -303,7 +352,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"), mockImageFile());
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
-        assertThatThrownBy(() -> memoryService.updateMemoryPhoto(memory.getId(), otherMember.getId(), "http://new.img/1"))
+        assertThatThrownBy(() -> memoryService.updateMemoryPhoto(mockImageFile(), memory.getId(), otherMember.getId()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
     }
@@ -355,12 +404,7 @@ class MemoryServiceTest {
     }
 
     private UpdateMemoryRequestDTO updateMemoryDto(String name, String description) {
-        return new UpdateMemoryRequestDTO(1L, name, description,
-                LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5), true);
-    }
-
-    private UpdateMemoryRequestDTO wrongUpdateMemoryDto(String name, String description) {
-        return new UpdateMemoryRequestDTO(9999L, name, description,
+        return new UpdateMemoryRequestDTO(name, description,
                 LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 5), true);
     }
 }
