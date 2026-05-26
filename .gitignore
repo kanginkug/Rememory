@@ -55,3 +55,6 @@ firebase-service-account.json
 
 ### Test ###
 backend/src/test/resources/application.properties
+
+### Uploads ###
+backend/uploads/
