@@ -70,7 +70,7 @@ class ReviewServiceTest {
     @Test
     @DisplayName("리뷰 작성 성공")
     void save_성공() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
 
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
         assertThat(review.getRating()).isEqualByComparingTo(BigDecimal.valueOf(4.5));
@@ -80,9 +80,9 @@ class ReviewServiceTest {
     @Test
     @DisplayName("리뷰 작성 시 Place 평균 별점 갱신")
     void save_평균별점_갱신() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.0), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.0), "맛있어요"));
 
-        em.clear(); // QueryDSL UPDATE 후 영속성 컨텍스트 초기화
+        em.clear();
         Place updatedPlace = placeRepository.findOne(memory.getId(), place.getId()).get();
         assertThat(updatedPlace.getAvgRating()).isNotEqualByComparingTo(BigDecimal.ZERO);
     }
@@ -90,10 +90,9 @@ class ReviewServiceTest {
     @Test
     @DisplayName("1인 1후기 - 중복 작성 시 BusinessException 발생")
     void save_중복_예외발생() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
 
-        assertThatThrownBy(() -> reviewService.save(memory.getId(), member.getId(), place.getId(),
-                createReviewDto(BigDecimal.valueOf(3.0), "그냥 그래요")))
+        assertThatThrownBy(() -> reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(3.0), "그냥 그래요")))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.REVIEW_ALREADY_EXISTS.getMessage());
     }
@@ -101,8 +100,7 @@ class ReviewServiceTest {
     @Test
     @DisplayName("추억 멤버가 아닌 사람이 리뷰 작성 시 BusinessException 발생")
     void save_비멤버_예외발생() {
-        assertThatThrownBy(() -> reviewService.save(memory.getId(), otherMember.getId(), place.getId(),
-                createReviewDto(BigDecimal.valueOf(4.5), "맛있어요")))
+        assertThatThrownBy(() -> reviewService.save(otherMember.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요")))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
     }
@@ -110,8 +108,8 @@ class ReviewServiceTest {
     @Test
     @DisplayName("없는 장소에 리뷰 작성 시 BusinessException 발생")
     void save_없는장소_예외발생() {
-        assertThatThrownBy(() -> reviewService.save(memory.getId(), member.getId(), 999999L,
-                createReviewDto(BigDecimal.valueOf(4.5), "맛있어요")))
+        assertThatThrownBy(() -> reviewService.save(member.getId(),
+                new CreateUpdateReviewRequestDTO(999999L, memory.getId(), BigDecimal.valueOf(4.5), "맛있어요", LocalDate.of(2026, 5, 2))))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.PLACE_NOT_FOUND.getMessage());
     }
@@ -121,11 +119,11 @@ class ReviewServiceTest {
     @Test
     @DisplayName("내 리뷰 조회 성공")
     void findMyReview_성공() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
 
-        Review review = reviewService.findMyReview(memory.getId(), member.getId(), place.getId());
+        ReviewDetailResponseDTO review = reviewService.findMyReview(memory.getId(), member.getId(), place.getId());
         assertThat(review).isNotNull();
-        assertThat(review.getMember().getId()).isEqualTo(member.getId());
+        assertThat(review.getMemberId()).isEqualTo(member.getId());
     }
 
     @Test
@@ -143,22 +141,22 @@ class ReviewServiceTest {
     void findAllByPlaceId_성공() {
         mmRepository.save(MemberMemory.create(otherMember, memory));
 
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
-        reviewService.save(memory.getId(), otherMember.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(3.0), "그냥 그래요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(otherMember.getId(), createReviewDto(BigDecimal.valueOf(3.0), "그냥 그래요"));
 
-        List<Review> reviews = reviewService.findAllByPlaceId(memory.getId(), member.getId(), place.getId());
+        List<ReviewDetailResponseDTO> reviews = reviewService.findAllByPlaceId(memory.getId(), member.getId(), place.getId());
         assertThat(reviews).hasSize(2);
     }
 
     @Test
     @DisplayName("삭제된 리뷰는 조회 안 됨")
     void findAllByPlaceId_삭제된리뷰_미조회() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        reviewService.deleteReview(memory.getId(), member.getId(), review.getId(), place.getId());
+        reviewService.deleteReview(member.getId(), review.getId(), memory.getId(), place.getId());
 
-        List<Review> reviews = reviewService.findAllByPlaceId(memory.getId(), member.getId(), place.getId());
+        List<ReviewDetailResponseDTO> reviews = reviewService.findAllByPlaceId(memory.getId(), member.getId(), place.getId());
         assertThat(reviews).isEmpty();
     }
 
@@ -169,13 +167,25 @@ class ReviewServiceTest {
     void sortByReviewType_별점높은순() {
         mmRepository.save(MemberMemory.create(otherMember, memory));
 
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(3.0), "보통이에요"));
-        reviewService.save(memory.getId(), otherMember.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(5.0), "최고예요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(3.0), "보통이에요"));
+        reviewService.save(otherMember.getId(), createReviewDto(BigDecimal.valueOf(5.0), "최고예요"));
 
-        SortReviewRequestDTO dto = new SortReviewRequestDTO(SortTypeReview.RATING_DESC);
-        List<Review> reviews = reviewService.sortByReviewType(memory.getId(), member.getId(), place.getId(), dto);
+        List<ReviewDetailResponseDTO> reviews = reviewService.sortByReviewType(memory.getId(), member.getId(), place.getId(), SortTypeReview.RATING_DESC);
 
         assertThat(reviews.get(0).getRating()).isEqualByComparingTo(BigDecimal.valueOf(5.0));
+    }
+
+    @Test
+    @DisplayName("별점 낮은순 정렬")
+    void sortByReviewType_별점낮은순() {
+        mmRepository.save(MemberMemory.create(otherMember, memory));
+
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(3.0), "보통이에요"));
+        reviewService.save(otherMember.getId(), createReviewDto(BigDecimal.valueOf(5.0), "최고예요"));
+
+        List<ReviewDetailResponseDTO> reviews = reviewService.sortByReviewType(memory.getId(), member.getId(), place.getId(), SortTypeReview.RATING_ASC);
+
+        assertThat(reviews.get(0).getRating()).isEqualByComparingTo(BigDecimal.valueOf(3.0));
     }
 
     // ===== updateReview =====
@@ -183,11 +193,10 @@ class ReviewServiceTest {
     @Test
     @DisplayName("리뷰 수정 성공")
     void updateReview_성공() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        reviewService.updateReview(memory.getId(), member.getId(), review.getId(), place.getId(),
-                createReviewDto(BigDecimal.valueOf(3.0), "생각보다 별로"));
+        reviewService.updateReview(member.getId(), review.getId(), createReviewDto(BigDecimal.valueOf(3.0), "생각보다 별로"));
 
         Review updated = reviewRepository.findOne(review.getId()).get();
         assertThat(updated.getRating()).isEqualByComparingTo(BigDecimal.valueOf(3.0));
@@ -197,16 +206,15 @@ class ReviewServiceTest {
     @Test
     @DisplayName("리뷰 수정 시 Place 평균 별점 갱신")
     void updateReview_평균별점_갱신() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.0), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.0), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        em.clear(); // QueryDSL UPDATE 후 영속성 컨텍스트 초기화
+        em.clear();
         BigDecimal beforeAvg = placeRepository.findOne(memory.getId(), place.getId()).get().getAvgRating();
 
-        reviewService.updateReview(memory.getId(), member.getId(), review.getId(), place.getId(),
-                createReviewDto(BigDecimal.valueOf(2.0), "별로"));
+        reviewService.updateReview(member.getId(), review.getId(), createReviewDto(BigDecimal.valueOf(2.0), "별로"));
 
-        em.clear(); // 다시 초기화
+        em.clear();
         BigDecimal afterAvg = placeRepository.findOne(memory.getId(), place.getId()).get().getAvgRating();
         assertThat(afterAvg).isNotEqualByComparingTo(beforeAvg);
     }
@@ -215,11 +223,10 @@ class ReviewServiceTest {
     @DisplayName("본인 리뷰가 아닌 경우 수정 시 BusinessException 발생")
     void updateReview_본인아님_예외발생() {
         mmRepository.save(MemberMemory.create(otherMember, memory));
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        assertThatThrownBy(() -> reviewService.updateReview(memory.getId(), otherMember.getId(), review.getId(), place.getId(),
-                createReviewDto(BigDecimal.valueOf(1.0), "별로")))
+        assertThatThrownBy(() -> reviewService.updateReview(otherMember.getId(), review.getId(), createReviewDto(BigDecimal.valueOf(1.0), "별로")))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.REVIEW_NOT_OWNER.getMessage());
     }
@@ -229,10 +236,10 @@ class ReviewServiceTest {
     @Test
     @DisplayName("리뷰 삭제 성공 - deletedAt 세팅")
     void deleteReview_성공() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        reviewService.deleteReview(memory.getId(), member.getId(), review.getId(), place.getId());
+        reviewService.deleteReview(member.getId(), review.getId(), memory.getId(), place.getId());
 
         assertThat(reviewRepository.findOne(review.getId())).isEmpty();
     }
@@ -240,12 +247,12 @@ class ReviewServiceTest {
     @Test
     @DisplayName("리뷰 삭제 시 Place 평균 별점 갱신")
     void deleteReview_평균별점_갱신() {
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.0), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.0), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        reviewService.deleteReview(memory.getId(), member.getId(), review.getId(), place.getId());
+        reviewService.deleteReview(member.getId(), review.getId(), memory.getId(), place.getId());
 
-        em.clear(); // QueryDSL UPDATE 후 영속성 컨텍스트 초기화
+        em.clear();
         Place updatedPlace = placeRepository.findOne(memory.getId(), place.getId()).get();
         assertThat(updatedPlace.getReviewCount()).isEqualTo(0);
         assertThat(updatedPlace.getAvgRating()).isEqualByComparingTo(BigDecimal.ZERO);
@@ -255,10 +262,10 @@ class ReviewServiceTest {
     @DisplayName("본인 리뷰가 아닌 경우 삭제 시 BusinessException 발생")
     void deleteReview_본인아님_예외발생() {
         mmRepository.save(MemberMemory.create(otherMember, memory));
-        reviewService.save(memory.getId(), member.getId(), place.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
+        reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        assertThatThrownBy(() -> reviewService.deleteReview(memory.getId(), otherMember.getId(), review.getId(), place.getId()))
+        assertThatThrownBy(() -> reviewService.deleteReview(otherMember.getId(), review.getId(), memory.getId(), place.getId()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.REVIEW_NOT_OWNER.getMessage());
     }
@@ -266,6 +273,6 @@ class ReviewServiceTest {
     // ===== 헬퍼 메서드 =====
 
     private CreateUpdateReviewRequestDTO createReviewDto(BigDecimal rating, String content) {
-        return new CreateUpdateReviewRequestDTO(rating, content, LocalDate.of(2026, 5, 2));
+        return new CreateUpdateReviewRequestDTO(place.getId(), memory.getId(), rating, content, LocalDate.of(2026, 5, 2));
     }
 }

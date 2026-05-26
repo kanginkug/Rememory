@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,7 +31,10 @@ public class ReviewService {
      * 1인 1후기 체크 → Review INSERT → Place avgRating 갱신 → Memory avgRating 재계산
      */
     @Transactional
-    public void save(Long memoryId, Long creatorId, Long placeId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
+    public void save(Long creatorId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
+        Long memoryId = cuReviewRequestDTO.getMemoryId();
+        Long placeId = cuReviewRequestDTO.getPlaceId();
+
         Member creator = memberRepository.findOne(creatorId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         if(mmRepository.findByMemoryIdAndMemberId(memoryId, creatorId).isEmpty()){
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
@@ -49,44 +53,31 @@ public class ReviewService {
         memoryRepository.recalculateRating(memoryId);
     }
 
-    public Review findMyReview(Long memoryId, Long memberId, Long placeId) {
-        if(memoryRepository.findOne(memoryId).isEmpty()) {
-            throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
-        }
-
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
-            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
-        }
-
-        return reviewRepository.findByPlaceIdAndMemberId(placeId, memberId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+    public ReviewDetailResponseDTO findMyReview(Long memoryId, Long memberId, Long placeId) {
+        certification(memoryId, memberId);
+        Review review = reviewRepository.findByPlaceIdAndMemberId(placeId, memberId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+        return ReviewDetailResponseDTO.from(review);
     }
 
-    public List<Review> findAllByPlaceId(Long memoryId, Long memberId, Long placeId) {
-        if(memoryRepository.findOne(memoryId).isEmpty()) {
-            throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
-        }
+    public List<ReviewDetailResponseDTO> findAllByPlaceId(Long memoryId, Long memberId, Long placeId) {
+        certification(memoryId, memberId);
 
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
-            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
-        }
-
-        return reviewRepository.findAllByPlaceId(placeId);
+        List<Review> reviewList = reviewRepository.findAllByPlaceId(placeId);
+        return toResponseDTOList(reviewList);
     }
 
-    public List<Review> sortByReviewType(Long memoryId, Long memberId, Long placeId, SortReviewRequestDTO srRequestDTO) {
-        if(memoryRepository.findOne(memoryId).isEmpty()) {
-            throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
-        }
+    public List<ReviewDetailResponseDTO> sortByReviewType(Long memoryId, Long memberId, Long placeId, SortTypeReview sortTypeReview) {
+        certification(memoryId, memberId);
 
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
-            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
-        }
-
-        return reviewRepository.sortByType(placeId, srRequestDTO.getSortTypeReview());
+        List<Review> reviewList = reviewRepository.sortByType(placeId, sortTypeReview);
+        return toResponseDTOList(reviewList);
     }
 
     @Transactional
-    public void updateReview(Long memoryId, Long updater, Long reviewId, Long PlaceId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
+    public void updateReview(Long updater, Long reviewId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
+        Long memoryId = cuReviewRequestDTO.getMemoryId();
+        Long placeId = cuReviewRequestDTO.getPlaceId();
+
         certification(memoryId, updater);
         Review review = reviewRepository.findOne(reviewId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
         if (!review.getMember().getId().equals(updater)) {
@@ -94,12 +85,12 @@ public class ReviewService {
         }
         BigDecimal oldRating = review.getRating();
         review.update(cuReviewRequestDTO.getRating(), cuReviewRequestDTO.getContent(), cuReviewRequestDTO.getVisitedAt());
-        placeRepository.updateRatingOnUpdate(PlaceId, cuReviewRequestDTO.getRating(), oldRating);
+        placeRepository.updateRatingOnUpdate(placeId, cuReviewRequestDTO.getRating(), oldRating);
         memoryRepository.recalculateRating(memoryId);
     }
 
     @Transactional
-    public void deleteReview(Long memoryId, Long deleter, Long reviewId, Long placeId) {
+    public void deleteReview(Long deleter, Long reviewId, Long memoryId, Long placeId) {
         certification(memoryId, deleter);
         Review review = reviewRepository.findOne(reviewId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
         if (!review.getMember().getId().equals(deleter)) {
@@ -123,5 +114,14 @@ public class ReviewService {
         if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
+    }
+
+    private List<ReviewDetailResponseDTO> toResponseDTOList(List<Review> reviewList) {
+        List<ReviewDetailResponseDTO> rdResponseDTOList = new ArrayList<>();
+        for(Review review : reviewList) {
+            rdResponseDTOList.add(ReviewDetailResponseDTO.from(review));
+        }
+
+        return rdResponseDTOList;
     }
 }
