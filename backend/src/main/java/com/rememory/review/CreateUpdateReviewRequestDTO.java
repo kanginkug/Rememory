@@ -1,6 +1,5 @@
 package com.rememory.review;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,8 +9,13 @@ import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
-@Valid
 public class CreateUpdateReviewRequestDTO {
+
+    @NotNull
+    private Long placeId;
+
+    @NotNull
+    private Long memoryId;
 
     @NotNull
     private BigDecimal rating;

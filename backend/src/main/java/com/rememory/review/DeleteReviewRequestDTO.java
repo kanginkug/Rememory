@@ -6,8 +6,13 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SortReviewRequestDTO {
+public class DeleteReviewRequestDTO {
+    @NotNull
+    private Long memoryId;
 
     @NotNull
-    private SortTypeReview sortTypeReview;
+    private Long reviewId;
+
+    @NotNull
+    private Long placeId;
 }
