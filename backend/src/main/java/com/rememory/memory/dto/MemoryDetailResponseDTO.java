@@ -1,5 +1,6 @@
-package com.rememory.memory;
+package com.rememory.memory.dto;
 
+import com.rememory.memory.Memory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

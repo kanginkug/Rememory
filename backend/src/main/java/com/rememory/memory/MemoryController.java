@@ -1,5 +1,8 @@
 package com.rememory.memory;
 
+import com.rememory.memory.dto.CreateMemoryRequestDTO;
+import com.rememory.memory.dto.MemoryDetailResponseDTO;
+import com.rememory.memory.dto.UpdateMemoryRequestDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
