@@ -23,6 +23,6 @@ public class MemberController {
     @DeleteMapping("/me")
     public ResponseEntity<Void> delete(@RequestAttribute("memberId") Long memberId) {
         memberService.delete(memberId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
