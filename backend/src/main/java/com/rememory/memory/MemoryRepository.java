@@ -84,4 +84,13 @@ public class MemoryRepository {
                 .execute();
     }
 
+    public int findPlaceCount(Long memoryId) {
+         Long placeCount = queryFactory.select(QMemory.memory.count())
+                .from(QMemory.memory)
+                .where(
+                        QMemory.memory.id.eq(memoryId)
+                ).fetchOne();
+        return placeCount == null ? 0 : placeCount.intValue();
+    }
+
 }
