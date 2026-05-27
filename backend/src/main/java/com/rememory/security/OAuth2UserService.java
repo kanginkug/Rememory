@@ -56,6 +56,12 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         // DB 조회 → 없으면 회원가입
         memberRepository.findByOauthProviderAndOauthId(provider, oauthId)
+                .map(existing -> {
+                    if(existing.getDeletedAt() != null) {
+                        existing.restore(); // 탈퇴회원 - > 계정 복구
+                    }
+                    return existing; // 활성 회원 -> 그대로 반환
+                })
                 .orElseGet(() -> {
                     Member newMember = Member.create(name, email, profileImageUrl, provider, oauthId);
                     memberRepository.save(newMember);
