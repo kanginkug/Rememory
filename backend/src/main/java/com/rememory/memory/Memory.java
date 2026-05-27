@@ -78,4 +78,8 @@ public class Memory {
     public void delete() {
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void updatePlaceCount(int placeCount) {
+        this.placeCount = placeCount;
+    }
 }

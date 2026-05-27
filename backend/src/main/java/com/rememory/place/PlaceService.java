@@ -49,6 +49,8 @@ public class PlaceService {
         if(file != null && !file.isEmpty()){
             savePlacePhoto(memoryId, creatorId, place.getId(), file);
         }
+        int newPlaceCount = memoryRepository.findPlaceCount(memoryId);
+        memory.updatePlaceCount(newPlaceCount);
     }
 
     public List<PlaceDetailResponseDTO> findAllByMemoryId(Long memberId, Long memoryId) {
@@ -90,7 +92,7 @@ public class PlaceService {
     @Transactional
     public void deletePlace(Long memoryId, Long memberId, Long placeId) {
         certification(memoryId, memberId);
-
+        Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
 
         ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
@@ -99,6 +101,9 @@ public class PlaceService {
         place.delete();
         memoryRepository.updatePlaceCount(memoryId, -1);
         memoryRepository.recalculateRating(memoryId);
+
+        int newPlaceCount = memoryRepository.findPlaceCount(memoryId);
+        memory.updatePlaceCount(newPlaceCount);
     }
 
     @Transactional
