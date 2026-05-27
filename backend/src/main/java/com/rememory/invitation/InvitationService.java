@@ -29,7 +29,7 @@ public class InvitationService {
         Member invitor =  memberRepository.findOne(invitorId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, invitorId).isEmpty()){
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, invitorId).isEmpty()){
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
@@ -57,12 +57,15 @@ public class InvitationService {
         Member invitedMember = memberRepository.findOne(invitedMemberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         Memory memory = memoryRepository.findOne(invitation.getMemory().getId()).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
-        if(mmRepository.findByMemoryIdAndMemberId(memory.getId(),invitedMemberId).isPresent()) {
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memory.getId(),invitedMemberId).isPresent()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_ALREADY_EXISTS);
         }
 
+        mmRepository.findLeftByMemoryIdAndMemberId(memory.getId(), invitedMemberId)
+                .ifPresentOrElse(
+                        MemberMemory::comebackMember,
+                        () -> mmRepository.save(MemberMemory.create(invitedMember, memory))
+                );
         invitation.plusUsedCount();
-        MemberMemory memberMemory = MemberMemory.create(invitedMember, memory);
-        mmRepository.save(memberMemory);
     }
 }

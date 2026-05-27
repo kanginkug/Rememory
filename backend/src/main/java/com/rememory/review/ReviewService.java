@@ -36,7 +36,7 @@ public class ReviewService {
         Long placeId = cuReviewRequestDTO.getPlaceId();
 
         Member creator = memberRepository.findOne(creatorId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, creatorId).isEmpty()){
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, creatorId).isEmpty()){
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
@@ -111,7 +111,7 @@ public class ReviewService {
             throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
         }
 
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
     }

@@ -36,7 +36,7 @@ public class PlaceService {
         Member creator = memberRepository.findOne(creatorId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, creatorId).isEmpty()){
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, creatorId).isEmpty()){
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
@@ -113,7 +113,7 @@ public class PlaceService {
     @Transactional
     public void savePlacePhoto(Long memoryId, Long memberId, Long placeId, MultipartFile file) {
         Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
@@ -154,7 +154,7 @@ public class PlaceService {
             throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
         }
 
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
     }

@@ -42,4 +42,6 @@ public class MemberMemory {
     public void leftMemory() {
         this.leftAt = LocalDateTime.now();
     }
+
+    public void comebackMember() {this.leftAt = null;}
 }
