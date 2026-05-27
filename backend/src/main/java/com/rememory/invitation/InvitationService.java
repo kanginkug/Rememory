@@ -50,7 +50,7 @@ public class InvitationService {
             throw new BusinessException(ErrorCode.INVITATION_EXPIRED);
         }
 
-        if(invitation.getMaxUses() < invitation.getUsedCount()+1) {
+        if(invitation.getMaxUses() != 0 && invitation.getMaxUses() < invitation.getUsedCount() + 1) {
             throw new BusinessException(ErrorCode.INVITATION_MAX_USES_EXCEEDED);
         }
 
