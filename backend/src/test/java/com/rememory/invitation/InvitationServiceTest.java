@@ -33,10 +33,10 @@ class InvitationServiceTest {
 
     @BeforeEach
     void setUp() {
-        invitor = Member.create("홍길동", "hong@gmail.com", "KAKAO", "kakao_111", "http://img/1");
+        invitor = Member.create("홍길동", "hong@gmail.com", "http://img/1", "KAKAO", "kakao_111");
         memberRepository.save(invitor);
 
-        invitedMember = Member.create("김철수", "kim@gmail.com", "KAKAO", "kakao_222", "http://img/2");
+        invitedMember = Member.create("김철수", "kim@gmail.com", "http://img/2", "KAKAO", "kakao_222");
         memberRepository.save(invitedMember);
 
         memory = Memory.create(invitor, "제주도 여행", "즐거운 여행",
@@ -94,7 +94,7 @@ class InvitationServiceTest {
         invitationService.agreeInvite(invitedMember.getId(), invitation.getInviteCode());
 
         // then
-        Optional<MemberMemory> memberMemory = mmRepository.findByMemoryIdAndMemberId(
+        Optional<MemberMemory> memberMemory = mmRepository.findActiveByMemoryIdAndMemberId(
                 memory.getId(), invitedMember.getId());
         assertThat(memberMemory).isPresent();
     }
@@ -135,6 +135,44 @@ class InvitationServiceTest {
     }
 
     @Test
+    @DisplayName("초대 수락 성공 - 나갔던 멤버 재참여 시 leftAt 초기화")
+    void agreeInvite_재참여_성공() {
+        // given - invitedMember가 한 번 참여 후 나간 상태
+        MemberMemory pastMemberMemory = MemberMemory.create(invitedMember, memory);
+        mmRepository.save(pastMemberMemory);
+        pastMemberMemory.leftMemory(); // leftAt 세팅
+
+        Invitation invitation = Invitation.create(memory, invitor, 5);
+        invitationRepository.save(invitation);
+
+        // when
+        invitationService.agreeInvite(invitedMember.getId(), invitation.getInviteCode());
+
+        // then - 활성 멤버로 복귀
+        Optional<MemberMemory> memberMemory = mmRepository.findActiveByMemoryIdAndMemberId(
+                memory.getId(), invitedMember.getId());
+        assertThat(memberMemory).isPresent();
+    }
+
+    @Test
+    @DisplayName("초대 수락 성공 - 재참여 시에도 usedCount 증가")
+    void agreeInvite_재참여_usedCount_증가() {
+        // given - invitedMember가 나간 상태
+        MemberMemory pastMemberMemory = MemberMemory.create(invitedMember, memory);
+        mmRepository.save(pastMemberMemory);
+        pastMemberMemory.leftMemory();
+
+        Invitation invitation = Invitation.create(memory, invitor, 5);
+        invitationRepository.save(invitation);
+
+        // when
+        invitationService.agreeInvite(invitedMember.getId(), invitation.getInviteCode());
+
+        // then
+        assertThat(invitation.getUsedCount()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("maxUses 초과 시 BusinessException 발생")
     void agreeInvite_maxUses_초과_예외발생() {
         // given - maxUses = 1
@@ -145,7 +183,7 @@ class InvitationServiceTest {
         invitationService.agreeInvite(invitedMember.getId(), invitation.getInviteCode());
 
         // 두 번째 수락할 새 멤버
-        Member newMember = Member.create("박영희", "park@gmail.com", "KAKAO", "kakao_333", "http://img/3");
+        Member newMember = Member.create("박영희", "park@gmail.com", "http://img/3", "KAKAO", "kakao_333");
         memberRepository.save(newMember);
 
         // when & then

@@ -22,7 +22,7 @@ public class MemberMemoryRepository {
     }
 
     /** leftAt.isNull() 조건으로 이미 나간 멤버는 활성 멤버로 인식되지 않도록 차단 */
-    public Optional<MemberMemory> findByMemoryIdAndMemberId(Long memoryId, Long memberId) {
+    public Optional<MemberMemory> findActiveByMemoryIdAndMemberId(Long memoryId, Long memberId) {
         return Optional.ofNullable(
                 queryFactory
                 .selectFrom(QMemberMemory.memberMemory)
@@ -32,6 +32,20 @@ public class MemberMemoryRepository {
                         QMemberMemory.memberMemory.leftAt.isNull()
                 )
                 .fetchOne()
+        );
+    }
+
+    /** 나갔던 멤버 조회 */
+    public Optional<MemberMemory> findLeftByMemoryIdAndMemberId(Long memoryId, Long memberId) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(QMemberMemory.memberMemory)
+                        .where(
+                                QMemberMemory.memberMemory.memory.id.eq(memoryId),
+                                QMemberMemory.memberMemory.member.id.eq(memberId),
+                                QMemberMemory.memberMemory.leftAt.isNotNull()
+                        )
+                        .fetchOne()
         );
     }
 

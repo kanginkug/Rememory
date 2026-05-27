@@ -79,7 +79,7 @@ public class MemoryService {
 
     /** 해당 메모리에 해당 회원이 존재하는지 체크 */
     public MemberMemory findMemberMemory (Long memoryId, Long memberId) {
-        return mmRepository.findByMemoryIdAndMemberId(memoryId, memberId)
+        return mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND));
     }
 
@@ -87,7 +87,7 @@ public class MemoryService {
         if(memberRepository.findOne(memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
         }
-        if(mmRepository.findByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
         Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
@@ -101,7 +101,7 @@ public class MemoryService {
      */
     @Transactional
     public void leftMemory(Long memoryId, Long memberId) {
-        MemberMemory memberMemory = mmRepository.findByMemoryIdAndMemberId(memoryId, memberId)
+        MemberMemory memberMemory = mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND));
 
         memberMemory.leftMemory();
@@ -125,7 +125,7 @@ public class MemoryService {
         Memory memory = memoryRepository.findOne(memoryId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
-        if (mmRepository.findByMemoryIdAndMemberId(memoryId, updaterId).isEmpty()) {
+        if (mmRepository.findActiveByMemoryIdAndMemberId(memoryId, updaterId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
@@ -147,7 +147,7 @@ public class MemoryService {
         if (memoryRepository.findOne(memoryId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
         }
-        if (mmRepository.findByMemoryIdAndMemberId(memoryId, deleterId).isEmpty()) {
+        if (mmRepository.findActiveByMemoryIdAndMemberId(memoryId, deleterId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
