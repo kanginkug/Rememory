@@ -84,6 +84,7 @@ public class Place {
         place.regionDepth1 = regionDepth1;
         place.regionDepth2 = regionDepth2;
         place.visitedAt = visitedAt;
+        place.reviewCount = 0;
         return place;
     }
 
