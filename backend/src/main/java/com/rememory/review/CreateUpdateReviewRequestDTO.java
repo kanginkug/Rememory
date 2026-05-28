@@ -1,5 +1,7 @@
 package com.rememory.review;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +20,8 @@ public class CreateUpdateReviewRequestDTO {
     private Long memoryId;
 
     @NotNull
+    @DecimalMin("1.0")
+    @DecimalMax("5.0")
     private BigDecimal rating;
 
     private String content;
