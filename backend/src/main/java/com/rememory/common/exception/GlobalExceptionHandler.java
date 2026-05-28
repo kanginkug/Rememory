@@ -1,5 +1,6 @@
 package com.rememory.common.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
  * - NoResourceFoundException            : 존재하지 않는 경로 (404)
  * - HttpMessageNotReadableException     : 잘못된 JSON / ENUM body 값 (400)
  * - MethodArgumentTypeMismatchException : 잘못된 쿼리 파라미터 ENUM (400)
+ * - ConstraintViolationException        : @Validated @RequestParam 검증 실패 (400)
  * - Exception                           : 예상 못한 서버 에러 (500)
  */
 @Slf4j
@@ -83,6 +85,18 @@ public class GlobalExceptionHandler {
         log.warn("[MethodArgumentTypeMismatchException] message={}", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("BAD_REQUEST", "잘못된 파라미터입니다."));
+    }
+
+    /**
+     * @Validated @RequestParam 검증 실패
+     * ex) invitedCnt=-1 (@Min(0) 위반)
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException e) {
+        String message = e.getConstraintViolations().iterator().next().getMessage();
+        log.warn("[ConstraintViolationException] message={}", message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("VALID001", message));
     }
 
     /**
