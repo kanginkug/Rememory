@@ -66,7 +66,7 @@ public class ReviewService {
         return toResponseDTOList(reviewList);
     }
 
-    public List<ReviewDetailResponseDTO> sortByReviewType(Long memoryId, Long memberId, Long placeId, SortTypeReview sortTypeReview) {
+    public List<ReviewDetailResponseDTO> sortByReviewType(Long memberId, Long memoryId, Long placeId, SortTypeReview sortTypeReview) {
         certification(memoryId, memberId);
 
         List<Review> reviewList = reviewRepository.sortByType(placeId, sortTypeReview);
