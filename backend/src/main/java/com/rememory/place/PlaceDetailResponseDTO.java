@@ -19,6 +19,7 @@ public class PlaceDetailResponseDTO {
     private BigDecimal latitude;
     private BigDecimal longitude;
     private BigDecimal avgRating;
+    private int reviewCount;
     // (시/도) ex : 서울
     private String regionDepth1;
     // (시/군/구) ex : 마포구
@@ -36,6 +37,7 @@ public class PlaceDetailResponseDTO {
                 place.getLatitude(),
                 place.getLongitude(),
                 place.getAvgRating(),
+                place.getReviewCount(),
                 place.getRegionDepth1(),
                 place.getRegionDepth2(),
                 place.getVisitedAt(),

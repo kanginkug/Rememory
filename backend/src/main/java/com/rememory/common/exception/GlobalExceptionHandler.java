@@ -30,9 +30,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
         ErrorCode errorCode = e.getErrorCode();
-        log.warn("[BusinessException] code={}, message={}", errorCode.getCode(), errorCode.getMessage());
+        log.warn("[BusinessException] code={}, status={}, message={}", errorCode.getCode(), errorCode.getStatus(), errorCode.getMessage());
         return ResponseEntity
-                .badRequest()
+                .status(errorCode.getStatus())
                 .body(new ErrorResponse(errorCode.getCode(), errorCode.getMessage()));
     }
 
