@@ -58,3 +58,6 @@ backend/src/test/resources/application.properties
 
 ### Uploads ###
 backend/uploads/
+
+### Local Test Results ###
+backend/API_TEST_RESULTS.md
