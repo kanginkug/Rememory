@@ -3,6 +3,7 @@ package com.rememory.common.config;
 import com.rememory.security.JwtFilter;
 import com.rememory.security.OAuth2SuccessHandler;
 import com.rememory.security.OAuth2UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +50,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login/success", "/login/failed").permitAll() // 임시 테스트용
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"code\":\"AUTH001\",\"message\":\"인증이 필요합니다.\"}");
+                        })
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
