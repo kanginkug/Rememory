@@ -21,13 +21,13 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const handleKakaoLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api';
-    window.location.href = `${apiUrl}/auth/kakao`;
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
+    window.location.href = `${baseUrl}/oauth2/authorization/kakao`;
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080/api';
-    window.location.href = `${apiUrl}/auth/google`;
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080';
+    window.location.href = `${baseUrl}/oauth2/authorization/google`;
   };
 
   return (
