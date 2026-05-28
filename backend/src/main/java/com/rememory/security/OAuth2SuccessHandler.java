@@ -46,11 +46,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String token = jwtProvider.createToken(member.getId());
 
         // 프론트로 토큰과 함께 리다이렉트 (배포 전 HttpOnly 쿠키 방식으로 변경 예정)
-//        getRedirectStrategy().sendRedirect(request, response,
-//                "http://localhost:3000/auth/callback?token=" + token);
-
-        // 임시 테스트용 (프론트 연동 전)
         getRedirectStrategy().sendRedirect(request, response,
-                "http://localhost:8080/login/success?token=" + token);
+                "http://localhost:3000/auth/callback?token=" + token);
     }
 }
