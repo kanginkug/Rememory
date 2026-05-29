@@ -22,8 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PlaceService {
-
     private final PlaceRepository placeRepository;
+
     private final PlacePhotoRepository ppRepository;
     private final MemberRepository memberRepository;
     private final MemoryRepository memoryRepository;
@@ -57,6 +57,13 @@ public class PlaceService {
         certification(memoryId, memberId);
         List<Place> placeList = placeRepository.findAllByMemoryId(memoryId);
         return toResponseDTOList(placeList);
+    }
+
+    public List<PlaceDetailResponseDTO> findBestPlace(Long memberId) {
+        if(memberRepository.findOne(memberId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+        return toResponseDTOList(placeRepository.findBestPlace(memberId));
     }
 
     public List<PlaceDetailResponseDTO> sortPlaceByType(Long memberId, Long memoryId, Category category, String regionDepth1, String regionDepth2) {
@@ -163,8 +170,8 @@ public class PlaceService {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
     }
-
     // Repository에서 조회한 PlaceList를 ResponseDTOList로 변환하는 메서드
+
     private List<PlaceDetailResponseDTO> toResponseDTOList(List<Place> placeList) {
         List<PlaceDetailResponseDTO> pdResponseDTOList = new ArrayList<>();
         for(Place place : placeList) {

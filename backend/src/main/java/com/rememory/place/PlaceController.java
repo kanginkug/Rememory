@@ -28,6 +28,11 @@ public class PlaceController {
         return ResponseEntity.ok(placeService.findAllByMemoryId(memberId, memoryId));
     }
 
+    @GetMapping("/best")
+    public ResponseEntity<List<PlaceDetailResponseDTO>> findBestPlace(@RequestAttribute("memberId") Long memberId) {
+        return ResponseEntity.ok(placeService.findBestPlace(memberId));
+    }
+
     @GetMapping("/{memoryId}/sort")
     public ResponseEntity<List<PlaceDetailResponseDTO>> sortPlaceByType(@RequestAttribute("memberId") Long memberId,
                                                                         @PathVariable("memoryId") Long memoryId,
@@ -71,6 +76,4 @@ public class PlaceController {
         placeService.deletePlacePhoto(memoryId, memberId, placeId, placePhotoId);
         return ResponseEntity.noContent().build();
     }
-
-
 }

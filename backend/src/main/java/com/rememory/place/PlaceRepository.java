@@ -3,6 +3,7 @@ package com.rememory.place;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.rememory.member.QMember;
+import com.rememory.memory.QMemberMemory;
 import com.rememory.memory.QMemory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -128,5 +129,23 @@ public class PlaceRepository {
                 .set(QPlace.place.reviewCount, QPlace.place.reviewCount.subtract(1))
                 .where(QPlace.place.id.eq(placeId))
                 .execute();
+    }
+
+    public List<Place> findBestPlace(Long memberId) {
+        return queryFactory.selectFrom(QPlace.place)
+                .join(QMemory.memory).on(QPlace.place.memory.id.eq(QMemory.memory.id))
+                .join(QMemberMemory.memberMemory).on(QMemory.memory.id.eq(QMemberMemory.memberMemory.memory.id))
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull()
+                )
+                .orderBy(
+                        QPlace.place.avgRating.desc(),
+                        QPlace.place.reviewCount.desc()
+                )
+                .limit(5)
+                .fetch();
     }
 }
