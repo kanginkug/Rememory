@@ -30,6 +30,8 @@ public class Memory {
 
     private int placeCount;
 
+    private int memberCount;
+
     // 신규 멤버에게 과거 공개 여부
     @Column(nullable = false)
     private Boolean showHistoryToNew = true;
@@ -53,6 +55,7 @@ public class Memory {
         memory.endDate = endDate;
         memory.avgRating = BigDecimal.ZERO;
         memory.placeCount = 0;
+        memory.memberCount = 1;
         return memory;
     }
 
@@ -81,5 +84,13 @@ public class Memory {
 
     public void updatePlaceCount(int placeCount) {
         this.placeCount = placeCount;
+    }
+
+    public void plusMemberCount() {
+        this.memberCount++;
+    }
+
+    public void minusMemberCount() {
+        this.memberCount--;
     }
 }

@@ -107,9 +107,9 @@ public class MemoryService {
         memberMemory.leftMemory();
 
         int remainCount = mmRepository.countActiveMembers(memoryId);
+        Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
+        memory.minusMemberCount();
         if (remainCount == 0) {
-            Memory memory = memoryRepository.findOne(memoryId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
             memory.delete();
         }
     }
