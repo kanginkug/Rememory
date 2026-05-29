@@ -67,5 +67,6 @@ public class InvitationService {
                         () -> mmRepository.save(MemberMemory.create(invitedMember, memory))
                 );
         invitation.plusUsedCount();
+        memory.plusMemberCount();
     }
 }

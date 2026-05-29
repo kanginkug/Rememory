@@ -15,6 +15,7 @@ public class MemoryDetailResponseDTO {
     private String name;
     private BigDecimal avgRating;
     private int placeCount;
+    private int memberCount;
     private String description;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -25,6 +26,7 @@ public class MemoryDetailResponseDTO {
                 memory.getName(),
                 memory.getAvgRating(),
                 memory.getPlaceCount(),
+                memory.getMemberCount(),
                 memory.getDescription(),
                 memory.getStartDate(),
                 memory.getEndDate()
