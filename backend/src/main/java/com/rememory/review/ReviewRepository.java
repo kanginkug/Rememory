@@ -3,6 +3,7 @@ package com.rememory.review;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.rememory.member.QMember;
+import com.rememory.memory.QMemberMemory;
 import com.rememory.memory.QMemory;
 import com.rememory.memory.SortTypeMemory;
 import com.rememory.place.QPlace;
@@ -97,4 +98,20 @@ public class ReviewRepository {
         }
     }
 
+    public List<Review> findRecentReview(Long memberId) {
+        return queryFactory.selectFrom(QReview.review)
+                .join(QReview.review.place, QPlace.place).fetchJoin()
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
+                .join(QMemberMemory.memberMemory).on(QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id))
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull(),
+                        QReview.review.deletedAt.isNull()
+                )
+                .orderBy(QReview.review.createdAt.desc())
+                .limit(10)
+                .fetch();
+    }
 }

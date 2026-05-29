@@ -124,4 +124,8 @@ public class ReviewService {
 
         return rdResponseDTOList;
     }
+
+    public List<ReviewDetailResponseDTO> findRecentReview(Long memberId) {
+        return toResponseDTOList(reviewRepository.findRecentReview(memberId));
+    }
 }
