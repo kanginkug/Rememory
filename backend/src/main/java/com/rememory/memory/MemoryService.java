@@ -72,7 +72,10 @@ public class MemoryService {
         List<Memory> memoryList = memoryRepository.findAllByMemberId(memberId, sortTypeMemory, keyword);
         List<MemoryDetailResponseDTO> mDResponseDTOList = new ArrayList<>();
         for(Memory memory : memoryList) {
-            mDResponseDTOList.add(MemoryDetailResponseDTO.from(memory));
+            String imageUrl = mpRepository.findOne(memory.getId())  // Optional<MemoryPhoto> 반환
+                    .map(MemoryPhoto::getImageUrl)     // MemoryPhoto가 있으면 imageUrl로 변환 → Optional<String>
+                    .orElse(null);
+            mDResponseDTOList.add(MemoryDetailResponseDTO.from(memory, imageUrl));
         }
         return mDResponseDTOList;
     }
@@ -91,7 +94,10 @@ public class MemoryService {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
         Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
-        return MemoryDetailResponseDTO.from(memory);
+        String imageUrl = mpRepository.findOne(memory.getId())  // Optional<MemoryPhoto> 반환
+                .map(MemoryPhoto::getImageUrl)     // MemoryPhoto가 있으면 imageUrl로 변환 → Optional<String>
+                .orElse(null);
+        return MemoryDetailResponseDTO.from(memory, imageUrl);
     }
 
     /**

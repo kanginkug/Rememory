@@ -19,8 +19,9 @@ public class MemoryDetailResponseDTO {
     private String description;
     private LocalDate startDate;
     private LocalDate endDate;
+    private String imageUrl;
 
-    public static MemoryDetailResponseDTO from(Memory memory) {
+    public static MemoryDetailResponseDTO from(Memory memory, String imageUrl) {
         return new MemoryDetailResponseDTO(
                 memory.getId(),
                 memory.getName(),
@@ -29,7 +30,8 @@ public class MemoryDetailResponseDTO {
                 memory.getMemberCount(),
                 memory.getDescription(),
                 memory.getStartDate(),
-                memory.getEndDate()
+                memory.getEndDate(),
+                imageUrl
         );
     }
 }
