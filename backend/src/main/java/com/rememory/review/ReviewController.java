@@ -26,6 +26,11 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.findMyReview(memoryId, memberId, placeId));
     }
 
+    @GetMapping("/recent")
+    public ResponseEntity<List<ReviewDetailResponseDTO>> findRecentReview(@RequestAttribute("memberId") Long memberId) {
+        return ResponseEntity.ok(reviewService.findRecentReview(memberId));
+    }
+
     @GetMapping("/memory/{memoryId}/place/{placeId}/all")
     public ResponseEntity<List<ReviewDetailResponseDTO>> findReviewByPlaceId(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @PathVariable("placeId") Long placeId) {
         return ResponseEntity.ok(reviewService.findAllByPlaceId(memoryId, memberId, placeId));
