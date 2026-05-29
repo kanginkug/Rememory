@@ -1,5 +1,6 @@
 package com.rememory.review;
 
+import com.rememory.place.Category;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,6 +16,7 @@ public class ReviewDetailResponseDTO {
     private BigDecimal rating;
     private String content;
     private String placeName;
+    private Category placeCategory;
     private String memoryName;
     private LocalDate visitedAt;
     private LocalDateTime createdAt;
@@ -26,6 +28,7 @@ public class ReviewDetailResponseDTO {
           review.getRating(),
           review.getContent(),
           review.getPlace().getName(),
+          review.getPlace().getCategory(),
           review.getPlace().getMemory().getName(),
           review.getVisitedAt(),
           review.getCreatedAt()
