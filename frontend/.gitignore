@@ -42,3 +42,7 @@ next-env.d.ts
 
 # api docs (internal)
 API.md
+
+# local dev files
+PAGES.md
+/lib/api.ts
