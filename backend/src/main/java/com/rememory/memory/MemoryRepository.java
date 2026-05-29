@@ -45,6 +45,7 @@ public class MemoryRepository {
                 .on(
                         QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id)
                 )
+                .leftJoin(QMemoryPhoto.memoryPhoto).on(QMemoryPhoto.memoryPhoto.memory.id.eq(QMemory.memory.id)).fetchJoin()
                 .where(
                         QMemberMemory.memberMemory.member.id.eq(memberId),
                         QMemberMemory.memberMemory.leftAt.isNull(),
