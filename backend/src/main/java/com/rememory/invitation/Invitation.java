@@ -56,7 +56,7 @@ public class Invitation {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.expiresAt = LocalDateTime.now().plusDays(7); // 초대 링크 유효 기간 7일
+        this.expiresAt = LocalDateTime.now().plusDays(3); // 초대 링크 유효 기간 3일
     }
 
     public void plusUsedCount(){
