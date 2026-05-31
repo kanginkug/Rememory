@@ -49,7 +49,7 @@ public class MemoryService {
         }
 
         if (memory.getInvitedCnt() > 0) {
-            invitationService.save(createMemory.getId(), creatorId, memory.getInvitedCnt());
+            invitationService.save(createMemory.getId(), creatorId);
         }
     }
 

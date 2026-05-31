@@ -43,12 +43,12 @@ public class Invitation {
 
     private LocalDateTime expiresAt;
 
-    public static Invitation create(Memory memory, Member inviter, int maxUses) {
+    public static Invitation create(Memory memory, Member inviter) {
         Invitation invitation = new Invitation();
         invitation.memory = memory;
         invitation.inviter = inviter;
         invitation.inviteCode = UUID.randomUUID().toString();
-        invitation.maxUses = maxUses;
+        invitation.maxUses = 0;
         invitation.usedCount = 0;
         return invitation;
     }
