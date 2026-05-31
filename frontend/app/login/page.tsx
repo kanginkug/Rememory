@@ -40,7 +40,7 @@ export default function LoginPage() {
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'top center',
         // 이미지 아래 남은 공간은 일러스트 하늘색과 자연스럽게 이어짐
-        backgroundColor: '#C8E8F5',
+        backgroundColor: '#BFDBF3',
       }}
     >
       {/* 바텀 시트: 항상 화면 맨 아래 고정
