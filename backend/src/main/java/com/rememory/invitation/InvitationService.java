@@ -25,7 +25,7 @@ public class InvitationService {
     private final MemberMemoryRepository mmRepository;
 
     @Transactional
-    public void save(Long memoryId, Long invitorId, int invitedCnt){
+    public void save(Long memoryId, Long invitorId){
         Member invitor =  memberRepository.findOne(invitorId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
@@ -33,7 +33,7 @@ public class InvitationService {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
-        Invitation invitation = Invitation.create(memory, invitor, invitedCnt);
+        Invitation invitation = Invitation.create(memory, invitor);
         invitationRepository.save(invitation);
     }
 

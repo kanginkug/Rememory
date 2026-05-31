@@ -172,23 +172,4 @@ class InvitationServiceTest {
         assertThat(invitation.getUsedCount()).isEqualTo(1);
     }
 
-    @Test
-    @DisplayName("maxUses 초과 시 BusinessException 발생")
-    void agreeInvite_maxUses_초과_예외발생() {
-        // given - maxUses = 1
-        Invitation invitation = Invitation.create(memory, invitor, 1);
-        invitationRepository.save(invitation);
-
-        // 첫 번째 수락 (성공)
-        invitationService.agreeInvite(invitedMember.getId(), invitation.getInviteCode());
-
-        // 두 번째 수락할 새 멤버
-        Member newMember = Member.create("박영희", "park@gmail.com", "http://img/3", "KAKAO", "kakao_333");
-        memberRepository.save(newMember);
-
-        // when & then
-        assertThatThrownBy(() -> invitationService.agreeInvite(newMember.getId(), invitation.getInviteCode()))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorCode.INVITATION_MAX_USES_EXCEEDED.getMessage());
-    }
 }
