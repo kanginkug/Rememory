@@ -73,4 +73,13 @@ public class MemberMemoryRepository {
                 .fetchOne();
         return count != null ? count.intValue() : 0;
     }
+
+    public List<MemberMemory> findActiveByMemoryId(Long memoryId) {
+        return queryFactory
+                .selectFrom(QMemberMemory.memberMemory)
+                .where(
+                        QMemberMemory.memberMemory.memory.id.eq(memoryId),
+                        QMemberMemory.memberMemory.leftAt.isNull()
+                ).fetch();
+    }
 }

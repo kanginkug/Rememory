@@ -2,6 +2,7 @@ package com.rememory.memory;
 
 import com.rememory.memory.dto.CreateMemoryRequestDTO;
 import com.rememory.memory.dto.MemoryDetailResponseDTO;
+import com.rememory.memory.dto.MemoryListResponseDTO;
 import com.rememory.memory.dto.UpdateMemoryRequestDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +42,8 @@ public class MemoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MemoryDetailResponseDTO>> findMemoryList(@RequestAttribute("memberId") Long memberId, @RequestParam("sortType") SortTypeMemory sortTypeMemory,
-                                                                        @RequestParam(value = "keyword", required = false) String keyword) {
+    public ResponseEntity<List<MemoryListResponseDTO>> findMemoryList(@RequestAttribute("memberId") Long memberId, @RequestParam("sortType") SortTypeMemory sortTypeMemory,
+                                                                      @RequestParam(value = "keyword", required = false) String keyword) {
         return ResponseEntity.ok(memoryService.findMemoryList(memberId, sortTypeMemory, keyword));
     }
 
