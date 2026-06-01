@@ -8,7 +8,6 @@ import com.rememory.member.MemberRepository;
 import com.rememory.memory.MemberMemoryRepository;
 import com.rememory.memory.Memory;
 import com.rememory.memory.MemoryRepository;
-import com.rememory.review.Review;
 import com.rememory.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -102,9 +101,11 @@ public class PlaceService {
         Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
 
-        ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
-        reviewRepository.findAllByPlaceId(placeId).forEach(Review::delete);
+        if (!reviewRepository.findAllByPlaceId(placeId).isEmpty()) {
+            throw new BusinessException(ErrorCode.PLACE_HAS_REVIEWS);
+        }
 
+        ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
         place.delete();
         memoryRepository.updatePlaceCount(memoryId, -1);
         memoryRepository.recalculateRating(memoryId);
