@@ -5,9 +5,11 @@ import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
 import com.rememory.invitation.InvitationService;
 import com.rememory.member.Member;
+import com.rememory.member.MemberInfoDTO;
 import com.rememory.member.MemberRepository;
 import com.rememory.memory.dto.CreateMemoryRequestDTO;
 import com.rememory.memory.dto.MemoryDetailResponseDTO;
+import com.rememory.memory.dto.MemoryListResponseDTO;
 import com.rememory.memory.dto.UpdateMemoryRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -67,15 +69,15 @@ public class MemoryService {
         updateMemory.update(memory.getMemoryName(), memory.getShowHistoryToNew(), memory.getDescription(), memory.getStartDate(), memory.getEndDate());
     }
 
-    public List<MemoryDetailResponseDTO> findMemoryList(Long memberId, SortTypeMemory sortTypeMemory, String keyword) {
+    public List<MemoryListResponseDTO> findMemoryList(Long memberId, SortTypeMemory sortTypeMemory, String keyword) {
 
         List<Memory> memoryList = memoryRepository.findAllByMemberId(memberId, sortTypeMemory, keyword);
-        List<MemoryDetailResponseDTO> mDResponseDTOList = new ArrayList<>();
+        List<MemoryListResponseDTO> mDResponseDTOList = new ArrayList<>();
         for(Memory memory : memoryList) {
             String imageUrl = mpRepository.findOne(memory.getId())  // Optional<MemoryPhoto> 반환
                     .map(MemoryPhoto::getImageUrl)     // MemoryPhoto가 있으면 imageUrl로 변환 → Optional<String>
                     .orElse(null);
-            mDResponseDTOList.add(MemoryDetailResponseDTO.from(memory, imageUrl));
+            mDResponseDTOList.add(MemoryListResponseDTO.from(memory, imageUrl));
         }
         return mDResponseDTOList;
     }
@@ -97,7 +99,11 @@ public class MemoryService {
         String imageUrl = mpRepository.findOne(memory.getId())  // Optional<MemoryPhoto> 반환
                 .map(MemoryPhoto::getImageUrl)     // MemoryPhoto가 있으면 imageUrl로 변환 → Optional<String>
                 .orElse(null);
-        return MemoryDetailResponseDTO.from(memory, imageUrl);
+        List<MemberInfoDTO> members = mmRepository.findActiveByMemoryId(memoryId)
+                .stream()
+                .map(mm -> MemberInfoDTO.from(mm.getMember().getId(), mm.getMember().getName(), mm.getMember().getProfileImageUrl()))
+                .toList();
+        return MemoryDetailResponseDTO.from(memory, imageUrl, members);
     }
 
     /**

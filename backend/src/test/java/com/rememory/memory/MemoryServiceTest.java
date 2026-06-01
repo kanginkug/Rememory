@@ -6,6 +6,7 @@ import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import com.rememory.memory.dto.CreateMemoryRequestDTO;
 import com.rememory.memory.dto.MemoryDetailResponseDTO;
+import com.rememory.memory.dto.MemoryListResponseDTO;
 import com.rememory.memory.dto.UpdateMemoryRequestDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -160,7 +161,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("첫번째 여행", "설명1"), null);
         memoryService.createMemory(member.getId(), createMemoryDto("두번째 여행", "설명2"), null);
 
-        List<MemoryDetailResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
+        List<MemoryListResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
 
         assertThat(memories).hasSize(2);
         assertThat(memories.get(0).getName()).isEqualTo("두번째 여행");
@@ -173,7 +174,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("부산 여행", "설명2"), null);
         memoryService.createMemory(member.getId(), createMemoryDto("서울 나들이", "설명3"), null);
 
-        List<MemoryDetailResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, "여행");
+        List<MemoryListResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, "여행");
 
         assertThat(memories).hasSize(2);
     }
@@ -184,7 +185,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "설명1"), null);
         memoryService.createMemory(otherMember.getId(), createMemoryDto("부산 여행", "설명2"), null);
 
-        List<MemoryDetailResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
+        List<MemoryListResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
 
         assertThat(memories).hasSize(1);
         assertThat(memories.get(0).getName()).isEqualTo("제주도 여행");
@@ -246,7 +247,7 @@ class MemoryServiceTest {
 
         memoryService.leftMemory(memory.getId(), member.getId());
 
-        List<MemoryDetailResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
+        List<MemoryListResponseDTO> memories = memoryService.findMemoryList(member.getId(), SortTypeMemory.DATE_DESC, null);
         assertThat(memories).isEmpty();
     }
 
