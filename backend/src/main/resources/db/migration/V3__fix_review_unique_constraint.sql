@@ -1,5 +1,5 @@
 -- =============================================
--- V2__fix_review_unique_constraint.sql
+-- V3__fix_review_unique_constraint.sql
 -- review 테이블 UNIQUE 제약 → 부분 인덱스 교체
 -- 문제: UNIQUE(place_id, member_id) 제약이 deleted_at 무관하게 적용되어
 --       soft delete 후 동일 멤버가 리뷰 재작성 시 UNIQUE 위반 발생
