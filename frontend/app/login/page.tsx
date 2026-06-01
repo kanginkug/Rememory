@@ -31,49 +31,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="relative h-screen overflow-hidden w-full max-w-md mx-auto shadow-2xl"
-      style={{
-        // 이미지: 가로=화면폭 고정, 세로=비율 자동 → 양옆 잘림 없음
-        backgroundImage: "url('/images/login-bg.jpg')",
-        backgroundSize: '100% auto',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'top center',
-        // 이미지 아래 남은 공간은 일러스트 하늘색과 자연스럽게 이어짐
-        backgroundColor: '#BFDBF3',
-      }}
-    >
-      {/* 바텀 시트: 항상 화면 맨 아래 고정
-          짧은 폰 → 공원 일부를 덮음 / 긴 폰 → 공원이 더 많이 노출됨 */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] px-8 pt-10 pb-10 shadow-[0_-8px_30px_rgba(0,0,0,0.15)] flex flex-col items-center">
-
-        <h2 className="text-xl font-extrabold text-gray-900 mb-8 tracking-tight">
-          간편 로그인으로 추억 기록하기
-        </h2>
-
-        <div className="w-full space-y-3.5 mb-6">
+    <div className="login-bg relative h-screen overflow-hidden w-full max-w-md mx-auto shadow-2xl">
+      <div className="absolute bottom-[5vh] left-0 right-0 px-6">
+        <div className="w-full bg-white/30 backdrop-blur-sm rounded-3xl px-6 py-[1vh] flex flex-col gap-[0.8vh]">
           <button
             onClick={handleKakaoLogin}
-            className="w-full bg-[#FEE500] hover:bg-[#FAD600] text-[#191919] font-bold py-4 px-6 rounded-2xl shadow-sm border border-[#E6CE00]/30 flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
+            className="w-full bg-[#FEE500] hover:bg-[#FAD600] text-[#191919] font-bold py-[1.4vh] px-6 rounded-2xl shadow-sm border border-[#E6CE00]/30 flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
           >
             <KakaoIcon />
-            <span className="text-[15px]">카카오로 시작하기</span>
+            <span className="text-[clamp(12px,1.7vh,15px)]">카카오로 시작하기</span>
           </button>
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full bg-white hover:bg-gray-50 text-gray-700 font-bold py-4 px-6 rounded-2xl shadow-md border border-gray-200 flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
+            className="w-full bg-white hover:bg-gray-50 text-gray-700 font-bold py-[1.4vh] px-6 rounded-2xl shadow-md border border-gray-200 flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
           >
             <GoogleIcon />
-            <span className="text-[15px]">Google로 로그인</span>
+            <span className="text-[clamp(12px,1.7vh,15px)]">Google로 로그인</span>
           </button>
         </div>
 
-        <p className="text-xs text-gray-500 font-medium mb-8">
-          SNS 계정으로 안전하고 빠르게 로그인하세요
-        </p>
-
-        <p className="text-[11px] text-gray-400 font-medium tracking-tight">
+        <p className="text-[11px] text-gray-400 font-medium tracking-tight text-center mt-2">
           가입 시{' '}
           <button className="underline underline-offset-2 hover:text-gray-600 transition-colors">
             서비스 이용 약관
