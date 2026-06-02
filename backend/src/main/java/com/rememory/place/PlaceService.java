@@ -132,6 +132,11 @@ public class PlaceService {
         }
 
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
+
+        if(ppRepository.countByPlaceId(placeId) >= 5) {
+            throw new BusinessException(ErrorCode.PLACE_PHOTO_MAX_COUNT);
+        }
+
         String photoUrl = "";
         if(file != null && !file.isEmpty()){
             photoUrl = commonMethod.madePhotoUrl(file);
