@@ -32,6 +32,7 @@ public enum ErrorCode {
     PLACE_PHOTO_NOT_FOUND("P002", "장소 사진이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     PLACE_PHOTO_ACCESS_DENIED("P003", "장소 사진에 접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
     PLACE_HAS_REVIEWS("P004", "후기가 있는 장소는 삭제할 수 없습니다.", HttpStatus.CONFLICT),
+    PLACE_PHOTO_MAX_COUNT("P005", "장소 이미지는 5장까지만 저장 가능합니다.", HttpStatus.CONFLICT),
 
     // ===== Review =====
     REVIEW_NOT_FOUND("R001", "존재하지 않는 후기입니다.", HttpStatus.BAD_REQUEST),

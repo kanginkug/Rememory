@@ -65,4 +65,14 @@ public class PlacePhotoRepository {
                         (existing, replacement) -> existing
                 ));
     }
+
+    public int countByPlaceId(Long placeId) {
+         Long photoCount = queryFactory.select(QPlacePhoto.placePhoto.count())
+                .from(QPlacePhoto.placePhoto)
+                .where(
+                        QPlacePhoto.placePhoto.deletedAt.isNull(),
+                        QPlacePhoto.placePhoto.place.id.eq(placeId)
+                ).fetchOne();
+        return photoCount == null ? 0 : photoCount.intValue();
+    }
 }
