@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -174,10 +175,17 @@ public class PlaceService {
     // Repository에서 조회한 PlaceList를 ResponseDTOList로 변환하는 메서드
 
     private List<PlaceDetailResponseDTO> toResponseDTOList(List<Place> placeList) {
-        List<PlaceDetailResponseDTO> pdResponseDTOList = new ArrayList<>();
-        for(Place place : placeList) {
-            pdResponseDTOList.add(PlaceDetailResponseDTO.from(place));
-        }
-        return pdResponseDTOList;
+        if (placeList.isEmpty()) return List.of();
+        List<Long> placeIds = placeList.stream().map(Place::getId).toList();
+        Map<Long, PlacePhotoResponseDTO> thumbMap = ppRepository.findThumbByPlaceIdList(placeIds);
+
+        return placeList.stream()
+                .map(place -> {
+                    List<PlacePhotoResponseDTO> photos = thumbMap.containsKey(place.getId())
+                            ? List.of(thumbMap.get(place.getId()))
+                            : List.of();
+                    return PlaceDetailResponseDTO.from(place, photos);
+                })
+                .toList();
     }
 }
