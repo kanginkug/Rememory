@@ -8,7 +8,6 @@ import com.rememory.member.MemberRepository;
 import com.rememory.memory.MemberMemoryRepository;
 import com.rememory.memory.Memory;
 import com.rememory.memory.MemoryRepository;
-import com.rememory.review.Review;
 import com.rememory.review.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -102,9 +102,11 @@ public class PlaceService {
         Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
 
-        ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
-        reviewRepository.findAllByPlaceId(placeId).forEach(Review::delete);
+        if (!reviewRepository.findAllByPlaceId(placeId).isEmpty()) {
+            throw new BusinessException(ErrorCode.PLACE_HAS_REVIEWS);
+        }
 
+        ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
         place.delete();
         memoryRepository.updatePlaceCount(memoryId, -1);
         memoryRepository.recalculateRating(memoryId);
@@ -173,10 +175,17 @@ public class PlaceService {
     // Repository에서 조회한 PlaceList를 ResponseDTOList로 변환하는 메서드
 
     private List<PlaceDetailResponseDTO> toResponseDTOList(List<Place> placeList) {
-        List<PlaceDetailResponseDTO> pdResponseDTOList = new ArrayList<>();
-        for(Place place : placeList) {
-            pdResponseDTOList.add(PlaceDetailResponseDTO.from(place));
-        }
-        return pdResponseDTOList;
+        if (placeList.isEmpty()) return List.of();
+        List<Long> placeIds = placeList.stream().map(Place::getId).toList();
+        Map<Long, PlacePhotoResponseDTO> thumbMap = ppRepository.findThumbByPlaceIdList(placeIds);
+
+        return placeList.stream()
+                .map(place -> {
+                    List<PlacePhotoResponseDTO> photos = thumbMap.containsKey(place.getId())
+                            ? List.of(thumbMap.get(place.getId()))
+                            : List.of();
+                    return PlaceDetailResponseDTO.from(place, photos);
+                })
+                .toList();
     }
 }
