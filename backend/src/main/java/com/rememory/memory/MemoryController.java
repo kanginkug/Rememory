@@ -47,16 +47,14 @@ public class MemoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "/{memoryId}/image")
-    public ResponseEntity<Void> updateMemoryPhoto(
+    @PostMapping("/{memoryId}/image")
+    public ResponseEntity<Void> saveMemoryPhoto(
             @RequestAttribute("memberId") Long memberId,
-            @PathVariable("memoryId") Long memoryId, // 경로 변수 이름 명시
+            @PathVariable("memoryId") Long memoryId,
             @RequestBody @Valid MemoryPhotoRequestDTO memoryPhotoRequestDTO
     ) {
-
-        memoryService.updateMemoryPhoto(memoryPhotoRequestDTO, memoryId, memberId);
-
-        return ResponseEntity.ok().build();
+        memoryService.saveMemoryPhoto(memoryPhotoRequestDTO, memoryId, memberId);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @DeleteMapping("/{memoryId}/image")

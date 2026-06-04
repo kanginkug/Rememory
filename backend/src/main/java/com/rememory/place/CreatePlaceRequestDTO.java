@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Valid
@@ -21,6 +22,8 @@ public class CreatePlaceRequestDTO {
     private Category category;
 
     private String address;
+
+    private List<String> photoUrlList;
 
     private String kakaoPlaceId;
 
