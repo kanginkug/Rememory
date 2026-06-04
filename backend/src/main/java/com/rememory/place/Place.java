@@ -38,6 +38,9 @@ public class Place {
 
     private String name;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     //식당, 숙소, 관광지
     // RESTAURANT, ACCOMMODATION, ATTRACTION
     @Enumerated(EnumType.STRING)
@@ -69,18 +72,19 @@ public class Place {
 
     private LocalDateTime deletedAt;
 
-    public static Place create(Memory memory, Member creator, String name, Category category, String address, String kakaoPlaceId,
+    public static Place create(Memory memory, Member creator, String name, String description, Category category, String address, String kakaoPlaceId,
                            BigDecimal latitude, BigDecimal longitude, String regionDepth1, String regionDepth2, LocalDate visitedAt) {
         Place place = new Place();
         place.memory = memory;
         place.creator = creator;
         place.name = name;
+        place.description = description;
         place.category = category;
         place.address = address;
         place.kakaoPlaceId = kakaoPlaceId;
         place.latitude = latitude;
         place.longitude = longitude;
-        place.avgRating = BigDecimal.ZERO; // null이면 첫 리뷰 추가 시 UPDATE 산술식(null*0)이 null이 되므로 반드시 초기화
+        place.avgRating = BigDecimal.ZERO;
         place.regionDepth1 = regionDepth1;
         place.regionDepth2 = regionDepth2;
         place.visitedAt = visitedAt;
@@ -88,9 +92,10 @@ public class Place {
         return place;
     }
 
-    public void update(String name, Category category, String address, String kakaoPlaceId,
+    public void update(String name, String description, Category category, String address, String kakaoPlaceId,
                        BigDecimal latitude, BigDecimal longitude, String regionDepth1, String regionDepth2, LocalDate visitedAt) {
         this.name = name;
+        this.description = description;
         this.category = category;
         this.address = address;
         this.kakaoPlaceId = kakaoPlaceId;

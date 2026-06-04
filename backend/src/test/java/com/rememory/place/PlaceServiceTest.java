@@ -373,19 +373,19 @@ class PlaceServiceTest {
     // ===== 헬퍼 메서드 =====
 
     private CreatePlaceRequestDTO createPlaceDto(String name, Category category) {
-        return new CreatePlaceRequestDTO(name, category, "제주시 어딘가", null, "kakao_" + name,
+        return new CreatePlaceRequestDTO(name, category, "제주시 어딘가", null, null, "kakao_" + name,
                 BigDecimal.valueOf(33.4996), BigDecimal.valueOf(126.5312),
                 "제주", "제주시", LocalDate.of(2026, 5, 2));
     }
 
     private CreatePlaceRequestDTO createPlaceDto(String name, Category category, String depth1, String depth2) {
-        return new CreatePlaceRequestDTO(name, category, "제주시 어딘가", null, "kakao_" + name,
+        return new CreatePlaceRequestDTO(name, category, "제주시 어딘가", null, null, "kakao_" + name,
                 BigDecimal.valueOf(33.4996), BigDecimal.valueOf(126.5312),
                 depth1, depth2, LocalDate.of(2026, 5, 2));
     }
 
     private UpdatePlaceRequestDTO updatePlaceDto(String name, Category category) {
-        return new UpdatePlaceRequestDTO(name, category, "제주시 어딘가", "kakao_" + name,
+        return new UpdatePlaceRequestDTO(name, category, "제주시 어딘가", null, "kakao_" + name,
                 BigDecimal.valueOf(33.4996), BigDecimal.valueOf(126.5312),
                 "제주", "제주시", LocalDate.of(2026, 5, 2));
     }

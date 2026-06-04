@@ -22,6 +22,8 @@ public class UpdatePlaceRequestDTO {
 
     private String address;
 
+    private String description;
+
     private String kakaoPlaceId;
 
     private BigDecimal latitude;
