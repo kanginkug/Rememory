@@ -57,7 +57,7 @@ class ReviewServiceTest {
 
         mmRepository.save(MemberMemory.create(member, memory));
 
-        place = Place.create(memory, member, "흑돼지 맛집", Category.RESTAURANT,
+        place = Place.create(memory, member, "흑돼지 맛집", null, Category.RESTAURANT,
                 "제주시 어딘가", "kakao_001",
                 BigDecimal.valueOf(33.4996), BigDecimal.valueOf(126.5312),
                 "제주", "제주시",

@@ -23,6 +23,8 @@ public class CreatePlaceRequestDTO {
 
     private String address;
 
+    private String description;
+
     private List<String> photoUrlList;
 
     private String kakaoPlaceId;
