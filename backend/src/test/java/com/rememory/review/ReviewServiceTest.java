@@ -109,7 +109,7 @@ class ReviewServiceTest {
     @DisplayName("없는 장소에 리뷰 작성 시 BusinessException 발생")
     void save_없는장소_예외발생() {
         assertThatThrownBy(() -> reviewService.save(member.getId(),
-                new CreateUpdateReviewRequestDTO(999999L, memory.getId(), BigDecimal.valueOf(4.5), "맛있어요", LocalDate.of(2026, 5, 2))))
+                new CreateUpdateReviewRequestDTO(999999L, memory.getId(), BigDecimal.valueOf(4.5), "맛있어요", null, LocalDate.of(2026, 5, 2))))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.PLACE_NOT_FOUND.getMessage());
     }
@@ -273,6 +273,6 @@ class ReviewServiceTest {
     // ===== 헬퍼 메서드 =====
 
     private CreateUpdateReviewRequestDTO createReviewDto(BigDecimal rating, String content) {
-        return new CreateUpdateReviewRequestDTO(place.getId(), memory.getId(), rating, content, LocalDate.of(2026, 5, 2));
+        return new CreateUpdateReviewRequestDTO(place.getId(), memory.getId(), rating, content, null, LocalDate.of(2026, 5, 2));
     }
 }

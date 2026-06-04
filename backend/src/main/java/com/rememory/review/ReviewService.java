@@ -1,6 +1,5 @@
 package com.rememory.review;
 
-import com.rememory.common.CommonMethod;
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
 import com.rememory.member.Member;
@@ -12,7 +11,6 @@ import com.rememory.place.PlaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,14 +29,13 @@ public class ReviewService {
     private final PlaceRepository placeRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewPhotoRepository rpRepository;
-    private final CommonMethod commonMethod;
 
     /**
      * 후기 작성
      * 1인 1후기 체크 → Review INSERT → Place avgRating 갱신 → Memory avgRating 재계산
      */
     @Transactional
-    public void save(Long creatorId, CreateUpdateReviewRequestDTO cuReviewRequestDTO, MultipartFile file) {
+    public void save(Long creatorId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
         Long memoryId = cuReviewRequestDTO.getMemoryId();
         Long placeId = cuReviewRequestDTO.getPlaceId();
 
@@ -57,8 +54,8 @@ public class ReviewService {
         Review review = Review.create(creator, place, cuReviewRequestDTO.getRating(), cuReviewRequestDTO.getContent(), cuReviewRequestDTO.getVisitedAt());
         reviewRepository.save(review);
 
-        if(file != null && !file.isEmpty()){
-            saveReviewPhoto(memoryId, creatorId, review.getId(), file);
+        if(cuReviewRequestDTO.getPhotoUrlList() != null && !cuReviewRequestDTO.getPhotoUrlList().isEmpty()){
+            saveReviewPhoto(memoryId, creatorId, review.getId(), cuReviewRequestDTO.getPhotoUrlList());
         }
 
         placeRepository.updateRatingOnCreate(placeId, cuReviewRequestDTO.getRating());
@@ -167,34 +164,53 @@ public class ReviewService {
 
     // 리뷰 사진 업로드
     @Transactional
-    public void saveReviewPhoto(Long memoryId, Long memberId, Long reviewId, MultipartFile file) {
+    public void saveReviewPhoto(Long memoryId, Long memberId, Long reviewId, List<String> photoUrlList) {
         Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
-        Review review = reviewRepository.findOne(reviewId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+        if (photoUrlList != null && !photoUrlList.isEmpty()) {
+            Review review = reviewRepository.findOne(reviewId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+            if(!review.getMember().getId().equals(memberId)) {
+                throw new BusinessException(ErrorCode.REVIEW_PHOTO_ACCESS_DENIED);
+            }
 
-        if(rpRepository.findCountByReviewId(reviewId) >= 3) {
-            throw new BusinessException(ErrorCode.REVIEW_PHOTO_MAX_COUNT);
-        }
+            if(rpRepository.findCountByReviewId(reviewId) + photoUrlList.size() > 3) {
+                throw new BusinessException(ErrorCode.REVIEW_PHOTO_MAX_COUNT);
+            }
 
-        String photoUrl = "";
-        if(file != null && !file.isEmpty()){
-            photoUrl = commonMethod.madePhotoUrl(file);
-        }
-        if (photoUrl != null && !photoUrl.isEmpty()) {
-            ReviewPhoto reviewPhoto = ReviewPhoto.create(review, member, photoUrl);
-            rpRepository.save(reviewPhoto);
+            for(String photoUrl : photoUrlList) {
+                ReviewPhoto reviewPhoto = ReviewPhoto.create(review, member, photoUrl);
+                rpRepository.save(reviewPhoto);
+            }
         } else {
             throw new BusinessException(ErrorCode.PHOTO_NOT_FOUND);
         }
 
     }
 
-    // 리뷰 사진 수정
+    // 리뷰 사진 삭제
     @Transactional
-    public void updateReviewPhoto(){
+    public void deleteReviewPhoto(Long memoryId, Long memberId, Long reviewId, List<Long> reviewPhotoIdList){
+        if(memberRepository.findOne(memberId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
+        }
+        if (reviewPhotoIdList != null && !reviewPhotoIdList.isEmpty()) {
+            Review review = reviewRepository.findOne(reviewId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+
+            if(!review.getMember().getId().equals(memberId)) {
+                throw new BusinessException(ErrorCode.REVIEW_PHOTO_ACCESS_DENIED);
+            }
+
+            for(Long id : reviewPhotoIdList) {
+                ReviewPhoto reviewPhoto = rpRepository.findOne(id).orElseThrow(() -> new BusinessException(ErrorCode.DELETE_PHOTO_NOT_FOUND));
+                reviewPhoto.delete();
+            }
+        }
 
     }
 }

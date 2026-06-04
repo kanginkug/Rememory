@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,9 +17,8 @@ public class ReviewController {
 
     // 후기 작성 (1인 1후기, 사진 선택)
     @PostMapping
-    public ResponseEntity<Void> createReview(@RequestAttribute("memberId") Long memberId, @RequestPart("data") CreateUpdateReviewRequestDTO cuReviewRequestDTO,
-                                             @RequestPart(value = "file", required = false) MultipartFile file) {
-        reviewService.save(memberId, cuReviewRequestDTO, file);
+    public ResponseEntity<Void> createReview(@RequestAttribute("memberId") Long memberId, @RequestBody @Valid CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
+        reviewService.save(memberId, cuReviewRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -59,6 +57,20 @@ public class ReviewController {
     @DeleteMapping("/memory/{memoryId}/place/{placeId}/review/{reviewId}")
     public ResponseEntity<Void> deleteReview(@RequestAttribute("memberId") Long memberId, @PathVariable("reviewId") Long reviewId, @PathVariable("memoryId") Long memoryId, @PathVariable("placeId") Long placeId) {
         reviewService.deleteReview(memberId, reviewId, memoryId, placeId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 이미지 생성
+    @PostMapping("/{memoryId}/{reviewId}/photo")
+    public ResponseEntity<Void> saveReviewPhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("reviewId") Long reviewId, @PathVariable("memoryId") Long memoryId, @RequestBody @Valid CreateReviewPhotoRequestDTO createReviewPhotoRequestDTO) {
+        reviewService.saveReviewPhoto(memoryId, memberId, reviewId, createReviewPhotoRequestDTO.getPhotoUrlList());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    // 이미지 제거
+    @DeleteMapping("/{memoryId}/{reviewId}/photo")
+    public ResponseEntity<Void> deleteReviewPhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("reviewId") Long reviewId, @PathVariable("memoryId") Long memoryId, @RequestBody @Valid DeleteReviewPhotoRequestDTO deleteReviewPhotoRequestDTO) {
+        reviewService.deleteReviewPhoto(memoryId, memberId, reviewId, deleteReviewPhotoRequestDTO.getReviewPhotoIdList());
         return ResponseEntity.noContent().build();
     }
 }

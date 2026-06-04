@@ -8,6 +8,7 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -25,6 +26,8 @@ public class CreateUpdateReviewRequestDTO {
     private BigDecimal rating;
 
     private String content;
+
+    private List<String> photoUrlList;
 
     @NotNull
     private LocalDate visitedAt;
