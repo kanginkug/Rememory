@@ -17,6 +17,7 @@ public enum ErrorCode {
     MEMORY_ACCESS_DENIED("MM002", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
     MEMORY_NOT_CREATOR("MM003", "메모리 생성자만 가능합니다.", HttpStatus.FORBIDDEN),
     MEMORY_PHOTO_NOT_FOUND("MM004", "메모리 사진이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    MEMORY_PHOTO_ALREADY_EXISTS("MM005", "이미 표지 사진이 존재합니다.", HttpStatus.CONFLICT),
 
     // ===== MemberMemory =====
     MEMBER_MEMORY_ALREADY_EXISTS("MME001", "이미 참가한 메모리입니다.", HttpStatus.CONFLICT),
@@ -50,6 +51,9 @@ public enum ErrorCode {
     TOKEN_INVALID("T002", "유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_MALFORMED("T003", "잘못된 형식의 토큰입니다.", HttpStatus.BAD_REQUEST),
     TOKEN_EMPTY("T004", "토큰이 없습니다.", HttpStatus.BAD_REQUEST),
+
+    // ===== Common =====
+    INVALID_REQUEST("C001", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
 
     // ===== Server =====
     INTERNAL_SERVER_ERROR("S001", "서버 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);

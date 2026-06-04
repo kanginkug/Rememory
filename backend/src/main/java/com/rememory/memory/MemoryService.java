@@ -114,25 +114,22 @@ public class MemoryService {
         }
     }
 
-    /**
-     * 추억 표지 사진 수정
-     * 기존 사진 softDelete 후 새 사진 INSERT (이력 보존)
-     */
+    /** 추억 표지 사진 저장 */
     @Transactional
-    public void updateMemoryPhoto(MemoryPhotoRequestDTO memoryPhotoRequestDTO, Long memoryId, Long updaterId) {
-        Member updater = memberRepository.findOne(updaterId)
+    public void saveMemoryPhoto(MemoryPhotoRequestDTO memoryPhotoRequestDTO, Long memoryId, Long creatorId) {
+        Member creator = memberRepository.findOne(creatorId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
         Memory memory = memoryRepository.findOne(memoryId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
-        if (mmRepository.findActiveByMemoryIdAndMemberId(memoryId, updaterId).isEmpty()) {
+        if (mmRepository.findActiveByMemoryIdAndMemberId(memoryId, creatorId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
-        // 기존 사진 softDelete
-        mpRepository.findOne(memoryId).ifPresent(MemoryPhoto::delete);
+        if (mpRepository.findOne(memoryId).isPresent()) {
+            throw new BusinessException(ErrorCode.MEMORY_PHOTO_ALREADY_EXISTS);
+        }
 
-        // 새 사진 INSERT
-        MemoryPhoto newPhoto = MemoryPhoto.create(memory, updater, memoryPhotoRequestDTO.getImageUrl());
+        MemoryPhoto newPhoto = MemoryPhoto.create(memory, creator, memoryPhotoRequestDTO.getImageUrl());
         mpRepository.save(newPhoto);
     }
 

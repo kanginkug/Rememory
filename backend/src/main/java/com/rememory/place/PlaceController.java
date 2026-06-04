@@ -3,10 +3,8 @@ package com.rememory.place;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,10 +15,9 @@ public class PlaceController {
     private final PlaceService placeService;
 
     // 장소 등록 (사진 선택)
-    @PostMapping(value = "{memoryId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> createPlace(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @RequestPart("data") CreatePlaceRequestDTO cpRequestDTO,
-                                            @RequestPart(value = "file", required = false) MultipartFile file) {
-        placeService.save(memoryId, memberId, cpRequestDTO, file);
+    @PostMapping(value = "{memoryId}")
+    public ResponseEntity<Void> createPlace(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @RequestBody @Valid CreatePlaceRequestDTO cpRequestDTO) {
+        placeService.save(memoryId, memberId, cpRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -73,17 +70,24 @@ public class PlaceController {
     }
 
     // 장소 사진 추가 (최대 5장)
-    @PostMapping(value = "/{memoryId}/place/{placeId}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> savePlacePhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @PathVariable("placeId") Long placeId, @RequestPart(value = "file", required = false) MultipartFile file) {
-        placeService.savePlacePhoto(memoryId, memberId, placeId, file);
+    @PostMapping(value = "/{memoryId}/place/{placeId}/photo")
+    public ResponseEntity<Void> savePlacePhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @PathVariable("placeId") Long placeId, @RequestBody @Valid CreatePlacePhotoRequestDTO createPlacePhotoRequestDTO) {
+        placeService.savePlacePhoto(memoryId, memberId, placeId, createPlacePhotoRequestDTO.getPhotoUrlList());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    // 장소 사진 수정(사용 안하는 API인지 확인 필요)
+    @PutMapping(value = "/{memoryId}/place/{placeId}/photo")
+    public ResponseEntity<Void> updatePlacePhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @PathVariable("placeId") Long placeId, @RequestBody @Valid UpdatePlacePhotoRequestDTO updatePlacePhotoRequestDTO) {
+        placeService.updatePlacePhoto(memoryId, memberId, placeId, updatePlacePhotoRequestDTO);
+        return ResponseEntity.noContent().build();
+    }
+
     // 장소 사진 삭제 (본인만 가능)
-    @DeleteMapping("/{memoryId}/place/{placeId}/photo/{placePhotoId}")
+    @DeleteMapping("/{memoryId}/place/{placeId}/photo")
     public ResponseEntity<Void> deletePlacePhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @PathVariable("placeId") Long placeId,
-                                                 @PathVariable("placePhotoId") Long placePhotoId) {
-        placeService.deletePlacePhoto(memoryId, memberId, placeId, placePhotoId);
+                                                 @RequestBody @Valid DeletePlacePhotoRequestDTO deletePlacePhotoRequestDTO) {
+        placeService.deletePlacePhoto(memoryId, memberId, placeId, deletePlacePhotoRequestDTO);
         return ResponseEntity.noContent().build();
     }
 }
