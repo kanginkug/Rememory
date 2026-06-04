@@ -3,6 +3,7 @@ package com.rememory.review;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -25,6 +26,7 @@ public class CreateUpdateReviewRequestDTO {
     @DecimalMax("5.0")
     private BigDecimal rating;
 
+    @Size(max = 1000)
     private String content;
 
     private List<String> photoUrlList;
