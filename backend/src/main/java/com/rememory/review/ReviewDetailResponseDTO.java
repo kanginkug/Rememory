@@ -7,6 +7,7 @@ import lombok.Getter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -17,11 +18,12 @@ public class ReviewDetailResponseDTO {
     private String content;
     private String placeName;
     private Category placeCategory;
+    private List<ReviewPhotoResponseDTO> rpResponseDTOList;
     private String memoryName;
     private LocalDate visitedAt;
     private LocalDateTime createdAt;
 
-    public static ReviewDetailResponseDTO from(Review review) {
+    public static ReviewDetailResponseDTO from(Review review, List<ReviewPhotoResponseDTO> rpResponseDTOList) {
         return new ReviewDetailResponseDTO(
           review.getId(),
           review.getMember().getId(),
@@ -29,6 +31,7 @@ public class ReviewDetailResponseDTO {
           review.getContent(),
           review.getPlace().getName(),
           review.getPlace().getCategory(),
+          rpResponseDTOList,
           review.getPlace().getMemory().getName(),
           review.getVisitedAt(),
           review.getCreatedAt()

@@ -38,6 +38,7 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND("R001", "존재하지 않는 후기입니다.", HttpStatus.BAD_REQUEST),
     REVIEW_ALREADY_EXISTS("R002", "이미 후기를 작성했습니다.", HttpStatus.CONFLICT),
     REVIEW_NOT_OWNER("R003", "후기 작성자만 가능합니다.", HttpStatus.FORBIDDEN),
+    REVIEW_PHOTO_MAX_COUNT("R004", "리뷰 이미지는 3장까지만 저장 가능합니다.", HttpStatus.CONFLICT),
 
     // ===== Photo =====
     INVALID_FILE_TYPE("PT001", "이미지 파일만 업로드할 수 있습니다.", HttpStatus.BAD_REQUEST),
