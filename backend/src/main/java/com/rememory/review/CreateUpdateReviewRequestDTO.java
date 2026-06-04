@@ -29,6 +29,5 @@ public class CreateUpdateReviewRequestDTO {
 
     private List<String> photoUrlList;
 
-    @NotNull
     private LocalDate visitedAt;
 }
