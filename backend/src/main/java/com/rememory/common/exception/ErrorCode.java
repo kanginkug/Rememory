@@ -40,11 +40,13 @@ public enum ErrorCode {
     REVIEW_ALREADY_EXISTS("R002", "이미 후기를 작성했습니다.", HttpStatus.CONFLICT),
     REVIEW_NOT_OWNER("R003", "후기 작성자만 가능합니다.", HttpStatus.FORBIDDEN),
     REVIEW_PHOTO_MAX_COUNT("R004", "리뷰 이미지는 3장까지만 저장 가능합니다.", HttpStatus.CONFLICT),
+    REVIEW_PHOTO_ACCESS_DENIED("R005", "해당 리뷰 사진에 접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
 
     // ===== Photo =====
     INVALID_FILE_TYPE("PT001", "이미지 파일만 업로드할 수 있습니다.", HttpStatus.BAD_REQUEST),
     FILE_UPLOAD_FAILED("PT002", "파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     PHOTO_NOT_FOUND("PT003", "업로드할 이미지가 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    DELETE_PHOTO_NOT_FOUND("PT004", "제거할 이미지가 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
 
     // ===== Token =====
     TOKEN_EXPIRED("T001", "만료된 토큰입니다.", HttpStatus.UNAUTHORIZED),
