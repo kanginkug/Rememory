@@ -1,5 +1,6 @@
 package com.rememory.review;
 
+import com.rememory.common.CommonMethod;
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
 import com.rememory.member.Member;
@@ -11,10 +12,14 @@ import com.rememory.place.PlaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,13 +30,15 @@ public class ReviewService {
     private final MemberMemoryRepository mmRepository;
     private final PlaceRepository placeRepository;
     private final ReviewRepository reviewRepository;
+    private final ReviewPhotoRepository rpRepository;
+    private final CommonMethod commonMethod;
 
     /**
      * 후기 작성
      * 1인 1후기 체크 → Review INSERT → Place avgRating 갱신 → Memory avgRating 재계산
      */
     @Transactional
-    public void save(Long creatorId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
+    public void save(Long creatorId, CreateUpdateReviewRequestDTO cuReviewRequestDTO, MultipartFile file) {
         Long memoryId = cuReviewRequestDTO.getMemoryId();
         Long placeId = cuReviewRequestDTO.getPlaceId();
 
@@ -49,16 +56,28 @@ public class ReviewService {
 
         Review review = Review.create(creator, place, cuReviewRequestDTO.getRating(), cuReviewRequestDTO.getContent(), cuReviewRequestDTO.getVisitedAt());
         reviewRepository.save(review);
+
+        if(file != null && !file.isEmpty()){
+            saveReviewPhoto(memoryId, creatorId, review.getId(), file);
+        }
+
         placeRepository.updateRatingOnCreate(placeId, cuReviewRequestDTO.getRating());
         memoryRepository.recalculateRating(memoryId);
     }
 
+    // 특정 장소에 대한 내 후기 단건 조회
     public ReviewDetailResponseDTO findMyReview(Long memoryId, Long memberId, Long placeId) {
         certification(memoryId, memberId);
         Review review = reviewRepository.findByPlaceIdAndMemberId(placeId, memberId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
-        return ReviewDetailResponseDTO.from(review);
+        List<ReviewPhoto> reviewPhotoList = rpRepository.findByReviewIdAndMemberId(review.getId(), memberId);
+        List<ReviewPhotoResponseDTO> rpResponseDTOList = new ArrayList<>();
+        for(ReviewPhoto reviewPhoto : reviewPhotoList) {
+            rpResponseDTOList.add(ReviewPhotoResponseDTO.from(reviewPhoto));
+        }
+        return ReviewDetailResponseDTO.from(review, rpResponseDTOList);
     }
 
+    // 특정 장소 전체 후기 조회
     public List<ReviewDetailResponseDTO> findAllByPlaceId(Long memoryId, Long memberId, Long placeId) {
         certification(memoryId, memberId);
 
@@ -66,6 +85,7 @@ public class ReviewService {
         return toResponseDTOList(reviewList);
     }
 
+    // 정렬 타입 적용 후기 조회
     public List<ReviewDetailResponseDTO> sortByReviewType(Long memberId, Long memoryId, Long placeId, SortTypeReview sortTypeReview) {
         certification(memoryId, memberId);
 
@@ -73,6 +93,7 @@ public class ReviewService {
         return toResponseDTOList(reviewList);
     }
 
+    // 후기 수정 + Place·Memory 별점 재계산
     @Transactional
     public void updateReview(Long updater, Long reviewId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
         Long memoryId = cuReviewRequestDTO.getMemoryId();
@@ -89,6 +110,7 @@ public class ReviewService {
         memoryRepository.recalculateRating(memoryId);
     }
 
+    // 후기 삭제 + Place·Memory 별점 재계산
     @Transactional
     public void deleteReview(Long deleter, Long reviewId, Long memoryId, Long placeId) {
         certification(memoryId, deleter);
@@ -102,6 +124,7 @@ public class ReviewService {
         memoryRepository.recalculateRating(memoryId);
     }
 
+    // 멤버·추억 존재 여부 및 추억 접근 권한 통합 검증
     private void certification(Long memoryId, Long memberId){
         if(memberRepository.findOne(memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
@@ -116,16 +139,62 @@ public class ReviewService {
         }
     }
 
+    // Review 엔티티 리스트 → DTO 리스트 변환
     private List<ReviewDetailResponseDTO> toResponseDTOList(List<Review> reviewList) {
+        List<Long> reviewIdList = reviewList.stream().map(Review::getId).toList();
+        List<ReviewPhoto> reviewPhotoList = rpRepository.findAllByReviewIdList(reviewIdList);
+
+        Map<Long, List<ReviewPhotoResponseDTO>> photoMap = reviewPhotoList.stream()
+                .collect(groupingBy(
+                        p -> p.getReview().getId(),
+                        mapping(ReviewPhotoResponseDTO::from, toList())
+                ));
+
         List<ReviewDetailResponseDTO> rdResponseDTOList = new ArrayList<>();
         for(Review review : reviewList) {
-            rdResponseDTOList.add(ReviewDetailResponseDTO.from(review));
+            List<ReviewPhotoResponseDTO> rpResponseDTOList = photoMap.getOrDefault(review.getId(), List.of());
+
+            rdResponseDTOList.add(ReviewDetailResponseDTO.from(review, rpResponseDTOList));
         }
 
         return rdResponseDTOList;
     }
 
+    // 최근 작성한 후기 조회
     public List<ReviewDetailResponseDTO> findRecentReview(Long memberId) {
         return toResponseDTOList(reviewRepository.findRecentReview(memberId));
+    }
+
+    // 리뷰 사진 업로드
+    @Transactional
+    public void saveReviewPhoto(Long memoryId, Long memberId, Long reviewId, MultipartFile file) {
+        Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
+            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
+        }
+
+        Review review = reviewRepository.findOne(reviewId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
+
+        if(rpRepository.findCountByReviewId(reviewId) >= 3) {
+            throw new BusinessException(ErrorCode.REVIEW_PHOTO_MAX_COUNT);
+        }
+
+        String photoUrl = "";
+        if(file != null && !file.isEmpty()){
+            photoUrl = commonMethod.madePhotoUrl(file);
+        }
+        if (photoUrl != null && !photoUrl.isEmpty()) {
+            ReviewPhoto reviewPhoto = ReviewPhoto.create(review, member, photoUrl);
+            rpRepository.save(reviewPhoto);
+        } else {
+            throw new BusinessException(ErrorCode.PHOTO_NOT_FOUND);
+        }
+
+    }
+
+    // 리뷰 사진 수정
+    @Transactional
+    public void updateReviewPhoto(){
+
     }
 }
