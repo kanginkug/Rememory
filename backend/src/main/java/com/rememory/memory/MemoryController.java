@@ -1,16 +1,11 @@
 package com.rememory.memory;
 
-import com.rememory.memory.dto.CreateMemoryRequestDTO;
-import com.rememory.memory.dto.MemoryDetailResponseDTO;
-import com.rememory.memory.dto.MemoryListResponseDTO;
-import com.rememory.memory.dto.UpdateMemoryRequestDTO;
+import com.rememory.memory.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,13 +15,12 @@ import java.util.List;
 public class MemoryController {
     private final MemoryService memoryService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<Void> createMemory(
             @RequestAttribute("memberId") Long memberId,
-            @RequestPart("data") @Valid CreateMemoryRequestDTO cmRequestDTO,
-            @RequestPart(value = "file", required = false) MultipartFile file
+            @RequestBody @Valid CreateMemoryRequestDTO cmRequestDTO
     ) {
-        memoryService.createMemory(memberId, cmRequestDTO, file);
+        memoryService.createMemory(memberId, cmRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -53,20 +47,14 @@ public class MemoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping(value = "/{memoryId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{memoryId}/image")
     public ResponseEntity<Void> updateMemoryPhoto(
             @RequestAttribute("memberId") Long memberId,
             @PathVariable("memoryId") Long memoryId, // 경로 변수 이름 명시
-            @RequestPart("file") MultipartFile file
+            @RequestBody @Valid MemoryPhotoRequestDTO memoryPhotoRequestDTO
     ) {
-        // 1. 방어 코드: 파일이 비어있는지 체크
-        if (file == null || file.isEmpty()) {
-            return ResponseEntity.badRequest().build(); // 또는 custom exception 던지기
-        }
 
-        // 2. 비즈니스 로직을 서비스 하나로 묶어서 처리
-        // 파일 URL 생성 + DB 업데이트를 서비스 안에서 한 번에 해결합니다.
-        memoryService.updateMemoryPhoto(file, memoryId, memberId);
+        memoryService.updateMemoryPhoto(memoryPhotoRequestDTO, memoryId, memberId);
 
         return ResponseEntity.ok().build();
     }
