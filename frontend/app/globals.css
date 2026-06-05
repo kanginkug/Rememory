@@ -18,6 +18,14 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 .login-bg {
   background-image: url('/images/login-bg.png');
   background-size: cover;
