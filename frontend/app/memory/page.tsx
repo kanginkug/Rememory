@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchMemoryList, createInvitation, leaveMemory, type Memory, type SortType } from '@/lib/api';
+import { fetchMemoryList, createInvitation, leaveMemory, deleteMemory, type Memory, type SortType } from '@/lib/api';
 
 const SORT_OPTIONS: { label: string; value: SortType }[] = [
   { label: '최신순',    value: 'DATE_DESC'   },
@@ -23,12 +23,18 @@ const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 function fmtDate(d: string) {
   const dt = new Date(d);
-  return `${dt.getMonth() + 1}.${dt.getDate()} (${DAYS[dt.getDay()]})`;
+  const yy = String(dt.getFullYear()).slice(2);
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  return `${yy}.${mm}.${dd} (${DAYS[dt.getDay()]})`;
 }
 
-function formatDateRange(start: string, end: string): string {
-  if (!end || start === end) return fmtDate(start);
-  return `${fmtDate(start)} - ${fmtDate(end)}`;
+function formatDateRange(start: string | null, end: string | null): string {
+  if (!start && !end) return '추억 진행중';
+  if (!start) return `~ ${fmtDate(end!)}`;
+  if (!end) return `${fmtDate(start)} ~`;
+  if (start === end) return fmtDate(start);
+  return `${fmtDate(start)} ~ ${fmtDate(end)}`;
 }
 
 const SHEET_ACTIONS = [
@@ -118,9 +124,15 @@ export default function MemoryListPage() {
     }
   };
 
-  const handleDeleteMemory = () => {
+  const handleDeleteMemory = async (memoryId: number) => {
     setSheetId(null);
-    alert('추억 삭제 기능은 아직 준비 중입니다.');
+    if (!confirm('추억을 삭제하면 장소, 후기 등 모든 데이터가 사라집니다.\n정말 삭제하시겠어요?')) return;
+    try {
+      await deleteMemory(memoryId);
+      setMemories(prev => prev.filter(m => m.id !== memoryId));
+    } catch {
+      alert('추억 삭제에 실패했습니다.');
+    }
   };
 
   return (
@@ -256,6 +268,7 @@ export default function MemoryListPage() {
                     overflow: 'hidden',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     cursor: 'pointer',
+                    height: 220,
                   }}
                   onClick={() => router.push(`/memory/${mem.id}`)}
                 >
@@ -289,31 +302,35 @@ export default function MemoryListPage() {
                     </div>
 
                     {/* Description */}
-                    {mem.description && (
-                      <p
-                        className="line-clamp-2 mb-1.5"
-                        style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}
-                      >
-                        {mem.description}
-                      </p>
-                    )}
+                    <div className="flex-1">
+                      {mem.description && (
+                        <p
+                          className="line-clamp-2 mb-1.5"
+                          style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}
+                        >
+                          {mem.description}
+                        </p>
+                      )}
+                    </div>
 
                     {/* Meta */}
-                    <div className="flex items-center gap-2 mt-auto" style={{ fontSize: 11, marginBottom: 6 }}>
-                      <span className="flex items-center gap-0.5" style={{ color: '#888' }}>
-                        <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12, flexShrink: 0 }}>
-                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                        </svg>
-                        {mem.placeCount}곳
-                      </span>
-                      {mem.memberCount != null && (
+                    <div className="flex items-center justify-between" style={{ fontSize: 11, marginBottom: 6 }}>
+                      <div className="flex items-center gap-2">
                         <span className="flex items-center gap-0.5" style={{ color: '#888' }}>
                           <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12, flexShrink: 0 }}>
-                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                           </svg>
-                          {mem.memberCount}명
+                          {mem.placeCount}곳
                         </span>
-                      )}
+                        {mem.memberCount != null && (
+                          <span className="flex items-center gap-0.5" style={{ color: '#888' }}>
+                            <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12, flexShrink: 0 }}>
+                              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                            </svg>
+                            {mem.memberCount}명
+                          </span>
+                        )}
+                      </div>
                       {mem.avgRating > 0 && (
                         <span className="flex items-center gap-0.5" style={{ color: '#FFBB00' }}>
                           <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12, flexShrink: 0 }}>
@@ -372,7 +389,7 @@ export default function MemoryListPage() {
               { ...SHEET_ACTIONS[0], onClick: () => handleInvite(sheetId) },
               { ...SHEET_ACTIONS[1], onClick: () => handleEdit(sheetId) },
               { ...SHEET_ACTIONS[2], onClick: () => handleLeave(sheetId) },
-              { ...SHEET_ACTIONS[3], onClick: () => handleDeleteMemory() },
+              { ...SHEET_ACTIONS[3], onClick: () => handleDeleteMemory(sheetId) },
             ].map(item => (
               <div
                 key={item.label}

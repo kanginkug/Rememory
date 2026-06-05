@@ -80,9 +80,29 @@ export interface Memory {
   placeCount: number;
   memberCount: number;
   description: string;
-  startDate: string;
-  endDate: string;
+  startDate: string | null;
+  endDate: string | null;
   imageUrl: string | null;
+}
+
+export interface MemoryDetail {
+  id: number;
+  name: string;
+  avgRating: number;
+  placeCount: number;
+  memberCount: number;
+  description: string;
+  startDate: string | null;
+  endDate: string | null;
+  imageUrl: string | null;
+}
+
+export interface UpdateMemoryRequest {
+  memoryName: string;
+  description: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  showHistoryToNew: boolean;
 }
 
 export interface RecentReview {
@@ -144,6 +164,21 @@ export const createInvitation = (memoryId: number) =>
 
 export const leaveMemory = (memoryId: number) =>
   apiFetch<void>(`/memory/${memoryId}/left`, { method: 'DELETE' });
+
+export const fetchMemory = (memoryId: number) =>
+  apiFetch<MemoryDetail>(`/memory/${memoryId}`);
+
+export const updateMemory = (memoryId: number, body: UpdateMemoryRequest) =>
+  apiFetch<void>(`/memory/${memoryId}`, { method: 'PUT', body: JSON.stringify(body) });
+
+export const updateMemoryPhoto = (memoryId: number, photoUrl: string) =>
+  apiFetch<void>(`/memory/${memoryId}/image`, { method: 'POST', body: JSON.stringify({ photoUrl }) });
+
+export const deleteMemoryPhoto = (memoryId: number) =>
+  apiFetch<void>(`/memory/${memoryId}/image`, { method: 'DELETE' });
+
+export const deleteMemory = (memoryId: number) =>
+  apiFetch<void>(`/memory/${memoryId}`, { method: 'DELETE' });
 
 export const fetchPresignedUrl = (fileName: string, contentType: string) =>
   apiFetch<PresignedUrlResponse>('/uploads/presigned-url', {
