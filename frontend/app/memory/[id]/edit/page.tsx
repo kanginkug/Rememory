@@ -1,0 +1,72 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import MemoryForm, { type MemoryFormValues } from '@/components/MemoryForm';
+import {
+  fetchMemory,
+  updateMemory,
+  updateMemoryPhoto,
+  deleteMemoryPhoto,
+  fetchPresignedUrl,
+  uploadToS3,
+  type MemoryDetail,
+} from '@/lib/api';
+
+export default function EditMemoryPage() {
+  const router = useRouter();
+  const { id } = useParams<{ id: string }>();
+  const memoryId = Number(id);
+
+  const [memory, setMemory] = useState<MemoryDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!localStorage.getItem('accessToken')) {
+      router.replace('/login');
+      return;
+    }
+    fetchMemory(memoryId)
+      .then(setMemory)
+      .catch(() => alert('추억 정보를 불러오지 못했습니다.'))
+      .finally(() => setLoading(false));
+  }, [memoryId, router]);
+
+  const handleSubmit = async ({ name, description, startDate, endDate, showHistory, photoFile, photoRemoved }: MemoryFormValues) => {
+    await updateMemory(memoryId, {
+      memoryName: name,
+      description,
+      startDate: startDate || null,
+      endDate: endDate || null,
+      showHistoryToNew: showHistory,
+    });
+
+    if (photoFile) {
+      const { presignedUrl, imageUrl } = await fetchPresignedUrl(photoFile.name, photoFile.type);
+      await uploadToS3(presignedUrl, photoFile);
+      await updateMemoryPhoto(memoryId, imageUrl);
+    } else if (photoRemoved && memory?.imageUrl) {
+      await deleteMemoryPhoto(memoryId);
+    }
+
+    router.replace('/memory');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-dvh mx-auto w-full max-w-[450px] flex items-center justify-center" style={{ background: '#BFDBF3' }}>
+        <div className="animate-pulse text-sm" style={{ color: '#888' }}>불러오는 중...</div>
+      </div>
+    );
+  }
+
+  return (
+    <MemoryForm
+      title="추억 수정"
+      submitLabel="수정하기"
+      submittingLabel="수정 중..."
+      initialData={memory ?? undefined}
+      onSubmit={handleSubmit}
+    />
+  );
+}
