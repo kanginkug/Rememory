@@ -30,7 +30,7 @@ const REVIEW_FALLBACK: Record<Category, string> = {
 
 const NAV_ITEMS = [
   { label: '홈', href: '/home', active: true,  d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
-  { label: '추억', href: '/memories', active: false, d: 'M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4 2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z' },
+  { label: '추억', href: '/memory', active: false, d: 'M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4 2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z' },
   { label: '지도탐색', href: '/map', active: false, d: 'M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z' },
   { label: '마이페이지', href: '/my', active: false, d: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' },
 ];
@@ -278,7 +278,7 @@ export default function HomePage() {
               <section className="mt-5">
                 <div className="flex items-center justify-between px-5 mb-3">
                   <h2 className="text-base font-extrabold text-gray-900">최근 추억 카드</h2>
-                  <Link href="/memories" className="text-xs font-semibold" style={{ color: '#7F77DD' }}>
+                  <Link href="/memory" className="text-xs font-semibold" style={{ color: '#7F77DD' }}>
                     전체 보기
                   </Link>
                 </div>
@@ -290,7 +290,7 @@ export default function HomePage() {
                       className="shrink-0 w-36 bg-white rounded-2xl shadow-sm overflow-hidden"
                     >
                       <img
-                        src={mem.photoUrl ?? '/images/no-memory.png'}
+                        src={mem.imageUrl ?? '/images/no-memory.png'}
                         alt={mem.name}
                         className="w-full object-cover"
                         style={{ height: 100 }}
