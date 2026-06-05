@@ -67,8 +67,6 @@ public class ReviewRepository {
         };
 
         return queryFactory.selectFrom(QReview.review)
-                .join(QPlace.place)
-                .on(QReview.review.place.id.eq(QPlace.place.id))
                 .where(
                         QReview.review.place.id.eq(placeId),
                         QReview.review.deletedAt.isNull()

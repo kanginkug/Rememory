@@ -77,9 +77,6 @@ public class MemoryService {
     }
 
     public MemoryDetailResponseDTO findMemory(Long memberId, Long memoryId){
-        if(memberRepository.findOne(memberId).isEmpty()) {
-            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
-        }
         if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }

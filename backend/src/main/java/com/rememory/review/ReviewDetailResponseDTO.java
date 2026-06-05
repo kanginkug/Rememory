@@ -14,6 +14,7 @@ import java.util.List;
 public class ReviewDetailResponseDTO {
     private Long reviewId;
     private Long memberId;
+    private String memberName;
     private BigDecimal rating;
     private String content;
     private String placeName;
@@ -27,6 +28,7 @@ public class ReviewDetailResponseDTO {
         return new ReviewDetailResponseDTO(
           review.getId(),
           review.getMember().getId(),
+          review.getMember().getName(),
           review.getRating(),
           review.getContent(),
           review.getPlace().getName(),
