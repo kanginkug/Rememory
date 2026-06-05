@@ -48,8 +48,6 @@ public class PlaceService {
         if(cpRequestDTO.getPhotoUrlList() != null && !cpRequestDTO.getPhotoUrlList().isEmpty()){
             savePlacePhoto(memoryId, creatorId, place.getId(), cpRequestDTO.getPhotoUrlList());
         }
-        int newPlaceCount = memoryRepository.findPlaceCount(memoryId);
-        memory.updatePlaceCount(newPlaceCount);
     }
 
     // 추억 내 전체 장소 조회 (대표 사진 포함, N+1 방지 IN 쿼리)
@@ -114,9 +112,6 @@ public class PlaceService {
         place.delete();
         memoryRepository.updatePlaceCount(memoryId, -1);
         memoryRepository.recalculateRating(memoryId);
-
-        int newPlaceCount = memoryRepository.findPlaceCount(memoryId);
-        memory.updatePlaceCount(newPlaceCount);
     }
 
     // 장소 정보 수정

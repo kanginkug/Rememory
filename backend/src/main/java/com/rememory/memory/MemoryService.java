@@ -57,6 +57,27 @@ public class MemoryService {
         updateMemory.update(memory.getMemoryName(), memory.getShowHistoryToNew(), memory.getDescription(), memory.getStartDate(), memory.getEndDate());
     }
 
+    @Transactional
+    public void deleteMemory(Long memoryId, Long memberId) {
+        if(memberRepository.findOne(memberId).isEmpty()){
+            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        Memory deleteMemory = memoryRepository.findOne(memoryId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
+
+        if(!deleteMemory.getCreator().getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.MEMORY_NOT_CREATOR);
+        }
+
+        if(deleteMemory.getPlaceCount() > 0) {
+            throw new BusinessException(ErrorCode.MEMORY_HAS_PLACES);
+        }
+
+        deleteMemory.delete();
+
+    }
+
     public List<MemoryListResponseDTO> findMemoryList(Long memberId, SortTypeMemory sortTypeMemory, String keyword) {
 
         List<Memory> memoryList = memoryRepository.findAllByMemberId(memberId, sortTypeMemory, keyword);
@@ -150,4 +171,6 @@ public class MemoryService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_PHOTO_NOT_FOUND));
         memoryPhoto.delete();
     }
+
+
 }

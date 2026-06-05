@@ -30,6 +30,12 @@ public class MemoryController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{memoryId}")
+    public ResponseEntity<Void> deleteMemory(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId) {
+        memoryService.deleteMemory(memoryId, memberId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{memoryId}")
     public ResponseEntity<MemoryDetailResponseDTO> findMemory(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId) {
         return ResponseEntity.ok(memoryService.findMemory(memberId, memoryId));
