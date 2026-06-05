@@ -28,8 +28,9 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     if (typeof window !== 'undefined') window.location.href = '/login';
     throw new Error('Unauthorized');
   }
-  if (res.status === 204) return undefined as T;
   if (!res.ok) throw new Error(`API error ${res.status}`);
+  const ct = res.headers.get('content-type');
+  if (!ct || !ct.includes('application/json')) return undefined as T;
   return res.json();
 }
 
@@ -103,6 +104,20 @@ export interface Member {
   profileImageUrl: string;
 }
 
+export interface CreateMemoryRequest {
+  memoryName: string;
+  description: string;
+  invitedCnt: number;
+  photoUrl?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
+export interface PresignedUrlResponse {
+  presignedUrl: string;
+  imageUrl: string;
+}
+
 // --- API functions ---
 
 export const fetchMe = () => apiFetch<Member>('/members/me');
@@ -120,3 +135,27 @@ export const fetchRecentMemories = () => fetchMemoryList('DATE_DESC');
 
 export const fetchRecentReviews = () =>
   apiFetch<RecentReview[]>('/review/recent');
+
+export const createMemory = (body: CreateMemoryRequest) =>
+  apiFetch<void>('/memory', { method: 'POST', body: JSON.stringify(body) });
+
+export const createInvitation = (memoryId: number) =>
+  apiFetch<{ inviteCode: string }>(`/invitation/memory/${memoryId}`, { method: 'POST' });
+
+export const leaveMemory = (memoryId: number) =>
+  apiFetch<void>(`/memory/${memoryId}/left`, { method: 'DELETE' });
+
+export const fetchPresignedUrl = (fileName: string, contentType: string) =>
+  apiFetch<PresignedUrlResponse>('/uploads/presigned-url', {
+    method: 'POST',
+    body: JSON.stringify({ fileName, contentType }),
+  });
+
+export async function uploadToS3(presignedUrl: string, file: File): Promise<void> {
+  const res = await fetch(presignedUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': file.type },
+    body: file,
+  });
+  if (!res.ok) throw new Error('S3 upload failed');
+}

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchMemoryList, type Memory, type SortType } from '@/lib/api';
+import { fetchMemoryList, createInvitation, leaveMemory, type Memory, type SortType } from '@/lib/api';
 
 const SORT_OPTIONS: { label: string; value: SortType }[] = [
   { label: '최신순',    value: 'DATE_DESC'   },
@@ -88,6 +88,39 @@ export default function MemoryListPage() {
     setInputValue('');
     currentKeyword.current = '';
     load(sort, '');
+  };
+
+  const handleInvite = async (memoryId: number) => {
+    setSheetId(null);
+    try {
+      const { inviteCode } = await createInvitation(memoryId);
+      const link = `${window.location.origin}/invite/${inviteCode}`;
+      await navigator.clipboard.writeText(link);
+      alert('초대 링크가 클립보드에 복사됐습니다.');
+    } catch {
+      alert('초대 링크 생성에 실패했습니다.');
+    }
+  };
+
+  const handleEdit = (memoryId: number) => {
+    setSheetId(null);
+    router.push(`/memory/${memoryId}/edit`);
+  };
+
+  const handleLeave = async (memoryId: number) => {
+    setSheetId(null);
+    if (!confirm('정말 이 추억에서 나가시겠어요?')) return;
+    try {
+      await leaveMemory(memoryId);
+      setMemories(prev => prev.filter(m => m.id !== memoryId));
+    } catch {
+      alert('추억 나가기에 실패했습니다.');
+    }
+  };
+
+  const handleDeleteMemory = () => {
+    setSheetId(null);
+    alert('추억 삭제 기능은 아직 준비 중입니다.');
   };
 
   return (
@@ -335,12 +368,17 @@ export default function MemoryListPage() {
             onClick={e => e.stopPropagation()}
           >
             <div style={{ width: 36, height: 4, background: '#e2e8f0', borderRadius: 2, margin: '0 auto 16px' }} />
-            {SHEET_ACTIONS.map(item => (
+            {[
+              { ...SHEET_ACTIONS[0], onClick: () => handleInvite(sheetId) },
+              { ...SHEET_ACTIONS[1], onClick: () => handleEdit(sheetId) },
+              { ...SHEET_ACTIONS[2], onClick: () => handleLeave(sheetId) },
+              { ...SHEET_ACTIONS[3], onClick: () => handleDeleteMemory() },
+            ].map(item => (
               <div
                 key={item.label}
                 className="flex items-center gap-3.5 cursor-pointer hover:bg-slate-50"
                 style={{ padding: '16px 20px', fontSize: 15, fontWeight: 500, color: item.danger ? '#ef4444' : '#1e293b' }}
-                onClick={() => setSheetId(null)}
+                onClick={item.onClick}
               >
                 <div
                   className="flex items-center justify-center shrink-0"
