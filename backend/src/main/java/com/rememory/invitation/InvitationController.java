@@ -15,9 +15,8 @@ public class InvitationController {
     private final InvitationService invitationService;
 
     @PostMapping("/memory/{memoryId}")
-    public ResponseEntity<Void> createInvitation(@RequestAttribute("memberId") Long memberId, @PathVariable Long memoryId) {
-        invitationService.save(memoryId, memberId);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<InvitationResponseDTO> createInvitation(@RequestAttribute("memberId") Long memberId, @PathVariable Long memoryId) {
+        return ResponseEntity.ok(InvitationResponseDTO.from(invitationService.save(memoryId, memberId)));
     }
 
     @PostMapping("/agree/{agreeCode}")
