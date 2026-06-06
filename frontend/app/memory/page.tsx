@@ -273,11 +273,14 @@ export default function MemoryListPage() {
                   onClick={() => router.push(`/place/${mem.id}`)}
                 >
                   <img
-                    src={mem.imageUrl ?? '/images/memories_no-memory.png'}
+                    src={mem.imageUrl ?? '/images/no_memory_data.png'}
                     alt={mem.name}
-                    className="w-full shrink-0 object-cover"
-                    style={{ height: 120 }}
-                    onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/memories_no-memory.png'; }}
+                    className="w-full shrink-0"
+                    style={{
+                      height: 120,
+                      objectFit: mem.imageUrl ? 'cover' : 'fill',
+                    }}
+                    onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/no_memory_data.png'; }}
                   />
                   <div className="flex flex-col flex-1 overflow-hidden" style={{ padding: 10 }}>
                     {/* Title + more btn */}
