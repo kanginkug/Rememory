@@ -1,0 +1,2 @@
+UPDATE memory SET name = LEFT(name, 30) WHERE LENGTH(name) > 30;
+ALTER TABLE memory ALTER COLUMN name TYPE VARCHAR(30);
