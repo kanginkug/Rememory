@@ -107,7 +107,7 @@ export default function HomePage() {
       </header>
 
       <div ref={bannerRef} className="banner-section" id="bannerSection">
-        <img src="/images/mainBanner.png" alt="메인 배너" className="main-banner" />
+        <img src="/images/mainBanner.png" alt="메인 배너" className="main-banner" fetchPriority="high" />
       </div>
 
       <div className="app-container">
