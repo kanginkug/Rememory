@@ -95,6 +95,7 @@ export interface MemoryDetail {
   startDate: string | null;
   endDate: string | null;
   imageUrl: string | null;
+  memberInfoDTOList?: Member[];
 }
 
 export interface UpdateMemoryRequest {
@@ -179,6 +180,39 @@ export const deleteMemoryPhoto = (memoryId: number) =>
 
 export const deleteMemory = (memoryId: number) =>
   apiFetch<void>(`/memory/${memoryId}`, { method: 'DELETE' });
+
+export interface MemoryPlace {
+  id: number;
+  name: string;
+  category: Category;
+  address: string;
+  description: string;
+  avgRating: number;
+  reviewCount: number;
+  regionDepth1: string;
+  regionDepth2: string;
+  visitedAt: string | null;
+  placePhotoList: PlacePhoto[];
+}
+
+export const fetchMemoryPlaces = (
+  memoryId: number,
+  params?: { category?: Category; regionDepth1?: string; regionDepth2?: string; keyword?: string },
+) => {
+  const p = new URLSearchParams();
+  if (params?.category) p.set('category', params.category);
+  if (params?.regionDepth1) p.set('regionDepth1', params.regionDepth1);
+  if (params?.regionDepth2) p.set('regionDepth2', params.regionDepth2);
+  if (params?.keyword) p.set('keyword', params.keyword);
+  const qs = p.toString();
+  return apiFetch<MemoryPlace[]>(`/memory/${memoryId}/places${qs ? `?${qs}` : ''}`);
+};
+
+export const fetchMemoryMembers = (memoryId: number) =>
+  apiFetch<Member[]>(`/memory/${memoryId}/members`);
+
+export const deletePlace = (placeId: number) =>
+  apiFetch<void>(`/place/${placeId}`, { method: 'DELETE' });
 
 export const fetchPresignedUrl = (fileName: string, contentType: string) =>
   apiFetch<PresignedUrlResponse>('/uploads/presigned-url', {

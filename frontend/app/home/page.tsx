@@ -165,7 +165,7 @@ export default function HomePage() {
               </div>
               <div className="horizontal-scroll memory-cards">
                 {memories.map(mem => (
-                  <Link key={mem.id} href={`/memory/${mem.id}`} className="memory-card">
+                  <Link key={mem.id} href={`/place/${mem.id}`} className="memory-card">
                     <img
                       className="memory-thumb"
                       src={mem.imageUrl ?? '/images/no-memory.png'}
