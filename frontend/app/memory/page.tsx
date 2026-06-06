@@ -270,7 +270,7 @@ export default function MemoryListPage() {
                     cursor: 'pointer',
                     height: 220,
                   }}
-                  onClick={() => router.push(`/memory/${mem.id}`)}
+                  onClick={() => router.push(`/place/${mem.id}`)}
                 >
                   <img
                     src={mem.imageUrl ?? '/images/memories_no-memory.png'}
