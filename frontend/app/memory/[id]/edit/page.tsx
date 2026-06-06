@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import MemoryForm, { type MemoryFormValues } from '@/components/MemoryForm';
 import {
   fetchMemory,
@@ -16,6 +16,7 @@ import {
 export default function EditMemoryPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const memoryId = Number(id);
 
   const [memory, setMemory] = useState<MemoryDetail | null>(null);
@@ -49,7 +50,8 @@ export default function EditMemoryPage() {
       await deleteMemoryPhoto(memoryId);
     }
 
-    router.replace('/memory');
+    const from = searchParams.get('from');
+    router.replace(from === 'place' ? `/place/${memoryId}` : '/memory');
   };
 
   if (loading) {

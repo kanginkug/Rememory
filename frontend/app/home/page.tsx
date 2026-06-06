@@ -51,6 +51,7 @@ export default function HomePage() {
       return;
     }
     setMounted(true);
+    window.scrollTo(0, 0);
 
     Promise.allSettled([
       fetchBestPlaces(),

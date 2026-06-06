@@ -194,20 +194,25 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#444', marginBottom: 8 }}>
             추억 이름 <span style={{ color: '#FF5A5A' }}>*</span>
           </label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="예: 단짝 친구들과의 부산 여행"
-            style={{
-              width: '100%', padding: '12px 14px',
-              border: '1px solid #EAEAEA', borderRadius: 12,
-              fontSize: 14, background: '#FAFAFA', color: '#333',
-              outline: 'none', boxSizing: 'border-box',
-            }}
-            onFocus={e => { e.currentTarget.style.borderColor = '#BFDBF3'; e.currentTarget.style.background = '#fff'; }}
-            onBlur={e => { e.currentTarget.style.borderColor = '#EAEAEA'; e.currentTarget.style.background = '#FAFAFA'; }}
-          />
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value.slice(0, 30))}
+              placeholder="예: 단짝 친구들과의 부산 여행"
+              style={{
+                width: '100%', padding: '12px 14px',
+                border: '1px solid #EAEAEA', borderRadius: 12,
+                fontSize: 14, background: '#FAFAFA', color: '#333',
+                outline: 'none', boxSizing: 'border-box',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = '#BFDBF3'; e.currentTarget.style.background = '#fff'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = '#EAEAEA'; e.currentTarget.style.background = '#FAFAFA'; }}
+            />
+            <span style={{ position: 'absolute', bottom: 10, right: 12, fontSize: 12, color: name.length >= 30 ? '#FF5A5A' : '#94a3b8' }}>
+              {name.length} / 30
+            </span>
+          </div>
         </div>
 
         {/* 설명 */}
@@ -215,21 +220,26 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
           <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#444', marginBottom: 8 }}>
             설명 <span style={{ color: '#FF5A5A' }}>*</span>
           </label>
-          <textarea
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            rows={4}
-            placeholder="이 추억에 대한 짤막한 이야기를 적어주세요."
-            style={{
-              width: '100%', padding: '12px 14px',
-              border: '1px solid #EAEAEA', borderRadius: 12,
-              fontSize: 14, background: '#FAFAFA', color: '#333',
-              outline: 'none', resize: 'none', boxSizing: 'border-box',
-              fontFamily: 'inherit',
-            }}
-            onFocus={e => { e.currentTarget.style.borderColor = '#BFDBF3'; e.currentTarget.style.background = '#fff'; }}
-            onBlur={e => { e.currentTarget.style.borderColor = '#EAEAEA'; e.currentTarget.style.background = '#FAFAFA'; }}
-          />
+          <div style={{ position: 'relative' }}>
+            <textarea
+              value={description}
+              onChange={e => setDescription(e.target.value.slice(0, 500))}
+              rows={4}
+              placeholder="이 추억에 대한 짤막한 이야기를 적어주세요."
+              style={{
+                width: '100%', padding: '12px 14px',
+                border: '1px solid #EAEAEA', borderRadius: 12,
+                fontSize: 14, background: '#FAFAFA', color: '#333',
+                outline: 'none', resize: 'none', boxSizing: 'border-box',
+                fontFamily: 'inherit',
+              }}
+              onFocus={e => { e.currentTarget.style.borderColor = '#BFDBF3'; e.currentTarget.style.background = '#fff'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = '#EAEAEA'; e.currentTarget.style.background = '#FAFAFA'; }}
+            />
+            <span style={{ position: 'absolute', bottom: 10, right: 12, fontSize: 12, color: description.length >= 500 ? '#FF5A5A' : '#94a3b8' }}>
+              {description.length} / 500
+            </span>
+          </div>
         </div>
 
         {/* 기간 설정 */}

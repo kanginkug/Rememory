@@ -114,8 +114,13 @@ export default function MemoryPlacePage() {
   }, [memoryId, router]);
 
   useEffect(() => {
-    if (descRef.current)
-      setDescOverflows(descRef.current.scrollHeight > descRef.current.clientHeight + 1);
+    const el = descRef.current;
+    if (!el) return;
+    // inline style로 clamp 적용 전 전체 높이 측정
+    el.style.cssText = 'display:block;overflow:visible;';
+    const full = el.scrollHeight;
+    el.style.cssText = '';
+    setDescOverflows(full > el.clientHeight);
   }, [memory]);
 
   const anySheet = moreSheet || shareSheet || memberSheet || regionSheet || placeMoreId !== null;
@@ -219,13 +224,55 @@ export default function MemoryPlacePage() {
           {/* 설명 */}
           {memory?.description && (
             <div className="memory-desc-card">
-              <div className="place-desc-wrap">
-                <p ref={descRef} className={`memory-desc-text ${descExpanded ? 'place-desc-expanded' : 'place-desc-clamped'}`}>
+              <div style={{ position: 'relative' }}>
+                <p
+                  ref={descRef}
+                  className="memory-desc-text"
+                  style={descExpanded ? {
+                    display: 'block',
+                    overflow: 'visible',
+                    whiteSpace: 'pre-line',
+                    wordBreak: 'break-word',
+                    WebkitLineClamp: 'unset' as any,
+                  } : {
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical' as any,
+                    overflow: 'hidden',
+                    whiteSpace: 'pre-line',
+                    wordBreak: 'break-word',
+                  }}
+                >
                   {memory.description}
                 </p>
                 {(descOverflows || descExpanded) && (
-                  <button className="desc-toggle-btn" onClick={() => setDescExpanded(e => !e)}>
-                    {descExpanded ? '말줄임' : '더보기'}
+                  <button
+                    onClick={() => setDescExpanded(e => !e)}
+                    style={descExpanded ? {
+                      display: 'block',
+                      border: 'none',
+                      background: 'none',
+                      padding: 0,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: '#7F77DD',
+                      cursor: 'pointer',
+                      marginTop: 2,
+                    } : {
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      border: 'none',
+                      background: 'linear-gradient(to right, transparent, white 40%)',
+                      paddingLeft: 32,
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: '#7F77DD',
+                      cursor: 'pointer',
+                      lineHeight: '1.6',
+                    }}
+                  >
+                    {descExpanded ? '접기' : '더보기'}
                   </button>
                 )}
               </div>
@@ -405,7 +452,7 @@ export default function MemoryPlacePage() {
               </div>
               초대하기
             </div>
-            <div className="menu-item" onClick={() => { setMoreSheet(false); router.push(`/memory/${memoryId}/edit`); }}>
+            <div className="menu-item" onClick={() => { setMoreSheet(false); router.push(`/memory/${memoryId}/edit?from=place`); }}>
               <div className="menu-item-icon" style={{ background: '#f1f0ff' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
