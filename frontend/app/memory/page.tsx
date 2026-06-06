@@ -110,7 +110,7 @@ export default function MemoryListPage() {
 
   const handleEdit = (memoryId: number) => {
     setSheetId(null);
-    router.push(`/memory/${memoryId}/edit`);
+    router.push(`/memory/${memoryId}/edit?from=memory`);
   };
 
   const handleLeave = async (memoryId: number) => {
@@ -268,7 +268,7 @@ export default function MemoryListPage() {
                     overflow: 'hidden',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     cursor: 'pointer',
-                    height: 220,
+                    height: 230,
                   }}
                   onClick={() => router.push(`/place/${mem.id}`)}
                 >
@@ -276,7 +276,7 @@ export default function MemoryListPage() {
                     src={mem.imageUrl ?? '/images/memories_no-memory.png'}
                     alt={mem.name}
                     className="w-full shrink-0 object-cover"
-                    style={{ height: 110 }}
+                    style={{ height: 120 }}
                     onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/memories_no-memory.png'; }}
                   />
                   <div className="flex flex-col flex-1 overflow-hidden" style={{ padding: 10 }}>
@@ -302,19 +302,17 @@ export default function MemoryListPage() {
                     </div>
 
                     {/* Description */}
-                    <div className="flex-1">
-                      {mem.description && (
-                        <p
-                          className="line-clamp-2 mb-1.5"
-                          style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}
-                        >
-                          {mem.description}
-                        </p>
-                      )}
+                    <div style={{ minHeight: 30.8, marginBottom: 2 }}>
+                      <p
+                        className="line-clamp-2"
+                        style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}
+                      >
+                        {mem.description}
+                      </p>
                     </div>
 
                     {/* Meta */}
-                    <div className="flex items-center justify-between" style={{ fontSize: 11, marginBottom: 6 }}>
+                    <div className="flex items-center justify-between" style={{ fontSize: 11, marginBottom: 4, marginTop: 2 }}>
                       <div className="flex items-center gap-2">
                         <span className="flex items-center gap-0.5" style={{ color: '#888' }}>
                           <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12, flexShrink: 0 }}>
@@ -342,7 +340,7 @@ export default function MemoryListPage() {
                     </div>
 
                     {/* Date */}
-                    <p style={{ fontSize: 11, color: '#999', paddingTop: 4 }}>
+                    <p style={{ fontSize: 11, color: '#999', paddingTop: 1 }}>
                       {formatDateRange(mem.startDate, mem.endDate)}
                     </p>
                   </div>
