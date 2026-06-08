@@ -196,7 +196,7 @@ class ReviewServiceTest {
         reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        reviewService.updateReview(member.getId(), review.getId(), createReviewDto(BigDecimal.valueOf(3.0), "생각보다 별로"));
+        reviewService.updateReview(member.getId(), review.getId(), createUpdateDto(BigDecimal.valueOf(3.0), "생각보다 별로"));
 
         Review updated = reviewRepository.findOne(review.getId()).get();
         assertThat(updated.getRating()).isEqualByComparingTo(BigDecimal.valueOf(3.0));
@@ -212,7 +212,7 @@ class ReviewServiceTest {
         em.clear();
         BigDecimal beforeAvg = placeRepository.findOne(memory.getId(), place.getId()).get().getAvgRating();
 
-        reviewService.updateReview(member.getId(), review.getId(), createReviewDto(BigDecimal.valueOf(2.0), "별로"));
+        reviewService.updateReview(member.getId(), review.getId(), createUpdateDto(BigDecimal.valueOf(2.0), "별로"));
 
         em.clear();
         BigDecimal afterAvg = placeRepository.findOne(memory.getId(), place.getId()).get().getAvgRating();
@@ -226,7 +226,7 @@ class ReviewServiceTest {
         reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(4.5), "맛있어요"));
         Review review = reviewRepository.findByPlaceIdAndMemberId(place.getId(), member.getId()).get();
 
-        assertThatThrownBy(() -> reviewService.updateReview(otherMember.getId(), review.getId(), createReviewDto(BigDecimal.valueOf(1.0), "별로")))
+        assertThatThrownBy(() -> reviewService.updateReview(otherMember.getId(), review.getId(), createUpdateDto(BigDecimal.valueOf(1.0), "별로")))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.REVIEW_NOT_OWNER.getMessage());
     }
@@ -274,5 +274,9 @@ class ReviewServiceTest {
 
     private CreateUpdateReviewRequestDTO createReviewDto(BigDecimal rating, String content) {
         return new CreateUpdateReviewRequestDTO(place.getId(), memory.getId(), rating, content, null, LocalDate.of(2026, 5, 2));
+    }
+
+    private UpdateReviewRequestDTO createUpdateDto(BigDecimal rating, String content) {
+        return new UpdateReviewRequestDTO(place.getId(), memory.getId(), rating, content, LocalDate.of(2026, 5, 2));
     }
 }

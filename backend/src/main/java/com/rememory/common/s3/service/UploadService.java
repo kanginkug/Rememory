@@ -4,6 +4,7 @@ import com.rememory.common.s3.PresignedUrlResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -20,9 +21,9 @@ public class UploadService {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-
     @Value("${cloud.aws.region.static}")
     private String region;
+    private final S3Client s3Client;
 
     public List<PresignedUrlResponseDTO> generatePresignedUrls(String folder, int count) {
         return IntStream.range(0, count)
@@ -45,5 +46,17 @@ public class UploadService {
         String imageUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
 
         return new PresignedUrlResponseDTO(presigned.url().toString(), imageUrl);
+    }
+
+    public void delete(String imageUrl) {
+        String key = imageUrl.substring(imageUrl.indexOf(".amazonaws.com/") + ".amazonaws.com/".length());
+
+        s3Client.deleteObject(r -> r
+                .bucket(bucket)
+                .key(key));
+    }
+
+    public void deleteAll(List<String> imageUrls) {
+        imageUrls.forEach(this::delete);
     }
 }
