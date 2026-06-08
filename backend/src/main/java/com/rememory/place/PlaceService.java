@@ -2,6 +2,7 @@ package com.rememory.place;
 
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
+import com.rememory.common.s3.service.UploadService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import com.rememory.memory.MemberMemoryRepository;
@@ -28,6 +29,7 @@ public class PlaceService {
     private final MemoryRepository memoryRepository;
     private final ReviewRepository reviewRepository;
     private final MemberMemoryRepository mmRepository;
+    private final UploadService uploadService;
 
     // 장소 생성 + 사진 업로드 + placeCount 갱신
     @Transactional
@@ -108,7 +110,12 @@ public class PlaceService {
             throw new BusinessException(ErrorCode.PLACE_HAS_REVIEWS);
         }
 
-        ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
+        List<PlacePhoto> urls = ppRepository.findAllByPlaceId(placeId);
+        List<String> photoUrls = urls.stream()
+                .map(PlacePhoto::getImageUrl)
+                .toList();
+        uploadService.deleteAll(photoUrls);
+        urls.forEach(PlacePhoto::delete);
         place.delete();
         memoryRepository.updatePlaceCount(memoryId, -1);
         memoryRepository.recalculateRating(memoryId);
@@ -180,6 +187,7 @@ public class PlaceService {
             if(!placePhoto.getCreator().getId().equals(memberId)) {
                 throw new BusinessException(ErrorCode.PLACE_PHOTO_ACCESS_DENIED);
             }
+            uploadService.delete(placePhoto.getImageUrl());
             placePhoto.delete();
             ppRepository.save(PlacePhoto.create(place, member, photoUrlList.get(i)));
         }
@@ -201,6 +209,10 @@ public class PlaceService {
                 throw new BusinessException(ErrorCode.PLACE_PHOTO_ACCESS_DENIED);
             }
         }
+        List<String> urls = placePhotoList.stream()
+                        .map(PlacePhoto::getImageUrl)
+                                .toList();
+        uploadService.deleteAll(urls);
         placePhotoList.forEach(PlacePhoto::delete);
     }
 

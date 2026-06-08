@@ -48,8 +48,8 @@ public class ReviewController {
 
     // 후기 수정 + 별점 재계산
     @PutMapping("/{reviewId}")
-    public ResponseEntity<Void> updateReview(@RequestAttribute("memberId") Long memberId, @PathVariable("reviewId") Long reviewId, @RequestBody @Valid CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
-        reviewService.updateReview(memberId, reviewId, cuReviewRequestDTO);
+    public ResponseEntity<Void> updateReview(@RequestAttribute("memberId") Long memberId, @PathVariable("reviewId") Long reviewId, @RequestBody @Valid UpdateReviewRequestDTO updateReviewRequestDTO) {
+        reviewService.updateReview(memberId, reviewId, updateReviewRequestDTO);
         return ResponseEntity.noContent().build();
     }
 

@@ -2,6 +2,7 @@ package com.rememory.review;
 
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
+import com.rememory.common.s3.service.UploadService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import com.rememory.memory.MemberMemoryRepository;
@@ -29,6 +30,7 @@ public class ReviewService {
     private final PlaceRepository placeRepository;
     private final ReviewRepository reviewRepository;
     private final ReviewPhotoRepository rpRepository;
+    private final UploadService uploadService;
 
     /**
      * 후기 작성
@@ -92,9 +94,9 @@ public class ReviewService {
 
     // 후기 수정 + Place·Memory 별점 재계산
     @Transactional
-    public void updateReview(Long updater, Long reviewId, CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
-        Long memoryId = cuReviewRequestDTO.getMemoryId();
-        Long placeId = cuReviewRequestDTO.getPlaceId();
+    public void updateReview(Long updater, Long reviewId, UpdateReviewRequestDTO updateReviewRequestDTO) {
+        Long memoryId = updateReviewRequestDTO.getMemoryId();
+        Long placeId = updateReviewRequestDTO.getPlaceId();
 
         certification(memoryId, updater);
         Review review = reviewRepository.findOne(reviewId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
@@ -102,8 +104,8 @@ public class ReviewService {
             throw new BusinessException(ErrorCode.REVIEW_NOT_OWNER);
         }
         BigDecimal oldRating = review.getRating();
-        review.update(cuReviewRequestDTO.getRating(), cuReviewRequestDTO.getContent(), cuReviewRequestDTO.getVisitedAt());
-        placeRepository.updateRatingOnUpdate(placeId, cuReviewRequestDTO.getRating(), oldRating);
+        review.update(updateReviewRequestDTO.getRating(), updateReviewRequestDTO.getContent(), updateReviewRequestDTO.getVisitedAt());
+        placeRepository.updateRatingOnUpdate(placeId, updateReviewRequestDTO.getRating(), oldRating);
         memoryRepository.recalculateRating(memoryId);
     }
 
@@ -116,6 +118,10 @@ public class ReviewService {
             throw new BusinessException(ErrorCode.REVIEW_NOT_OWNER);
         }
         BigDecimal oldRating = review.getRating();
+        List<String> urls = rpRepository.findByReviewIdAndMemberId(review.getId(), deleter)
+                .stream().map(ReviewPhoto::getImageUrl).toList();
+        uploadService.deleteAll(urls);
+
         review.delete();
         placeRepository.updateRatingOnDelete(placeId, oldRating);
         memoryRepository.recalculateRating(memoryId);
@@ -208,6 +214,7 @@ public class ReviewService {
 
             for(Long id : reviewPhotoIdList) {
                 ReviewPhoto reviewPhoto = rpRepository.findOne(id).orElseThrow(() -> new BusinessException(ErrorCode.DELETE_PHOTO_NOT_FOUND));
+                uploadService.delete(reviewPhoto.getImageUrl());
                 reviewPhoto.delete();
             }
         }
