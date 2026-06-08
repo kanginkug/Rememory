@@ -157,6 +157,49 @@ export const fetchRecentMemories = () => fetchMemoryList('DATE_DESC');
 export const fetchRecentReviews = () =>
   apiFetch<RecentReview[]>('/review/recent');
 
+export interface PlaceReview {
+  reviewId: number;
+  memberId: number;
+  memberName: string;
+  profileImageUrl: string;
+  rating: number;
+  content: string | null;
+  visitedAt: string | null;
+  createdAt: string;
+  photoUrlList: string[];
+}
+
+export interface CreateReviewRequest {
+  rating: number;
+  content?: string;
+  visitedAt?: string;
+  photoUrlList?: string[];
+}
+
+export const fetchPlaceReviews = (memoryId: number, placeId: number) =>
+  apiFetch<PlaceReview[]>(`/review/${memoryId}/place/${placeId}`);
+
+export const fetchPlaceReviewsSorted = (memoryId: number, placeId: number, sortType: string) =>
+  apiFetch<PlaceReview[]>(`/review/${memoryId}/place/${placeId}/sort?sortType=${sortType}`);
+
+export const fetchMyReview = (memoryId: number, placeId: number) =>
+  apiFetch<PlaceReview>(`/review/${memoryId}/place/${placeId}/my`);
+
+export const createReview = (memoryId: number, placeId: number, body: CreateReviewRequest) =>
+  apiFetch<void>(`/review/${memoryId}/place/${placeId}`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+export const updateReview = (memoryId: number, placeId: number, reviewId: number, body: CreateReviewRequest) =>
+  apiFetch<void>(`/review/${memoryId}/place/${placeId}/review/${reviewId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+
+export const deleteReview = (memoryId: number, placeId: number, reviewId: number) =>
+  apiFetch<void>(`/review/${memoryId}/place/${placeId}/review/${reviewId}`, { method: 'DELETE' });
+
 export const createMemory = (body: CreateMemoryRequest) =>
   apiFetch<void>('/memory', { method: 'POST', body: JSON.stringify(body) });
 
@@ -172,11 +215,11 @@ export const fetchMemory = (memoryId: number) =>
 export const updateMemory = (memoryId: number, body: UpdateMemoryRequest) =>
   apiFetch<void>(`/memory/${memoryId}`, { method: 'PUT', body: JSON.stringify(body) });
 
-export const updateMemoryPhoto = (memoryId: number, photoUrl: string) =>
-  apiFetch<void>(`/memory/${memoryId}/image`, { method: 'POST', body: JSON.stringify({ photoUrl }) });
+export const addMemoryPhoto = (memoryId: number, imageUrl: string) =>
+  apiFetch<void>(`/memory/${memoryId}/photo`, { method: 'POST', body: JSON.stringify({ imageUrl }) });
 
 export const deleteMemoryPhoto = (memoryId: number) =>
-  apiFetch<void>(`/memory/${memoryId}/image`, { method: 'DELETE' });
+  apiFetch<void>(`/memory/${memoryId}/photo`, { method: 'DELETE' });
 
 export const deleteMemory = (memoryId: number) =>
   apiFetch<void>(`/memory/${memoryId}`, { method: 'DELETE' });
@@ -195,6 +238,57 @@ export interface MemoryPlace {
   placePhotoList: PlacePhoto[];
 }
 
+export interface PlaceDetail {
+  id: number;
+  name: string;
+  category: Category;
+  address: string;
+  description: string;
+  kakaoPlaceId: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  avgRating: number;
+  reviewCount: number;
+  regionDepth1: string;
+  regionDepth2: string;
+  visitedAt: string | null;
+  placePhotoList: PlacePhoto[];
+}
+
+export const fetchPlace = (memoryId: number, placeId: number) =>
+  apiFetch<PlaceDetail>(`/place/${memoryId}/${placeId}`);
+
+export interface UpdatePlaceRequest {
+  name: string;
+  category: Category;
+  description?: string;
+  visitedAt?: string;
+  address?: string;
+  kakaoPlaceId?: string;
+  latitude?: string;
+  longitude?: string;
+  regionDepth1?: string;
+  regionDepth2?: string;
+}
+
+export const updatePlace = (memoryId: number, placeId: number, req: UpdatePlaceRequest) =>
+  apiFetch<void>(`/place/${memoryId}/${placeId}`, {
+    method: 'PUT',
+    body: JSON.stringify(req),
+  });
+
+export const addPlacePhotos = (memoryId: number, placeId: number, imageUrlList: string[]) =>
+  apiFetch<void>(`/place/${memoryId}/${placeId}/photo`, {
+    method: 'POST',
+    body: JSON.stringify({ photoUrlList: imageUrlList }),
+  });
+
+export const deletePlacePhotos = (memoryId: number, placeId: number, placePhotoIdList: number[]) =>
+  apiFetch<void>(`/place/${memoryId}/${placeId}/photo`, {
+    method: 'DELETE',
+    body: JSON.stringify({ placePhotoIdList }),
+  });
+
 export const fetchMemoryPlaces = (
   memoryId: number,
   params?: { category?: Category; regionDepth1?: string; regionDepth2?: string; keyword?: string },
@@ -205,7 +299,7 @@ export const fetchMemoryPlaces = (
   if (params?.regionDepth2) p.set('regionDepth2', params.regionDepth2);
   if (params?.keyword) p.set('keyword', params.keyword);
   const qs = p.toString();
-  return apiFetch<MemoryPlace[]>(`/memory/${memoryId}/places${qs ? `?${qs}` : ''}`);
+  return apiFetch<MemoryPlace[]>(`/place/${memoryId}${qs ? `?${qs}` : ''}`);
 };
 
 export const fetchMemoryMembers = (memoryId: number) =>
@@ -214,10 +308,30 @@ export const fetchMemoryMembers = (memoryId: number) =>
 export const deletePlace = (placeId: number) =>
   apiFetch<void>(`/place/${placeId}`, { method: 'DELETE' });
 
-export const fetchPresignedUrl = (fileName: string, contentType: string) =>
-  apiFetch<PresignedUrlResponse>('/uploads/presigned-url', {
+export interface CreatePlaceRequest {
+  name: string;
+  category: Category;
+  description?: string;
+  visitedAt?: string;
+  address?: string;
+  kakaoPlaceId?: string;
+  latitude?: string;
+  longitude?: string;
+  regionDepth1?: string;
+  regionDepth2?: string;
+  imageUrlList?: string[];
+}
+
+export const createPlace = (memoryId: number, req: CreatePlaceRequest) =>
+  apiFetch<{ id: number }>(`/place/${memoryId}`, {
     method: 'POST',
-    body: JSON.stringify({ fileName, contentType }),
+    body: JSON.stringify(req),
+  });
+
+export const fetchPresignedUrls = (folder: string, count: number) =>
+  apiFetch<PresignedUrlResponse[]>('/upload/presigned-urls', {
+    method: 'POST',
+    body: JSON.stringify({ folder, count }),
   });
 
 export async function uploadToS3(presignedUrl: string, file: File): Promise<void> {
