@@ -377,7 +377,7 @@ export default function MemoryPlacePage() {
           ) : (
           <div className="place-list">
             {filteredPlaces.map(place => (
-              <Link key={place.id} href={`/memory/${memoryId}/place/${place.id}`} className="place-card">
+              <Link key={place.id} href={`/place/${memoryId}/${place.id}`} className="place-card">
                 <img
                   className="place-img"
                   src={place.placePhotoList[0]?.imageUrl ?? '/images/no-place.png'}
@@ -418,7 +418,7 @@ export default function MemoryPlacePage() {
         </div>
 
         {/* FAB */}
-        <button className="fab" onClick={() => router.push(`/memory/${memoryId}/place/new`)}>
+        <button className="fab" onClick={() => router.push(`/place/${memoryId}/new`)}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
           </svg>
@@ -565,7 +565,7 @@ export default function MemoryPlacePage() {
         <div className="sheet-overlay open" onClick={() => setPlaceMoreId(null)}>
           <div className="sheet" onClick={e => e.stopPropagation()}>
             <div className="sheet-handle" />
-            <div className="menu-item" onClick={() => { setPlaceMoreId(null); router.push(`/memory/${memoryId}/place/${placeMoreId}/edit`); }}>
+            <div className="menu-item" onClick={() => { setPlaceMoreId(null); router.push(`/place/${memoryId}/${placeMoreId}/edit`); }}>
               <div className="menu-item-icon" style={{ background: '#f1f0ff' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>

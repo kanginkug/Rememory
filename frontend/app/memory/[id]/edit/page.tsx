@@ -6,9 +6,9 @@ import MemoryForm, { type MemoryFormValues } from '@/components/MemoryForm';
 import {
   fetchMemory,
   updateMemory,
-  updateMemoryPhoto,
+  addMemoryPhoto,
   deleteMemoryPhoto,
-  fetchPresignedUrl,
+  fetchPresignedUrls,
   uploadToS3,
   type MemoryDetail,
 } from '@/lib/api';
@@ -43,9 +43,9 @@ export default function EditMemoryPage() {
     });
 
     if (photoFile) {
-      const { presignedUrl, imageUrl } = await fetchPresignedUrl(photoFile.name, photoFile.type);
-      await uploadToS3(presignedUrl, photoFile);
-      await updateMemoryPhoto(memoryId, imageUrl);
+      const [slot] = await fetchPresignedUrls('memory', 1);
+      await uploadToS3(slot.presignedUrl, photoFile);
+      await addMemoryPhoto(memoryId, slot.imageUrl);
     } else if (photoRemoved && memory?.imageUrl) {
       await deleteMemoryPhoto(memoryId);
     }

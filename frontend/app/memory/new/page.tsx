@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import MemoryForm, { type MemoryFormValues } from '@/components/MemoryForm';
-import { createMemory, fetchPresignedUrl, uploadToS3 } from '@/lib/api';
+import { createMemory, fetchPresignedUrls, uploadToS3 } from '@/lib/api';
 
 export default function CreateMemoryPage() {
   const router = useRouter();
@@ -15,9 +15,9 @@ export default function CreateMemoryPage() {
   const handleSubmit = async ({ name, description, startDate, endDate, showHistory, photoFile }: MemoryFormValues) => {
     let photoUrl: string | null = null;
     if (photoFile) {
-      const { presignedUrl, imageUrl } = await fetchPresignedUrl(photoFile.name, photoFile.type);
-      await uploadToS3(presignedUrl, photoFile);
-      photoUrl = imageUrl;
+      const [slot] = await fetchPresignedUrls('memory', 1);
+      await uploadToS3(slot.presignedUrl, photoFile);
+      photoUrl = slot.imageUrl;
     }
     await createMemory({
       memoryName: name,
