@@ -17,6 +17,7 @@ import java.util.List;
 public class CreatePlaceRequestDTO {
 
     @NotBlank
+    @Size(max = 30)
     private String name;
 
     @NotNull
