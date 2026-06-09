@@ -17,6 +17,7 @@ public class PlaceDetailResponseDTO {
     private Category category;
     private String address;
     private String kakaoPlaceId; // 해외는 NULL 가능
+    private String kakaoPlaceName;
     private BigDecimal latitude;
     private BigDecimal longitude;
     private BigDecimal avgRating;
@@ -36,6 +37,7 @@ public class PlaceDetailResponseDTO {
                 place.getCategory(),
                 place.getAddress(),
                 place.getKakaoPlaceId(),
+                place.getKakaoPlaceName(),
                 place.getLatitude(),
                 place.getLongitude(),
                 place.getAvgRating(),
