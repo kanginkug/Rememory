@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { Category, PlacePhoto } from '@/lib/api';
+import { searchPlaces, type Category, type PlacePhoto, type PlaceSearchResult } from '@/lib/api';
 
 const CATEGORY_CHIPS: { value: Category; label: string }[] = [
   { value: 'RESTAURANT',    label: '🍽️ 식당' },
@@ -11,15 +11,7 @@ const CATEGORY_CHIPS: { value: Category; label: string }[] = [
   { value: 'ATTRACTION',    label: '🎡 관광지' },
 ];
 
-export interface KakaoPlace {
-  id: string;
-  place_name: string;
-  category_name: string;
-  address_name: string;
-  road_address_name: string;
-  x: string;
-  y: string;
-}
+export type KakaoPlace = PlaceSearchResult;
 
 export interface PlaceFormValues {
   name: string;
@@ -27,7 +19,7 @@ export interface PlaceFormValues {
   description: string;
   visitedAt: string;
   locationTab: 'kakao' | 'manual';
-  kakaoPlace: KakaoPlace | null;
+  kakaoPlace: PlaceSearchResult | null;
   depth1: string;
   depth2: string;
   newPhotos: File[];
@@ -43,6 +35,11 @@ interface PlaceFormProps {
     category?: Category;
     description?: string;
     visitedAt?: string | null;
+    kakaoPlaceId?: string | null;
+    kakaoPlaceName?: string | null;
+    address?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     regionDepth1?: string;
     regionDepth2?: string;
     placePhotoList?: PlacePhoto[];
@@ -54,10 +51,6 @@ declare global {
   interface Window { kakao: any; }
 }
 
-function parseRegion(address: string) {
-  const parts = address.split(' ');
-  return { depth1: parts[0] ?? '', depth2: parts[1] ?? '' };
-}
 
 export default function PlaceForm({
   title, submitLabel, submittingLabel, initialData, onSubmit,
@@ -69,7 +62,7 @@ export default function PlaceForm({
   const [description, setDescription] = useState('');
   const [visitedAt,   setVisitedAt]   = useState('');
   const [locationTab, setLocationTab] = useState<'kakao' | 'manual'>('kakao');
-  const [kakaoPlace,  setKakaoPlace]  = useState<KakaoPlace | null>(null);
+  const [kakaoPlace,  setKakaoPlace]  = useState<PlaceSearchResult | null>(null);
   const [depth1,      setDepth1]      = useState('');
   const [depth2,      setDepth2]      = useState('');
 
@@ -80,12 +73,11 @@ export default function PlaceForm({
 
   const [searchSheet, setSearchSheet] = useState(false);
   const [query,       setQuery]       = useState('');
-  const [results,     setResults]     = useState<KakaoPlace[]>([]);
+  const [results,     setResults]     = useState<PlaceSearchResult[]>([]);
   const [submitting,  setSubmitting]  = useState(false);
 
-  const fileRef    = useRef<HTMLInputElement>(null);
-  const queryRef   = useRef<HTMLInputElement>(null);
-  const kakaoReady = useRef(false);
+  const fileRef  = useRef<HTMLInputElement>(null);
+  const queryRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.body.classList.add('page-create-place');
@@ -98,7 +90,17 @@ export default function PlaceForm({
     if (initialData.category)    setCategory(initialData.category);
     if (initialData.description) setDescription(initialData.description);
     setVisitedAt(initialData.visitedAt ?? '');
-    if (initialData.regionDepth1 || initialData.regionDepth2) {
+    if (initialData.kakaoPlaceId) {
+      setKakaoPlace({
+        kakaoPlaceId: initialData.kakaoPlaceId,
+        kakaoPlaceName: initialData.kakaoPlaceName ?? '',
+        address: initialData.address ?? '',
+        latitude: String(initialData.latitude ?? ''),
+        longitude: String(initialData.longitude ?? ''),
+        regionDepth1: initialData.regionDepth1 ?? '',
+        regionDepth2: initialData.regionDepth2 ?? '',
+      });
+    } else if (initialData.regionDepth1 || initialData.regionDepth2) {
       setLocationTab('manual');
       setDepth1(initialData.regionDepth1 ?? '');
       setDepth2(initialData.regionDepth2 ?? '');
@@ -107,25 +109,18 @@ export default function PlaceForm({
   }, [initialData]);
 
   useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_KAKAO_APP_KEY;
-    if (!key || kakaoReady.current) return;
-    const script = document.createElement('script');
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${key}&libraries=services&autoload=false`;
-    script.onload = () => { window.kakao.maps.load(() => { kakaoReady.current = true; }); };
-    document.head.appendChild(script);
-  }, []);
-
-  useEffect(() => {
     document.body.style.overflow = searchSheet ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [searchSheet]);
 
-  const handleSearch = () => {
-    if (!query.trim() || !window.kakao?.maps?.services) return;
-    const ps = new window.kakao.maps.services.Places();
-    ps.keywordSearch(query, (data: KakaoPlace[], status: string) => {
-      setResults(status === window.kakao.maps.services.Status.OK ? data : []);
-    });
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+    try {
+      const data = await searchPlaces(query);
+      setResults(data);
+    } catch {
+      setResults([]);
+    }
   };
 
   const totalPhotoCount = existingPhotos.length + newPhotos.length;
@@ -284,12 +279,12 @@ export default function PlaceForm({
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
                     <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                   </svg>
-                  <span>{kakaoPlace ? kakaoPlace.place_name : '장소명 또는 주소 검색'}</span>
+                  <span>{kakaoPlace ? kakaoPlace.kakaoPlaceName : '장소명 또는 주소 검색'}</span>
                 </button>
                 {kakaoPlace && (
                   <div className="selected-place-card visible">
-                    <span className="selected-place-name">{kakaoPlace.place_name}</span>
-                    <span className="selected-place-addr">{kakaoPlace.road_address_name || kakaoPlace.address_name}</span>
+                    <span className="selected-place-name">{kakaoPlace.kakaoPlaceName}</span>
+                    <span className="selected-place-addr">{kakaoPlace.address}</span>
                     <button
                       type="button"
                       className="selected-place-clear"
@@ -389,13 +384,12 @@ export default function PlaceForm({
                 </div>
               ) : results.map(place => (
                 <div
-                  key={place.id}
-                  className={`search-result-item${kakaoPlace?.id === place.id ? ' selected' : ''}`}
+                  key={place.kakaoPlaceId}
+                  className={`search-result-item${kakaoPlace?.kakaoPlaceId === place.kakaoPlaceId ? ' selected' : ''}`}
                   onClick={() => { setKakaoPlace(place); setSearchSheet(false); }}
                 >
-                  <span className="result-name">{place.place_name}</span>
-                  <span className="result-category">{place.category_name}</span>
-                  <span className="result-address">{place.road_address_name || place.address_name}</span>
+                  <span className="result-name">{place.kakaoPlaceName}</span>
+                  <span className="result-address">{place.address}</span>
                 </div>
               ))}
             </div>

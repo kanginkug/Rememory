@@ -41,15 +41,14 @@ export default function EditPlacePage() {
     } = {};
 
     if (locationTab === 'kakao' && kakaoPlace) {
-      const addr = kakaoPlace.road_address_name || kakaoPlace.address_name;
-      const parts = addr.split(' ');
       locationInfo = {
-        address: addr,
-        kakaoPlaceId: kakaoPlace.id,
-        latitude: kakaoPlace.y,
-        longitude: kakaoPlace.x,
-        regionDepth1: parts[0] || undefined,
-        regionDepth2: parts[1] || undefined,
+        address: kakaoPlace.address,
+        kakaoPlaceId: kakaoPlace.kakaoPlaceId,
+        kakaoPlaceName: kakaoPlace.kakaoPlaceName || undefined,
+        latitude: kakaoPlace.latitude,
+        longitude: kakaoPlace.longitude,
+        regionDepth1: kakaoPlace.regionDepth1 || undefined,
+        regionDepth2: kakaoPlace.regionDepth2 || undefined,
       };
     } else if (locationTab === 'manual') {
       locationInfo = {

@@ -45,6 +45,13 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
   ),
 };
 
+const CATEGORY_FALLBACK: Record<Category, string> = {
+  RESTAURANT:    '/images/no_reveiw_restaurant.png',
+  ATTRACTION:    '/images/no_review_attraction.png',
+  ACCOMMODATION: '/images/no_review_accommodation.png',
+  CAFE:          '/images/no_review_cafe.png',
+};
+
 const CATEGORY_TAG: Record<Category, string> = {
   RESTAURANT:    'tag-restaurant',
   CAFE:          'tag-cafe',
@@ -380,9 +387,9 @@ export default function MemoryPlacePage() {
               <Link key={place.id} href={`/place/${memoryId}/${place.id}`} className="place-card">
                 <img
                   className="place-img"
-                  src={place.placePhotoList[0]?.imageUrl ?? '/images/no-place.png'}
+                  src={place.placePhotoList[0]?.imageUrl ?? CATEGORY_FALLBACK[place.category]}
                   alt={place.name}
-                  onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/no-place.png'; }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).src = CATEGORY_FALLBACK[place.category]; }}
                 />
                 <div className="place-info">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
