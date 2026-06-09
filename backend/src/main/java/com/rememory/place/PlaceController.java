@@ -23,6 +23,11 @@ public class PlaceController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<PlaceMapResponseDTO >> findAllPlaceInfo(@RequestAttribute("memberId") Long memberId) {
+        return ResponseEntity.ok(placeService.findAllPlaceInfo(memberId));
+    }
+
     // 추억 내 전체 장소 목록 조회 (대표 사진 포함)
     @GetMapping("/{memoryId}")
     public ResponseEntity<List<PlaceDetailResponseDTO>> findAllByMemoryId(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId) {
@@ -97,4 +102,6 @@ public class PlaceController {
     public ResponseEntity<List<PlaceSearchResponseDTO>> searchKakaoPlace(@RequestParam String query) {
         return ResponseEntity.ok(kakaoPlaceSearchService.searchByKeyword(query));
     }
+
+
 }

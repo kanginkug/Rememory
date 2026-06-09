@@ -246,4 +246,8 @@ public class PlaceService {
                 })
                 .toList();
     }
+
+    public List<PlaceMapResponseDTO> findAllPlaceInfo(Long memberId) {
+        return placeRepository.findAllPlaceInfo(memberId).stream().map(PlaceMapResponseDTO::from).toList();
+    }
 }
