@@ -36,7 +36,7 @@ public class PlaceController {
 
     // 내 베스트 장소 조회 (평점 높은 순)
     @GetMapping("/best")
-    public ResponseEntity<List<PlaceDetailResponseDTO>> findBestPlace(@RequestAttribute("memberId") Long memberId) {
+    public ResponseEntity<List<PlaceBestResponseDTO>> findBestPlace(@RequestAttribute("memberId") Long memberId) {
         return ResponseEntity.ok(placeService.findBestPlace(memberId));
     }
 
