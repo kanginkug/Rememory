@@ -60,15 +60,19 @@ export interface PlacePhoto {
 export interface BestPlace {
   id: number;
   name: string;
+  description: string;
   category: Category;
   address: string;
+  kakaoPlaceId: string | null;
+  kakaoPlaceName: string | null;
+  latitude: number;
+  longitude: number;
   avgRating: number;
   reviewCount: number;
   regionDepth1: string;
   regionDepth2: string;
-  visitedAt: string;
+  visitedAt: string | null;
   placePhotoList: PlacePhoto[];
-  memoryName?: string;
 }
 
 export type SortType = 'DATE_DESC' | 'DATE_ASC' | 'RATING_DESC' | 'RATING_ASC';
@@ -145,6 +149,23 @@ export const fetchMe = () => apiFetch<Member>('/members/me');
 
 export const fetchBestPlaces = () =>
   apiFetch<BestPlace[]>('/place/best');
+
+export interface PlaceMapItem {
+  memoryId: number;
+  memoryName: string;
+  placeId: number;
+  placeName: string;
+  category: Category;
+  latitude: number;
+  longitude: number;
+  avgRating: number;
+  regionDepth1: string;
+  regionDepth2: string;
+  visitedAt: string | null;
+}
+
+export const fetchAllPlaces = () =>
+  apiFetch<PlaceMapItem[]>('/place/all');
 
 export const fetchMemoryList = (sortType: SortType, keyword?: string) => {
   const params = new URLSearchParams({ sortType });
