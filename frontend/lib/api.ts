@@ -41,7 +41,7 @@ export type Category = 'RESTAURANT' | 'ACCOMMODATION' | 'ATTRACTION' | 'CAFE';
 export const CATEGORY_LABEL: Record<Category, string> = {
   RESTAURANT: '맛집',
   ACCOMMODATION: '숙소',
-  ATTRACTION: '장소',
+  ATTRACTION: '관광지',
   CAFE: '카페',
 };
 
@@ -245,6 +245,7 @@ export interface PlaceDetail {
   address: string;
   description: string;
   kakaoPlaceId: string | null;
+  kakaoPlaceName: string | null;
   latitude: number | null;
   longitude: number | null;
   avgRating: number;
@@ -265,6 +266,7 @@ export interface UpdatePlaceRequest {
   visitedAt?: string;
   address?: string;
   kakaoPlaceId?: string;
+  kakaoPlaceName?: string;
   latitude?: string;
   longitude?: string;
   regionDepth1?: string;
@@ -315,6 +317,7 @@ export interface CreatePlaceRequest {
   visitedAt?: string;
   address?: string;
   kakaoPlaceId?: string;
+  kakaoPlaceName?: string;
   latitude?: string;
   longitude?: string;
   regionDepth1?: string;
@@ -327,6 +330,19 @@ export const createPlace = (memoryId: number, req: CreatePlaceRequest) =>
     method: 'POST',
     body: JSON.stringify(req),
   });
+
+export interface PlaceSearchResult {
+  kakaoPlaceId: string;
+  kakaoPlaceName: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  regionDepth1: string;
+  regionDepth2: string;
+}
+
+export const searchPlaces = (query: string) =>
+  apiFetch<PlaceSearchResult[]>(`/place/search?query=${encodeURIComponent(query)}`);
 
 export const fetchPresignedUrls = (folder: string, count: number) =>
   apiFetch<PresignedUrlResponse[]>('/upload/presigned-urls', {
