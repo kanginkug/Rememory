@@ -1,5 +1,6 @@
 package com.rememory.place;
 
+import com.rememory.common.kakao_map.KakaoPlaceSearchService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlaceController {
     private final PlaceService placeService;
+    private final KakaoPlaceSearchService kakaoPlaceSearchService;
 
     // 장소 등록 (사진 선택)
     @PostMapping(value = "{memoryId}")
@@ -89,5 +91,10 @@ public class PlaceController {
                                                  @RequestBody @Valid DeletePlacePhotoRequestDTO deletePlacePhotoRequestDTO) {
         placeService.deletePlacePhoto(memoryId, memberId, placeId, deletePlacePhotoRequestDTO);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<PlaceSearchResponseDTO>> searchKakaoPlace(@RequestParam String query) {
+        return ResponseEntity.ok(kakaoPlaceSearchService.searchByKeyword(query));
     }
 }
