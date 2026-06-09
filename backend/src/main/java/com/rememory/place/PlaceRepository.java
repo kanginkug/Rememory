@@ -148,4 +148,17 @@ public class PlaceRepository {
                 .limit(5)
                 .fetch();
     }
+
+    public List<Place> findAllPlaceInfo(Long memberId) {
+        return queryFactory.selectFrom(QPlace.place)
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
+                .join(QMemberMemory.memberMemory)
+                .on(QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id))
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull()
+                ).fetch();
+    }
 }
