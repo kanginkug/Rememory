@@ -31,7 +31,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         {children}
         <Script
-          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&libraries=services`}
+          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&libraries=services&autoload=false`}
           strategy="afterInteractive"
         />
       </body>

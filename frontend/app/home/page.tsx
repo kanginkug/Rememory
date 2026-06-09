@@ -29,10 +29,10 @@ const REVIEW_FALLBACK: Record<Category, string> = {
 };
 
 const NAV_ITEMS = [
-  { label: '홈',      href: '/home',   active: true,  d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
-  { label: '추억',    href: '/memory', active: false, d: 'M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4 2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z' },
-  { label: '지도탐색', href: '/map',    active: false, d: 'M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z' },
-  { label: '마이페이지', href: '/my',  active: false, d: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' },
+  { label: '홈',        href: '/home',   active: true,  d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
+  { label: '추억',      href: '/memory', active: false, d: 'M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4 2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z' },
+  { label: '지도탐색',  href: '/map',    active: false, d: 'M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z' },
+  { label: '마이페이지', href: '/my',    active: false, d: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' },
 ];
 
 export default function HomePage() {
@@ -91,7 +91,7 @@ export default function HomePage() {
       if (!banner || !header) return;
       const t = Math.min(1, window.scrollY / Math.max(banner.offsetHeight * 0.75, 1));
       banner.style.opacity = String(1 - t);
-      header.style.background = `rgb(${lerp(from.r,to.r,t)},${lerp(from.g,to.g,t)},${lerp(from.b,to.b,t)})`;
+      header.style.background = `rgb(${lerp(from.r, to.r, t)},${lerp(from.g, to.g, t)},${lerp(from.b, to.b, t)})`;
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -101,11 +101,13 @@ export default function HomePage() {
 
   return (
     <>
+      {/* 고정 헤더 */}
       <header ref={headerRef} className="app-header" id="appHeader">
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
         <img src="/images/bell_icon_transparent.png" alt="알림" className="bell-img" />
       </header>
 
+      {/* 고정 배너 */}
       <div ref={bannerRef} className="banner-section" id="bannerSection">
         <img src="/images/mainBanner.png" alt="메인 배너" className="main-banner" fetchPriority="high" />
       </div>
@@ -115,6 +117,7 @@ export default function HomePage() {
 
         <main className="app-main">
 
+          {/* 새 추억 만들기 CTA */}
           <section className="cta-section">
             <button className="main-cta-btn" onClick={() => router.push('/memory/new')}>
               <span className="btn-icon">
@@ -126,6 +129,7 @@ export default function HomePage() {
             </button>
           </section>
 
+          {/* 우리 추억 장소 베스트 */}
           {bestPlaces.length > 0 && (
             <section className="scroll-section">
               <div className="section-header">
@@ -136,20 +140,33 @@ export default function HomePage() {
                   <div key={place.id} className="place-card">
                     <img
                       className="card-image"
-                      src={place.placePhotoList[0]?.imageUrl ?? '/images/no-place.png'}
+                      src={place.placePhotoList?.[0]?.imageUrl ?? REVIEW_FALLBACK[place.category]}
                       alt={place.name}
-                      onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/no-place.png'; }}
+                      onError={e => { (e.currentTarget as HTMLImageElement).src = REVIEW_FALLBACK[place.category]; }}
                     />
                     <div className="card-info">
-                      <span className={`category ${CATEGORY_TAG[place.category]}`}>{CATEGORY_LABEL[place.category]}</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span className={`category ${CATEGORY_TAG[place.category]}`}>
+                          {CATEGORY_LABEL[place.category]}
+                        </span>
+                        {place.visitedAt && (
+                          <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500, flexShrink: 0 }}>
+                            {place.visitedAt.slice(0, 10).replace(/-/g, '.')}
+                          </span>
+                        )}
+                      </div>
                       <h3 className="place-name">{place.name}</h3>
-                      {place.memoryName && <p className="memory-title">{place.memoryName}</p>}
+                      <p className="memory-title">{place.description || ' '}</p>
                       <div className="card-footer">
                         <span className="rating">
-                          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                          <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
                           {place.avgRating.toFixed(1)}
                         </span>
-                        <span className="review-count">리뷰 {place.reviewCount}개</span>
+                        {place.reviewCount > 0 && (
+                          <span className="review-count">리뷰 {place.reviewCount}개</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -158,6 +175,7 @@ export default function HomePage() {
             </section>
           )}
 
+          {/* 최근 추억 카드 */}
           {memories.length > 0 && (
             <section className="scroll-section">
               <div className="section-header">
@@ -178,7 +196,9 @@ export default function HomePage() {
                       <p className="meta-info">장소 {mem.placeCount}곳</p>
                       {mem.avgRating > 0 && (
                         <p className="meta-info">
-                          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                          <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                          </svg>
                           {mem.avgRating.toFixed(1)}
                         </p>
                       )}
@@ -197,6 +217,7 @@ export default function HomePage() {
             </section>
           )}
 
+          {/* 내 추억 최근 리뷰 */}
           {reviews.length > 0 && (
             <section className="scroll-section">
               <div className="section-header">
@@ -213,7 +234,9 @@ export default function HomePage() {
                     />
                     <p className="review-place">{rev.placeName}</p>
                     <div className="review-rating">
-                      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                      <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                      </svg>
                       {rev.rating.toFixed(1)}
                     </div>
                     <p className="review-memory">{rev.memoryName}</p>
