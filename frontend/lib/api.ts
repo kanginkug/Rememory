@@ -59,6 +59,7 @@ export interface PlacePhoto {
 
 export interface BestPlace {
   id: number;
+  memoryId: number;
   name: string;
   description: string;
   category: Category;

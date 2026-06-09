@@ -137,7 +137,7 @@ export default function HomePage() {
               </div>
               <div className="horizontal-scroll best-places">
                 {bestPlaces.map(place => (
-                  <div key={place.id} className="place-card">
+                  <div key={place.id} className="place-card" onClick={() => router.push(`/place/${place.memoryId}/${place.id}`)} style={{ cursor: 'pointer' }}>
                     <img
                       className="card-image"
                       src={place.placePhotoList?.[0]?.imageUrl ?? REVIEW_FALLBACK[place.category]}
