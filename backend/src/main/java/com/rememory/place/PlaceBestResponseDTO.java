@@ -13,6 +13,7 @@ public class PlaceBestResponseDTO {
     private Long id;
     private String name;
     private String description;
+    private String memoryName;
     private Category category;
     private String address;
     private String kakaoPlaceId; // 해외는 NULL 가능
@@ -34,6 +35,7 @@ public class PlaceBestResponseDTO {
                 place.getId(),
                 place.getName(),
                 place.getDescription(),
+                place.getMemory().getName(),
                 place.getCategory(),
                 place.getAddress(),
                 place.getKakaoPlaceId(),
