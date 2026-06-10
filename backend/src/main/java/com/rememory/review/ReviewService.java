@@ -73,7 +73,7 @@ public class ReviewService {
         for(ReviewPhoto reviewPhoto : reviewPhotoList) {
             rpResponseDTOList.add(ReviewPhotoResponseDTO.from(reviewPhoto));
         }
-        return ReviewDetailResponseDTO.from(review, rpResponseDTOList);
+        return ReviewDetailResponseDTO.from(review, memoryId, placeId, rpResponseDTOList);
     }
 
     // 특정 장소 전체 후기 조회
@@ -81,7 +81,7 @@ public class ReviewService {
         certification(memoryId, memberId);
 
         List<Review> reviewList = reviewRepository.findAllByPlaceId(placeId);
-        return toResponseDTOList(reviewList);
+        return toResponseDTOList(reviewList, memoryId, placeId);
     }
 
     // 정렬 타입 적용 후기 조회
@@ -89,7 +89,7 @@ public class ReviewService {
         certification(memoryId, memberId);
 
         List<Review> reviewList = reviewRepository.sortByType(placeId, sortTypeReview);
-        return toResponseDTOList(reviewList);
+        return toResponseDTOList(reviewList, memoryId, placeId);
     }
 
     // 후기 수정 + Place·Memory 별점 재계산
@@ -143,7 +143,7 @@ public class ReviewService {
     }
 
     // Review 엔티티 리스트 → DTO 리스트 변환
-    private List<ReviewDetailResponseDTO> toResponseDTOList(List<Review> reviewList) {
+    private List<ReviewDetailResponseDTO> toResponseDTOList(List<Review> reviewList, Long memoryId, Long placeId) {
         List<Long> reviewIdList = reviewList.stream().map(Review::getId).toList();
         List<ReviewPhoto> reviewPhotoList = rpRepository.findAllByReviewIdList(reviewIdList);
 
@@ -157,7 +157,7 @@ public class ReviewService {
         for(Review review : reviewList) {
             List<ReviewPhotoResponseDTO> rpResponseDTOList = photoMap.getOrDefault(review.getId(), List.of());
 
-            rdResponseDTOList.add(ReviewDetailResponseDTO.from(review, rpResponseDTOList));
+            rdResponseDTOList.add(ReviewDetailResponseDTO.from(review, memoryId, placeId, rpResponseDTOList));
         }
 
         return rdResponseDTOList;
@@ -165,7 +165,24 @@ public class ReviewService {
 
     // 최근 작성한 후기 조회
     public List<ReviewDetailResponseDTO> findRecentReview(Long memberId) {
-        return toResponseDTOList(reviewRepository.findRecentReview(memberId));
+        List<Review> reviewList = reviewRepository.findRecentReview(memberId);
+        List<Long> reviewIdList = reviewList.stream().map(Review::getId).toList();
+        List<ReviewPhoto> reviewPhotoList = rpRepository.findAllByReviewIdList(reviewIdList);
+
+        Map<Long, List<ReviewPhotoResponseDTO>> photoMap = reviewPhotoList.stream()
+                .collect(groupingBy(
+                        p -> p.getReview().getId(),
+                        mapping(ReviewPhotoResponseDTO::from, toList())
+                ));
+
+        List<ReviewDetailResponseDTO> rdResponseDTOList = new ArrayList<>();
+        for(Review review : reviewList) {
+            List<ReviewPhotoResponseDTO> rpResponseDTOList = photoMap.getOrDefault(review.getId(), List.of());
+
+            rdResponseDTOList.add(ReviewDetailResponseDTO.from(review, review.getPlace().getMemory().getId(), review.getPlace().getId(), rpResponseDTOList));
+        }
+
+        return rdResponseDTOList;
     }
 
     // 리뷰 사진 업로드
