@@ -60,10 +60,7 @@ export default function HomePage() {
     ]).then(([p, m, r]) => {
       if (p.status === 'fulfilled') setBestPlaces(p.value);
       if (m.status === 'fulfilled') setMemories(m.value);
-      if (r.status === 'fulfilled') {
-        console.log('최근 후기 응답:', r.value);
-        setReviews(r.value);
-      }
+      if (r.status === 'fulfilled') setReviews(r.value);
     });
   }, [router]);
 
