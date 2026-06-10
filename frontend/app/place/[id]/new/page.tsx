@@ -54,8 +54,8 @@ export default function CreatePlacePage() {
       });
 
       router.replace(`/place/${memoryId}`);
-    } catch {
-      alert('장소 등록에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 

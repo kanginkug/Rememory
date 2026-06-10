@@ -25,7 +25,7 @@ export default function EditPlacePage() {
   useEffect(() => {
     fetchPlace(memoryId, placeIdNum)
       .then(setPlace)
-      .catch(() => alert('장소 정보를 불러오지 못했습니다.'))
+      .catch((e: Error) => alert(e.message))
       .finally(() => setLoading(false));
   }, [memoryId, placeIdNum]);
 
@@ -35,7 +35,7 @@ export default function EditPlacePage() {
     newPhotos, removedPhotoIds,
   }: PlaceFormValues) => {
     let locationInfo: {
-      address?: string; kakaoPlaceId?: string;
+      address?: string; kakaoPlaceId?: string; kakaoPlaceName?: string;
       latitude?: string; longitude?: string;
       regionDepth1?: string; regionDepth2?: string;
     } = {};
@@ -84,8 +84,8 @@ export default function EditPlacePage() {
       if (photoTasks.length > 0) await Promise.all(photoTasks);
 
       router.replace(`/place/${memoryId}/${placeIdNum}`);
-    } catch {
-      alert('장소 수정에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 

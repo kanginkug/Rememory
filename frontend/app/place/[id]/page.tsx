@@ -175,7 +175,7 @@ export default function MemoryPlacePage() {
       const link = `${window.location.origin}/invite/${inviteCode}`;
       await navigator.clipboard.writeText(link);
       alert('초대 링크가 클립보드에 복사됐습니다.');
-    } catch { alert('초대 링크 생성에 실패했습니다.'); }
+    } catch (e) { alert((e as Error).message); }
     setShareSheet(false);
   };
 
@@ -183,21 +183,21 @@ export default function MemoryPlacePage() {
     setMoreSheet(false);
     if (!confirm('정말 이 추억에서 나가시겠어요?')) return;
     try { await leaveMemory(memoryId); router.replace('/memory'); }
-    catch { alert('추억 나가기에 실패했습니다.'); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const handleDeleteMemory = async () => {
     setMoreSheet(false);
     if (!confirm('추억을 삭제하면 장소, 후기 등 모든 데이터가 사라집니다.\n정말 삭제하시겠어요?')) return;
     try { await deleteMemory(memoryId); router.replace('/memory'); }
-    catch { alert('추억 삭제에 실패했습니다.'); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const handleDeletePlace = async (placeId: number) => {
     setPlaceMoreId(null);
     if (!confirm('장소를 삭제하시겠어요?')) return;
     try { await deletePlace(placeId); setPlaces(prev => prev.filter(p => p.id !== placeId)); }
-    catch { alert('장소 삭제에 실패했습니다.'); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const avgRating = memory?.avgRating ?? 0;
