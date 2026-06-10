@@ -60,11 +60,23 @@ public class PlaceService {
     }
 
     // 내 베스트 장소 조회 (내 모든 추억 기준, 평점 높은 순)
-    public List<PlaceDetailResponseDTO> findBestPlace(Long memberId) {
+    public List<PlaceBestResponseDTO> findBestPlace(Long memberId) {
         if(memberRepository.findOne(memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
         }
-        return toResponseDTOList(placeRepository.findBestPlace(memberId));
+        List<Place> bestPlaces = placeRepository.findBestPlace(memberId);
+        if (bestPlaces.isEmpty()) return List.of();
+        List<Long> placeIds = bestPlaces.stream().map(Place::getId).toList();
+        Map<Long, PlacePhotoResponseDTO> thumbMap = ppRepository.findThumbByPlaceIdList(placeIds);
+
+        return bestPlaces.stream()
+                .map(place -> {
+                    List<PlacePhotoResponseDTO> photos = thumbMap.containsKey(place.getId())
+                            ? List.of(thumbMap.get(place.getId()))
+                            : List.of();
+                    return PlaceBestResponseDTO.from(place, photos);
+                })
+                .toList();
     }
 
     // 카테고리·지역(depth1/depth2) 필터 적용 조회

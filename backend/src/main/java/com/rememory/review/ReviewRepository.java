@@ -42,11 +42,16 @@ public class ReviewRepository {
     }
 
     public List<Review> findAllByPlaceId(Long placeId) {
-            return em.createQuery("select r from Review r " +
-                                      "where r.place.id = :placeId and r.deletedAt is null " +
-                                      "order by r.createdAt desc", Review.class)
-                        .setParameter("placeId", placeId)
-                        .getResultList();
+            return queryFactory.selectFrom(QReview.review)
+                            .join(QReview.review.member, QMember.member).fetchJoin()
+                            .join(QReview.review.place, QPlace.place).fetchJoin()
+                            .join(QPlace.place.memory, QMemory.memory).fetchJoin()
+                            .where(
+                                    QReview.review.place.id.eq(placeId),
+                                    QReview.review.deletedAt.isNull(),
+                                    QPlace.place.deletedAt.isNull(),
+                                    QMemory.memory.deletedAt.isNull()
+                            ).fetch();
     }
 
     /**
@@ -67,11 +72,14 @@ public class ReviewRepository {
         };
 
         return queryFactory.selectFrom(QReview.review)
-                .join(QPlace.place)
-                .on(QReview.review.place.id.eq(QPlace.place.id))
+                .join(QReview.review.member, QMember.member).fetchJoin()
+                .join(QReview.review.place, QPlace.place).fetchJoin()
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
                 .where(
                         QReview.review.place.id.eq(placeId),
-                        QReview.review.deletedAt.isNull()
+                        QReview.review.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull(),
+                        QMemory.memory.deletedAt.isNull()
                 )
                 .orderBy(orderSpecifier, QReview.review.id.desc())
                 .fetch();
@@ -100,6 +108,7 @@ public class ReviewRepository {
 
     public List<Review> findRecentReview(Long memberId) {
         return queryFactory.selectFrom(QReview.review)
+                .join(QReview.review.member, QMember.member).fetchJoin()
                 .join(QReview.review.place, QPlace.place).fetchJoin()
                 .join(QPlace.place.memory, QMemory.memory).fetchJoin()
                 .join(QMemberMemory.memberMemory).on(QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id))

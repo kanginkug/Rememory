@@ -133,7 +133,7 @@ public class PlaceRepository {
 
     public List<Place> findBestPlace(Long memberId) {
         return queryFactory.selectFrom(QPlace.place)
-                .join(QMemory.memory).on(QPlace.place.memory.id.eq(QMemory.memory.id))
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
                 .join(QMemberMemory.memberMemory).on(QMemory.memory.id.eq(QMemberMemory.memberMemory.memory.id))
                 .where(
                         QMemberMemory.memberMemory.member.id.eq(memberId),
