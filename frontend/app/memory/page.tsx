@@ -103,8 +103,8 @@ export default function MemoryListPage() {
       const link = `${window.location.origin}/invite/${inviteCode}`;
       await navigator.clipboard.writeText(link);
       alert('초대 링크가 클립보드에 복사됐습니다.');
-    } catch {
-      alert('초대 링크 생성에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 
@@ -119,8 +119,8 @@ export default function MemoryListPage() {
     try {
       await leaveMemory(memoryId);
       setMemories(prev => prev.filter(m => m.id !== memoryId));
-    } catch {
-      alert('추억 나가기에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 
@@ -130,8 +130,8 @@ export default function MemoryListPage() {
     try {
       await deleteMemory(memoryId);
       setMemories(prev => prev.filter(m => m.id !== memoryId));
-    } catch {
-      alert('추억 삭제에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 

@@ -7,26 +7,26 @@ import {
   fetchPlace,
   fetchPlaceReviewsSorted,
   fetchMyReview,
-  createReview,
-  updateReview,
   deleteReview,
+  deletePlace,
   CATEGORY_LABEL,
   type PlaceDetail,
   type PlaceReview,
+  type ReviewSortType,
 } from '@/lib/api';
 
-const SORT_OPTIONS = [
-  { label: '최신순',    value: 'LATEST'      },
-  { label: '오래된순',  value: 'OLDEST'      },
-  { label: '별점높은순', value: 'HIGH_RATING' },
-  { label: '별점낮은순', value: 'LOW_RATING'  },
+const SORT_OPTIONS: { label: string; value: ReviewSortType }[] = [
+  { label: '최신순',    value: 'DATE_DESC'   },
+  { label: '오래된순',  value: 'DATE_ASC'    },
+  { label: '별점높은순', value: 'RATING_DESC' },
+  { label: '별점낮은순', value: 'RATING_ASC'  },
 ];
 
 const NAV_ITEMS = [
-  { label: '홈',       href: '/home',   d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
-  { label: '장소',     href: '/memory', d: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z' },
-  { label: '지도탐색', href: '/map',    d: 'M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z' },
-  { label: '마이페이지', href: '/my',  d: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' },
+  { label: '홈',        href: '/home',   d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
+  { label: '후기',      href: '/memory', d: 'M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-5 14H7v-2h8v2zm3-4H7v-2h11v2zm0-4H7V6h11v2z' },
+  { label: '지도탐색',  href: '/map',    d: 'M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z' },
+  { label: '마이페이지', href: '/my',   d: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' },
 ];
 
 function ReviewTextToggle({ text }: { text: string }) {
@@ -57,19 +57,6 @@ function ReviewTextToggle({ text }: { text: string }) {
   );
 }
 
-function StarInput({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', gap: 4 }}>
-      {[1, 2, 3, 4, 5].map(s => (
-        <button key={s} type="button" onClick={() => onChange(s)} style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer' }}>
-          <svg width="38" height="38" viewBox="0 0 24 24" fill={s <= value ? '#FFB800' : '#e2e8f0'}>
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-          </svg>
-        </button>
-      ))}
-    </div>
-  );
-}
 
 export default function PlaceDetailPage() {
   const router = useRouter();
@@ -81,18 +68,13 @@ export default function PlaceDetailPage() {
   const [reviews,  setReviews]  = useState<PlaceReview[]>([]);
   const [myReview, setMyReview] = useState<PlaceReview | null>(null);
   const [loading,  setLoading]  = useState(true);
-  const [sortType, setSortType] = useState('LATEST');
+  const [sortType, setSortType] = useState<ReviewSortType>('DATE_DESC');
 
   const [descExpanded,  setDescExpanded]  = useState(false);
   const [descOverflows, setDescOverflows] = useState(false);
   const descRef = useRef<HTMLParagraphElement>(null);
 
-  const [moreSheet,  setMoreSheet]  = useState(false);
-  const [writeSheet, setWriteSheet] = useState(false);
-  const [editSheet,  setEditSheet]  = useState(false);
-  const [rating,     setRating]     = useState(0);
-  const [content,    setContent]    = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [placeMenuSheet, setPlaceMenuSheet] = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) { router.replace('/login'); return; }
@@ -103,7 +85,7 @@ export default function PlaceDetailPage() {
   useEffect(() => {
     Promise.allSettled([
       fetchPlace(memoryId, placeIdNum),
-      fetchPlaceReviewsSorted(memoryId, placeIdNum, 'LATEST'),
+      fetchPlaceReviewsSorted(memoryId, placeIdNum, 'DATE_DESC'),
       fetchMyReview(memoryId, placeIdNum),
     ]).then(([p, r, m]) => {
       if (p.status === 'fulfilled') setPlace(p.value);
@@ -121,7 +103,7 @@ export default function PlaceDetailPage() {
     setDescOverflows(full > el.clientHeight + 1);
   }, [place]);
 
-  const anySheet = moreSheet || writeSheet || editSheet;
+  const anySheet = placeMenuSheet;
   useEffect(() => {
     document.body.style.overflow = anySheet ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -136,48 +118,9 @@ export default function PlaceDetailPage() {
     if (m.status === 'fulfilled') setMyReview(m.value ?? null);
   };
 
-  const handleSortChange = (sort: string) => {
+  const handleSortChange = (sort: ReviewSortType) => {
     setSortType(sort);
     loadReviews(sort);
-  };
-
-  const handleWriteSubmit = async () => {
-    if (rating === 0 || submitting) return;
-    setSubmitting(true);
-    try {
-      await createReview(memoryId, placeIdNum, { rating, content: content.trim() || undefined });
-      await loadReviews(sortType);
-      setWriteSheet(false);
-      setRating(0);
-      setContent('');
-    } catch {
-      alert('후기 등록에 실패했습니다.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleEditOpen = () => {
-    if (!myReview) return;
-    setRating(myReview.rating);
-    setContent(myReview.content ?? '');
-    setEditSheet(true);
-  };
-
-  const handleEditSubmit = async () => {
-    if (!myReview || rating === 0 || submitting) return;
-    setSubmitting(true);
-    try {
-      await updateReview(memoryId, placeIdNum, myReview.reviewId, { rating, content: content.trim() || undefined });
-      await loadReviews(sortType);
-      setEditSheet(false);
-      setRating(0);
-      setContent('');
-    } catch {
-      alert('후기 수정에 실패했습니다.');
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const handleDelete = async () => {
@@ -186,8 +129,18 @@ export default function PlaceDetailPage() {
       await deleteReview(memoryId, placeIdNum, myReview.reviewId);
       setMyReview(null);
       await loadReviews(sortType);
-    } catch {
-      alert('후기 삭제에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
+    }
+  };
+
+  const handlePlaceDelete = async () => {
+    if (!confirm('장소를 삭제하시겠어요?\n장소에 등록된 모든 후기도 함께 삭제됩니다.')) return;
+    try {
+      await deletePlace(placeIdNum);
+      router.replace(`/memory/${memoryId}`);
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 
@@ -213,14 +166,7 @@ export default function PlaceDetailPage() {
           </svg>
         </button>
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
-        <button
-          onClick={() => setMoreSheet(true)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#555">
-            <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-          </svg>
-        </button>
+        <img src="/images/bell_icon_transparent.png" alt="알림" className="bell-img" />
       </header>
 
       <div className="content">
@@ -235,6 +181,14 @@ export default function PlaceDetailPage() {
             >
               {CATEGORY_LABEL[place?.category ?? 'ATTRACTION']}
             </span>
+            <button
+              onClick={() => setPlaceMenuSheet(true)}
+              style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#94a3b8">
+                <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
+              </svg>
+            </button>
           </div>
 
           {place?.description && (
@@ -293,109 +247,119 @@ export default function PlaceDetailPage() {
           </div>
         </div>
 
-        {/* 정렬 탭 */}
-        <div className="filter-container" style={{ paddingBottom: 16 }}>
-          {SORT_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              className={`chip${sortType === opt.value ? ' active' : ''}`}
-              onClick={() => handleSortChange(opt.value)}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
-        {/* 내 후기 */}
-        {myReview && (
-          <div className="my-review-container">
-            <div className="my-review-header">
-              <span>내 후기</span>
-              <div style={{ display: 'flex', gap: 10 }}>
-                <button
-                  onClick={handleEditOpen}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center' }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                </button>
-                <button
-                  onClick={handleDelete}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center' }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                    <path d="M10 11v6"/><path d="M14 11v6"/>
-                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="review-card">
-              {myReview.photoUrlList?.length > 0 && (
-                <div className="card-img-row">
-                  {myReview.photoUrlList.slice(0, 3).map((url, i) => (
-                    <img key={i} className="card-img" src={url} alt="후기 사진" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-                  ))}
-                </div>
-              )}
-              <div className="profile-row">
-                {myReview.profileImageUrl ? (
-                  <img className="user-avatar" src={myReview.profileImageUrl} alt={myReview.memberName} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-                ) : (
-                  <div className="user-avatar" style={{ background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#94a3b8"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
-                  </div>
-                )}
-                <span className="user-name">{myReview.memberName}</span>
-                <span className="rating-star">⭐ {myReview.rating.toFixed(1)}</span>
-                <span className="review-date">{myReview.visitedAt ?? myReview.createdAt?.slice(0, 10)}</span>
-              </div>
-              {myReview.content && <ReviewTextToggle text={myReview.content} />}
-            </div>
+        {/* 후기 없을 때 빈 상태 */}
+        {!myReview && reviews.length === 0 ? (
+          <div style={{ background: 'white', borderRadius: 24, padding: '32px 20px 28px', textAlign: 'center', boxShadow: '0 4px 14px rgba(0,0,0,0.04)' }}>
+            <img
+              src="/images/no_review_data.png"
+              alt="후기 없음"
+              style={{ width: '90%', maxWidth: 320, objectFit: 'contain', display: 'block', margin: '0 auto 16px' }}
+            />
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#1e293b', marginBottom: 6 }}>아직 후기가 없어요</p>
+            <p style={{ fontSize: 13, color: '#94a3b8' }}>첫 번째 후기를 작성해보세요!</p>
           </div>
-        )}
+        ) : (
+          <>
+            {/* 정렬 탭 */}
+            <div className="filter-container" style={{ paddingBottom: 16 }}>
+              {SORT_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  className={`chip${sortType === opt.value ? ' active' : ''}`}
+                  onClick={() => handleSortChange(opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
 
-        {/* 전체 후기 목록 */}
-        <div className="other-reviews-list">
-          {otherReviews.length === 0 && !myReview && (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8', fontSize: 14 }}>
-              아직 후기가 없어요. 첫 번째로 후기를 남겨보세요!
-            </div>
-          )}
-          {otherReviews.map(r => (
-            <div key={r.reviewId} className="other-review-card">
-              {r.photoUrlList?.length > 0 && (
-                <div className="card-img-row">
-                  {r.photoUrlList.slice(0, 3).map((url, i) => (
-                    <img key={i} className="card-img" src={url} alt="후기 사진" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-                  ))}
-                </div>
-              )}
-              <div className="profile-row">
-                {r.profileImageUrl ? (
-                  <img className="user-avatar" src={r.profileImageUrl} alt={r.memberName} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-                ) : (
-                  <div className="user-avatar" style={{ background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="#94a3b8"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+            {/* 내 후기 */}
+            {myReview && (
+              <div className="my-review-container">
+                <div className="my-review-header">
+                  <span>내 후기</span>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      onClick={() => router.push(`/place/${memoryId}/${placeIdNum}/review/edit`)}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        <path d="M10 11v6"/><path d="M14 11v6"/>
+                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                      </svg>
+                    </button>
                   </div>
-                )}
-                <span className="user-name">{r.memberName}</span>
-                <span className="rating-star">⭐ {r.rating.toFixed(1)}</span>
-                <span className="review-date">{r.visitedAt ?? r.createdAt?.slice(0, 10)}</span>
+                </div>
+                <div className="review-card">
+                  {myReview.rpResponseDTOList?.length > 0 && (
+                    <div className="card-img-row">
+                      {myReview.rpResponseDTOList.slice(0, 3).map(p => (
+                        <img key={p.reviewPhotoId} className="card-img" src={p.photoUrl} alt="후기 사진" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                      ))}
+                    </div>
+                  )}
+                  <div className="profile-row">
+                    {myReview.profileImageUrl ? (
+                      <img className="user-avatar" src={myReview.profileImageUrl} alt={myReview.creatorName} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                    ) : (
+                      <div className="user-avatar" style={{ background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#94a3b8"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                      </div>
+                    )}
+                    <span className="user-name">{myReview.creatorName}</span>
+                    <span className="rating-star">⭐ {myReview.rating.toFixed(1)}</span>
+                    <span className="review-date">{myReview.visitedAt ?? myReview.createdAt?.slice(0, 10)}</span>
+                  </div>
+                  {myReview.content && <ReviewTextToggle text={myReview.content} />}
+                </div>
               </div>
-              {r.content && <ReviewTextToggle text={r.content} />}
+            )}
+
+            {/* 전체 후기 목록 */}
+            <div className="other-reviews-list">
+              {otherReviews.map(r => (
+                <div key={r.reviewId} className="other-review-card">
+                  {r.rpResponseDTOList?.length > 0 && (
+                    <div className="card-img-row">
+                      {r.rpResponseDTOList.slice(0, 3).map(p => (
+                        <img key={p.reviewPhotoId} className="card-img" src={p.photoUrl} alt="후기 사진" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                      ))}
+                    </div>
+                  )}
+                  <div className="profile-row">
+                    {r.profileImageUrl ? (
+                      <img className="user-avatar" src={r.profileImageUrl} alt={r.creatorName} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                    ) : (
+                      <div className="user-avatar" style={{ background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#94a3b8"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+                      </div>
+                    )}
+                    <span className="user-name">{r.creatorName}</span>
+                    <span className="rating-star">⭐ {r.rating.toFixed(1)}</span>
+                    <span className="review-date">{r.visitedAt ?? r.createdAt?.slice(0, 10)}</span>
+                  </div>
+                  {r.content && <ReviewTextToggle text={r.content} />}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
 
       </div>
 
       {/* FAB */}
-      <button className="fab" onClick={() => { setRating(0); setContent(''); setWriteSheet(true); }}>
+      <button className="fab" onClick={() => router.push(`/place/${memoryId}/${placeIdNum}/review/new`)}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
         후기 작성
       </button>
@@ -403,21 +367,21 @@ export default function PlaceDetailPage() {
       {/* 하단 네비 */}
       <nav className="bottom-nav">
         {NAV_ITEMS.map(({ label, href, d }) => (
-          <Link key={label} href={href} className={`nav-item${label === '장소' ? ' active' : ''}`}>
+          <Link key={label} href={href} className={`nav-item${label === '후기' ? ' active' : ''}`}>
             <span className="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d={d} /></svg></span>
             <span className="nav-label">{label}</span>
           </Link>
         ))}
       </nav>
 
-      {/* 더보기 시트 */}
-      {moreSheet && (
-        <div className="sheet-overlay open" onClick={() => setMoreSheet(false)}>
+      {/* 장소 메뉴 시트 */}
+      {placeMenuSheet && (
+        <div className="sheet-overlay open" onClick={() => setPlaceMenuSheet(false)}>
           <div className="sheet" onClick={e => e.stopPropagation()}>
             <div className="sheet-handle" />
             <div
               className="menu-item"
-              onClick={() => { setMoreSheet(false); router.push(`/place/${memoryId}/${placeIdNum}/edit`); }}
+              onClick={() => { setPlaceMenuSheet(false); router.push(`/place/${memoryId}/${placeIdNum}/edit`); }}
             >
               <div className="menu-item-icon" style={{ background: '#f1f0ff' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -427,75 +391,24 @@ export default function PlaceDetailPage() {
               </div>
               장소 수정
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* 후기 작성 시트 */}
-      {writeSheet && (
-        <div className="sheet-overlay open" onClick={() => setWriteSheet(false)}>
-          <div className="sheet" onClick={e => e.stopPropagation()}>
-            <div className="sheet-handle" />
-            <div className="sheet-title">후기 작성</div>
-            <div className="sheet-body" style={{ padding: '16px 20px 24px' }}>
-              <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 10 }}>별점을 선택해주세요 *</div>
-                <StarInput value={rating} onChange={setRating} />
-                {rating > 0 && <div style={{ fontSize: 13, color: '#5CCCBA', fontWeight: 700, marginTop: 6 }}>{rating}.0점</div>}
+            <div
+              className="menu-item danger"
+              onClick={() => { setPlaceMenuSheet(false); handlePlaceDelete(); }}
+            >
+              <div className="menu-item-icon" style={{ background: '#fef2f2' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6"/><path d="M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
               </div>
-              <textarea
-                placeholder="방문 후기를 남겨보세요 (선택)"
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                maxLength={500}
-                rows={4}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 14, outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', color: '#1e293b' }}
-              />
-              <div style={{ textAlign: 'right', fontSize: 11, color: '#94a3b8', marginBottom: 16 }}>{content.length}/500</div>
-              <button
-                onClick={handleWriteSubmit}
-                disabled={rating === 0 || submitting}
-                style={{ width: '100%', padding: '14px 0', borderRadius: 14, border: 'none', fontSize: 15, fontWeight: 700, cursor: rating > 0 && !submitting ? 'pointer' : 'not-allowed', background: rating > 0 ? '#5CCCBA' : '#e2e8f0', color: rating > 0 ? '#fff' : '#94a3b8' }}
-              >
-                {submitting ? '등록 중...' : '후기 등록'}
-              </button>
+              장소 삭제
             </div>
           </div>
         </div>
       )}
 
-      {/* 후기 수정 시트 */}
-      {editSheet && (
-        <div className="sheet-overlay open" onClick={() => setEditSheet(false)}>
-          <div className="sheet" onClick={e => e.stopPropagation()}>
-            <div className="sheet-handle" />
-            <div className="sheet-title">후기 수정</div>
-            <div className="sheet-body" style={{ padding: '16px 20px 24px' }}>
-              <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 10 }}>별점을 선택해주세요 *</div>
-                <StarInput value={rating} onChange={setRating} />
-                {rating > 0 && <div style={{ fontSize: 13, color: '#5CCCBA', fontWeight: 700, marginTop: 6 }}>{rating}.0점</div>}
-              </div>
-              <textarea
-                placeholder="방문 후기를 남겨보세요 (선택)"
-                value={content}
-                onChange={e => setContent(e.target.value)}
-                maxLength={500}
-                rows={4}
-                style={{ width: '100%', padding: '12px 14px', borderRadius: 12, border: '1.5px solid #e2e8f0', fontSize: 14, outline: 'none', resize: 'none', fontFamily: 'inherit', boxSizing: 'border-box', color: '#1e293b' }}
-              />
-              <div style={{ textAlign: 'right', fontSize: 11, color: '#94a3b8', marginBottom: 16 }}>{content.length}/500</div>
-              <button
-                onClick={handleEditSubmit}
-                disabled={rating === 0 || submitting}
-                style={{ width: '100%', padding: '14px 0', borderRadius: 14, border: 'none', fontSize: 15, fontWeight: 700, cursor: rating > 0 && !submitting ? 'pointer' : 'not-allowed', background: rating > 0 ? '#5CCCBA' : '#e2e8f0', color: rating > 0 ? '#fff' : '#94a3b8' }}
-              >
-                {submitting ? '수정 중...' : '수정하기'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

@@ -29,7 +29,7 @@ export default function EditMemoryPage() {
     }
     fetchMemory(memoryId)
       .then(setMemory)
-      .catch(() => alert('추억 정보를 불러오지 못했습니다.'))
+      .catch((e: Error) => alert(e.message))
       .finally(() => setLoading(false));
   }, [memoryId, router]);
 

@@ -60,7 +60,10 @@ export default function HomePage() {
     ]).then(([p, m, r]) => {
       if (p.status === 'fulfilled') setBestPlaces(p.value);
       if (m.status === 'fulfilled') setMemories(m.value);
-      if (r.status === 'fulfilled') setReviews(r.value);
+      if (r.status === 'fulfilled') {
+        console.log('최근 후기 응답:', r.value);
+        setReviews(r.value);
+      }
     });
   }, [router]);
 
@@ -225,7 +228,7 @@ export default function HomePage() {
               </div>
               <div className="horizontal-scroll review-cards">
                 {reviews.map(rev => (
-                  <div key={rev.reviewId} className="review-card">
+                  <div key={rev.reviewId} className="review-card" onClick={() => router.push(`/place/${rev.memoryId}/${rev.placeId}`)} style={{ cursor: 'pointer' }}>
                     <img
                       className="review-img"
                       src={REVIEW_FALLBACK[rev.placeCategory] ?? '/images/no-place.png'}
@@ -234,6 +237,7 @@ export default function HomePage() {
                     />
                     <p className="review-place">{rev.placeName}</p>
                     <div className="review-rating">
+                      <span className="review-creator">{rev.creatorName}</span>
                       <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                       </svg>

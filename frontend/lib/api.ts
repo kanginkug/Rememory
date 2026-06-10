@@ -28,7 +28,14 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     if (typeof window !== 'undefined') window.location.href = '/login';
     throw new Error('Unauthorized');
   }
-  if (!res.ok) throw new Error(`API error ${res.status}`);
+  if (!res.ok) {
+    let message = `오류가 발생했습니다. (${res.status})`;
+    try {
+      const body = await res.json();
+      if (typeof body?.message === 'string') message = body.message;
+    } catch {}
+    throw new Error(message);
+  }
   const ct = res.headers.get('content-type');
   if (!ct || !ct.includes('application/json')) return undefined as T;
   return res.json();
@@ -114,10 +121,15 @@ export interface UpdateMemoryRequest {
 export interface RecentReview {
   reviewId: number;
   memberId: number;
+  memoryId: number;
+  placeId: number;
+  creatorName: string;
+  profileImageUrl: string | null;
   rating: number;
   content: string;
   placeName: string;
   placeCategory: Category;
+  rpResponseDTOList: ReviewPhoto[];
   memoryName: string;
   visitedAt: string;
   createdAt: string;
@@ -179,48 +191,82 @@ export const fetchRecentMemories = () => fetchMemoryList('DATE_DESC');
 export const fetchRecentReviews = () =>
   apiFetch<RecentReview[]>('/review/recent');
 
+export type ReviewSortType = 'DATE_DESC' | 'DATE_ASC' | 'RATING_DESC' | 'RATING_ASC' | 'VISITED_DESC' | 'VISITED_ASC';
+
+export interface ReviewPhoto {
+  reviewPhotoId: number;
+  photoUrl: string;
+}
+
 export interface PlaceReview {
   reviewId: number;
   memberId: number;
-  memberName: string;
-  profileImageUrl: string;
+  memoryId: number;
+  placeId: number;
+  creatorName: string;
+  profileImageUrl: string | null;
   rating: number;
   content: string | null;
+  placeName: string;
+  placeCategory: Category;
+  rpResponseDTOList: ReviewPhoto[];
+  memoryName: string;
   visitedAt: string | null;
   createdAt: string;
-  photoUrlList: string[];
 }
 
 export interface CreateReviewRequest {
+  placeId: number;
+  memoryId: number;
   rating: number;
   content?: string;
   visitedAt?: string;
   photoUrlList?: string[];
 }
 
-export const fetchPlaceReviews = (memoryId: number, placeId: number) =>
-  apiFetch<PlaceReview[]>(`/review/${memoryId}/place/${placeId}`);
+export interface UpdateReviewRequest {
+  placeId: number;
+  memoryId: number;
+  rating: number;
+  content?: string;
+  visitedAt?: string;
+}
 
-export const fetchPlaceReviewsSorted = (memoryId: number, placeId: number, sortType: string) =>
-  apiFetch<PlaceReview[]>(`/review/${memoryId}/place/${placeId}/sort?sortType=${sortType}`);
+export const fetchPlaceReviews = (memoryId: number, placeId: number) =>
+  apiFetch<PlaceReview[]>(`/review/memory/${memoryId}/place/${placeId}/all`);
+
+export const fetchPlaceReviewsSorted = (memoryId: number, placeId: number, sortType: ReviewSortType) =>
+  apiFetch<PlaceReview[]>(`/review/memory/${memoryId}/place/${placeId}/sort?sortTypeReview=${sortType}`);
 
 export const fetchMyReview = (memoryId: number, placeId: number) =>
-  apiFetch<PlaceReview>(`/review/${memoryId}/place/${placeId}/my`);
+  apiFetch<PlaceReview>(`/review/memory/${memoryId}/place/${placeId}`);
 
-export const createReview = (memoryId: number, placeId: number, body: CreateReviewRequest) =>
-  apiFetch<void>(`/review/${memoryId}/place/${placeId}`, {
+export const createReview = (body: CreateReviewRequest) =>
+  apiFetch<void>('/review', {
     method: 'POST',
     body: JSON.stringify(body),
   });
 
-export const updateReview = (memoryId: number, placeId: number, reviewId: number, body: CreateReviewRequest) =>
-  apiFetch<void>(`/review/${memoryId}/place/${placeId}/review/${reviewId}`, {
-    method: 'PATCH',
+export const updateReview = (reviewId: number, body: UpdateReviewRequest) =>
+  apiFetch<void>(`/review/${reviewId}`, {
+    method: 'PUT',
     body: JSON.stringify(body),
   });
 
 export const deleteReview = (memoryId: number, placeId: number, reviewId: number) =>
-  apiFetch<void>(`/review/${memoryId}/place/${placeId}/review/${reviewId}`, { method: 'DELETE' });
+  apiFetch<void>(`/review/memory/${memoryId}/place/${placeId}/review/${reviewId}`, { method: 'DELETE' });
+
+export const addReviewPhotos = (memoryId: number, reviewId: number, photoUrlList: string[]) =>
+  apiFetch<void>(`/review/${memoryId}/${reviewId}/photo`, {
+    method: 'POST',
+    body: JSON.stringify({ photoUrlList }),
+  });
+
+export const deleteReviewPhotos = (memoryId: number, reviewId: number, reviewPhotoIdList: number[]) =>
+  apiFetch<void>(`/review/${memoryId}/${reviewId}/photo`, {
+    method: 'DELETE',
+    body: JSON.stringify({ reviewPhotoIdList }),
+  });
 
 export const createMemory = (body: CreateMemoryRequest) =>
   apiFetch<void>('/memory', { method: 'POST', body: JSON.stringify(body) });
