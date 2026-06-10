@@ -159,7 +159,7 @@ export default function HomePage() {
                         )}
                       </div>
                       <h3 className="place-name">{place.name}</h3>
-                      <p className="memory-title">{place.description || ' '}</p>
+                      <p className="memory-title">{place.memoryName}</p>
                       <div className="card-footer">
                         <span className="rating">
                           <svg viewBox="0 0 24 24" fill="currentColor">
@@ -231,11 +231,11 @@ export default function HomePage() {
                   <div key={rev.reviewId} className="review-card" onClick={() => router.push(`/place/${rev.memoryId}/${rev.placeId}`)} style={{ cursor: 'pointer' }}>
                     <img
                       className="review-img"
-                      src={REVIEW_FALLBACK[rev.placeCategory] ?? '/images/no-place.png'}
+                      src={rev.rpResponseDTOList?.[0]?.photoUrl ?? REVIEW_FALLBACK[rev.placeCategory] ?? '/images/no-place.png'}
                       alt={rev.placeName}
-                      onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/no-place.png'; }}
+                      onError={e => { (e.currentTarget as HTMLImageElement).src = REVIEW_FALLBACK[rev.placeCategory] ?? '/images/no-place.png'; }}
                     />
-                    <p className="review-place">{rev.placeName}</p>
+                    {rev.content && <p className="review-text">{rev.content}</p>}
                     <div className="review-rating">
                       <span className="review-creator">{rev.creatorName}</span>
                       <svg viewBox="0 0 24 24" fill="currentColor">
@@ -243,8 +243,8 @@ export default function HomePage() {
                       </svg>
                       {rev.rating.toFixed(1)}
                     </div>
-                    <p className="review-memory">{rev.memoryName}</p>
-                    {rev.content && <p className="review-text">{rev.content}</p>}
+                    <p className="review-memory"><span className="review-label review-label-memory">추억</span>{rev.memoryName}</p>
+                    <p className="review-place"><span className="review-label review-label-place">장소</span>{rev.placeName}</p>
                   </div>
                 ))}
               </div>
