@@ -143,6 +143,15 @@ export default function MemoryListPage() {
         className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-20 flex justify-center items-end"
         style={{ background: '#BFDBF3', padding: '10px 20px 2px', height: 62 }}
       >
+        <button
+          className="absolute flex items-center justify-center"
+          style={{ left: 20, top: '58%', transform: 'translateY(-50%)' }}
+          onClick={() => router.push('/home')}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
         <img
           src="/images/default_phrase.png"
           alt="Rememory"
