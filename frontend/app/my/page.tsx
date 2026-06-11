@@ -150,16 +150,6 @@ export default function MyPage() {
               <span className="menu-title">후기 관리</span>
               <span className="chevron-right">{CHEVRON}</span>
             </div>
-            <div className="menu-item" style={{ cursor: 'pointer' }}>
-              <div className="menu-icon mi-orange">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                  <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                </svg>
-              </div>
-              <span className="menu-title">알림 설정</span>
-              <span className="chevron-right">{CHEVRON}</span>
-            </div>
           </div>
 
           {/* 메뉴 카드 2 */}
