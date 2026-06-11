@@ -18,6 +18,7 @@ public enum ErrorCode {
     MEMORY_NOT_CREATOR("MM003", "메모리 생성자만 가능합니다.", HttpStatus.FORBIDDEN),
     MEMORY_PHOTO_NOT_FOUND("MM004", "메모리 사진이 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
     MEMORY_PHOTO_ALREADY_EXISTS("MM005", "이미 표지 사진이 존재합니다.", HttpStatus.CONFLICT),
+    MEMORY_HAS_PLACES("MM006", "장소가 존재하기 때문에 추억을 삭제할 수 없습니다.", HttpStatus.CONFLICT),
 
     // ===== MemberMemory =====
     MEMBER_MEMORY_ALREADY_EXISTS("MME001", "이미 참가한 메모리입니다.", HttpStatus.CONFLICT),

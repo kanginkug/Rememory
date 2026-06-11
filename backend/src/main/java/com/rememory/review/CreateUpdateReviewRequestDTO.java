@@ -22,7 +22,7 @@ public class CreateUpdateReviewRequestDTO {
     private Long memoryId;
 
     @NotNull
-    @DecimalMin("1.0")
+    @DecimalMin("0.5")
     @DecimalMax("5.0")
     private BigDecimal rating;
 

@@ -2,6 +2,7 @@ package com.rememory.memory;
 
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
+import com.rememory.common.s3.service.UploadService;
 import com.rememory.invitation.InvitationService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberInfoDTO;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,6 +24,7 @@ public class MemoryService {
     private final MemoryPhotoRepository mpRepository;
     private final MemberMemoryRepository mmRepository;
     private final InvitationService invitationService;
+    private final UploadService uploadService;
 
     @Transactional
     public void createMemory(Long creatorId, CreateMemoryRequestDTO memory) {
@@ -55,6 +58,27 @@ public class MemoryService {
             throw new BusinessException(ErrorCode.MEMORY_NOT_CREATOR);
         }
         updateMemory.update(memory.getMemoryName(), memory.getShowHistoryToNew(), memory.getDescription(), memory.getStartDate(), memory.getEndDate());
+    }
+
+    @Transactional
+    public void deleteMemory(Long memoryId, Long memberId) {
+        if(memberRepository.findOne(memberId).isEmpty()){
+            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        Memory deleteMemory = memoryRepository.findOne(memoryId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
+
+        if(!deleteMemory.getCreator().getId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.MEMORY_NOT_CREATOR);
+        }
+
+        if(deleteMemory.getPlaceCount() > 0) {
+            throw new BusinessException(ErrorCode.MEMORY_HAS_PLACES);
+        }
+
+        deleteMemory.delete();
+
     }
 
     public List<MemoryListResponseDTO> findMemoryList(Long memberId, SortTypeMemory sortTypeMemory, String keyword) {
@@ -125,8 +149,10 @@ public class MemoryService {
         if (mmRepository.findActiveByMemoryIdAndMemberId(memoryId, creatorId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
-        if (mpRepository.findOne(memoryId).isPresent()) {
-            throw new BusinessException(ErrorCode.MEMORY_PHOTO_ALREADY_EXISTS);
+        Optional<MemoryPhoto> existing = mpRepository.findOne(memoryId);
+        if (existing.isPresent()) {
+            uploadService.delete(existing.get().getImageUrl());
+            existing.get().delete();
         }
 
         MemoryPhoto newPhoto = MemoryPhoto.create(memory, creator, memoryPhotoRequestDTO.getImageUrl());
@@ -148,6 +174,9 @@ public class MemoryService {
 
         MemoryPhoto memoryPhoto = mpRepository.findOne(memoryId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_PHOTO_NOT_FOUND));
+        uploadService.delete(memoryPhoto.getImageUrl());
         memoryPhoto.delete();
     }
+
+
 }

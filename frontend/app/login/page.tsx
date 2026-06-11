@@ -32,11 +32,12 @@ export default function LoginPage() {
 
   return (
     <div className="login-bg relative h-screen overflow-hidden w-full max-w-md mx-auto shadow-2xl">
-      <div className="absolute bottom-[5vh] left-0 right-0 px-6">
-        <div className="w-full bg-white/30 backdrop-blur-sm rounded-3xl px-6 py-[1vh] flex flex-col gap-[0.8vh]">
+      <div className="absolute bottom-[2vh] left-0 right-0 flex flex-col items-center">
+        <div className="w-11/12 bg-white/30 backdrop-blur-sm rounded-3xl flex flex-col items-center gap-[1.5vh]" style={{ paddingTop: 16, paddingBottom: 16 }}>
           <button
             onClick={handleKakaoLogin}
-            className="w-full bg-[#FEE500] hover:bg-[#FAD600] text-[#191919] font-bold py-[1.4vh] px-6 rounded-2xl shadow-sm border border-[#E6CE00]/30 flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
+            className="bg-[#FEE500] hover:bg-[#FAD600] text-[#191919] font-bold rounded-2xl shadow-sm border border-[#E6CE00]/30 flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
+            style={{ padding: '10px 24px', width: '88%' }}
           >
             <KakaoIcon />
             <span className="text-[clamp(12px,1.7vh,15px)]">카카오로 시작하기</span>
@@ -44,14 +45,15 @@ export default function LoginPage() {
 
           <button
             onClick={handleGoogleLogin}
-            className="w-full bg-white hover:bg-gray-50 text-gray-700 font-bold py-[1.4vh] px-6 rounded-2xl shadow-md border border-gray-200 flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
+            className="bg-white hover:bg-gray-50 text-gray-700 font-bold rounded-2xl shadow-md border border-gray-200 flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
+            style={{ padding: '10px 24px', width: '88%' }}
           >
             <GoogleIcon />
             <span className="text-[clamp(12px,1.7vh,15px)]">Google로 로그인</span>
           </button>
         </div>
 
-        <p className="text-[11px] text-gray-400 font-medium tracking-tight text-center mt-2">
+        <p className="text-[11px] text-gray-400 font-medium tracking-tight text-center" style={{ marginTop: 16 }}>
           가입 시{' '}
           <button className="underline underline-offset-2 hover:text-gray-600 transition-colors">
             서비스 이용 약관

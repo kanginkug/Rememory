@@ -48,8 +48,8 @@ public class ReviewController {
 
     // 후기 수정 + 별점 재계산
     @PutMapping("/{reviewId}")
-    public ResponseEntity<Void> updateReview(@RequestAttribute("memberId") Long memberId, @PathVariable("reviewId") Long reviewId, @RequestBody @Valid CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
-        reviewService.updateReview(memberId, reviewId, cuReviewRequestDTO);
+    public ResponseEntity<Void> updateReview(@RequestAttribute("memberId") Long memberId, @PathVariable("reviewId") Long reviewId, @RequestBody @Valid UpdateReviewRequestDTO updateReviewRequestDTO) {
+        reviewService.updateReview(memberId, reviewId, updateReviewRequestDTO);
         return ResponseEntity.noContent().build();
     }
 
@@ -72,5 +72,11 @@ public class ReviewController {
     public ResponseEntity<Void> deleteReviewPhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("reviewId") Long reviewId, @PathVariable("memoryId") Long memoryId, @RequestBody @Valid DeleteReviewPhotoRequestDTO deleteReviewPhotoRequestDTO) {
         reviewService.deleteReviewPhoto(memoryId, memberId, reviewId, deleteReviewPhotoRequestDTO.getReviewPhotoIdList());
         return ResponseEntity.noContent().build();
+    }
+
+    //내 전체 리뷰 목록
+    @GetMapping("/my")
+    public ResponseEntity<List<ReviewDetailResponseDTO>> findAllMyReview(@RequestAttribute("memberId") Long memberId) {
+        return ResponseEntity.ok(reviewService.findAllMyReview(memberId));
     }
 }
