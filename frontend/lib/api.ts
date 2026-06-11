@@ -161,6 +161,14 @@ export interface PresignedUrlResponse {
 
 export const fetchMe = () => apiFetch<Member>('/members/me');
 
+export interface MemberStats {
+  memoryCount: number;
+  placeCount: number;
+  reviewAvg: number;
+}
+
+export const fetchMyStats = () => apiFetch<MemberStats>('/members/me/stats');
+
 export const updateMe = (name: string) =>
   apiFetch<void>('/members/me', { method: 'PUT', body: JSON.stringify({ name }) });
 

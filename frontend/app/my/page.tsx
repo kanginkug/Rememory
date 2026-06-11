@@ -4,9 +4,9 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  fetchMe, fetchMemoryList, removeToken, deleteMe,
+  fetchMe, fetchMyStats, removeToken, deleteMe,
   updateMe, updateMePhoto, fetchPresignedUrls, uploadToS3,
-  type Member, type Memory,
+  type Member, type MemberStats,
 } from '@/lib/api';
 
 const NAV_ITEMS = [
@@ -27,7 +27,7 @@ export default function MyPage() {
   const photoInputRef = useRef<HTMLInputElement>(null);
 
   const [me, setMe] = useState<Member | null>(null);
-  const [memories, setMemories] = useState<Memory[]>([]);
+  const [stats, setStats] = useState<MemberStats | null>(null);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState('');
   const [savingName, setSavingName] = useState(false);
@@ -40,18 +40,11 @@ export default function MyPage() {
   }, [router]);
 
   useEffect(() => {
-    Promise.allSettled([fetchMe(), fetchMemoryList('DATE_DESC')]).then(([m, mem]) => {
+    Promise.allSettled([fetchMe(), fetchMyStats()]).then(([m, s]) => {
       if (m.status === 'fulfilled') setMe(m.value);
-      if (mem.status === 'fulfilled') setMemories(mem.value);
+      if (s.status === 'fulfilled') setStats(s.value);
     });
   }, []);
-
-  const memoryCount = memories.length;
-  const placeCount = memories.reduce((sum, m) => sum + m.placeCount, 0);
-  const ratedMemories = memories.filter(m => m.avgRating > 0);
-  const avgRating = ratedMemories.length > 0
-    ? ratedMemories.reduce((sum, m) => sum + m.avgRating, 0) / ratedMemories.length
-    : 0;
 
   const handleEditName = () => {
     setNameInput(me?.name ?? '');
@@ -193,7 +186,7 @@ export default function MyPage() {
                 </svg>
               </div>
               <p className="stats-label">추억 수</p>
-              <p className="stats-value text-purple">{memoryCount}</p>
+              <p className="stats-value text-purple">{stats?.memoryCount ?? '-'}</p>
             </div>
             <div className="stats-item">
               <div className="stats-icon-bg bg-blue">
@@ -202,7 +195,7 @@ export default function MyPage() {
                 </svg>
               </div>
               <p className="stats-label">방문 장소 수</p>
-              <p className="stats-value text-blue">{placeCount}</p>
+              <p className="stats-value text-blue">{stats?.placeCount ?? '-'}</p>
             </div>
             <div className="stats-item">
               <div className="stats-icon-bg bg-yellow">
@@ -211,7 +204,7 @@ export default function MyPage() {
                 </svg>
               </div>
               <p className="stats-label">평균 별점</p>
-              <p className="stats-value text-yellow">{avgRating > 0 ? avgRating.toFixed(1) : '-'}</p>
+              <p className="stats-value text-yellow">{stats?.reviewAvg ? stats.reviewAvg.toFixed(1) : '-'}</p>
             </div>
           </div>
 
