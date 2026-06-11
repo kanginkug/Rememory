@@ -224,7 +224,7 @@ export default function MyPage() {
 
           {/* 메뉴 카드 2 */}
           <div className="mp-card">
-            <div className="menu-item" style={{ cursor: 'pointer' }}>
+            <div className="menu-item" style={{ cursor: 'pointer' }} onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLSdh_mtpfhIme_e81XdU7GLIziTtsCDitAg4QxRbOF-g4abXYg/viewform?usp=publish-editor', '_blank')}>
               <div className="menu-icon mi-light">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
