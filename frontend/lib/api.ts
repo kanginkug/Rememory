@@ -192,6 +192,9 @@ export const fetchRecentMemories = () => fetchMemoryList('DATE_DESC');
 export const fetchRecentReviews = () =>
   apiFetch<RecentReview[]>('/review/recent');
 
+export const fetchMyReviews = () =>
+  apiFetch<PlaceReview[]>('/review/my');
+
 export type ReviewSortType = 'DATE_DESC' | 'DATE_ASC' | 'RATING_DESC' | 'RATING_ASC' | 'VISITED_DESC' | 'VISITED_ASC';
 
 export interface ReviewPhoto {
