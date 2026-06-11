@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 
@@ -140,5 +141,15 @@ public class ReviewRepository {
                 )
                 .orderBy(QReview.review.createdAt.desc())
                 .fetch();
+    }
+
+    public BigDecimal getReviewAvg(Long memberId) {
+        Double reviewAvg =  queryFactory.select(QReview.review.rating.avg())
+                .from(QReview.review)
+                .where(
+                        QReview.review.member.id.eq(memberId),
+                        QReview.review.deletedAt.isNull()
+                ).fetchOne();
+        return reviewAvg == null ? BigDecimal.valueOf(0.0) : BigDecimal.valueOf(reviewAvg).setScale(1, RoundingMode.HALF_UP);
     }
 }

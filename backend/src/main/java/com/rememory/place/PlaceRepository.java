@@ -23,7 +23,7 @@ public class PlaceRepository {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
 
-    public void save(Place place){
+    public void save(Place place) {
         em.persist(place);
     }
 
@@ -44,39 +44,39 @@ public class PlaceRepository {
     }
 
     public List<Place> findAllByMemoryId(Long memoryId) {
-            return queryFactory.selectFrom(QPlace.place)
-                    .where(
-                            QPlace.place.deletedAt.isNull(),
-                            QPlace.place.memory.id.eq(memoryId)
-                    )
-                    .orderBy(QPlace.place.createdAt.desc())
-                    .fetch();
+        return queryFactory.selectFrom(QPlace.place)
+                .where(
+                        QPlace.place.deletedAt.isNull(),
+                        QPlace.place.memory.id.eq(memoryId)
+                )
+                .orderBy(QPlace.place.createdAt.desc())
+                .fetch();
     }
 
     //카테고리, 지역 별 조회
     public List<Place> findAllByCategoryAndRegion(Long memoryId, Category category, String regionDepth1, String regionDepth2) {
 
-            return queryFactory.selectFrom(QPlace.place)
-                    .where(
-                            QPlace.place.memory.id.eq(memoryId),
-                            QPlace.place.deletedAt.isNull(),
-                            category != null ? QPlace.place.category.eq(category) : null,
-                            regionDepth1 != null && !regionDepth1.isEmpty() ? QPlace.place.regionDepth1.eq(regionDepth1) : null,
-                            regionDepth2 != null && !regionDepth2.isEmpty() ? QPlace.place.regionDepth2.eq(regionDepth2) : null
-                    )
-                    .orderBy(QPlace.place.createdAt.desc())
-                    .fetch();
+        return queryFactory.selectFrom(QPlace.place)
+                .where(
+                        QPlace.place.memory.id.eq(memoryId),
+                        QPlace.place.deletedAt.isNull(),
+                        category != null ? QPlace.place.category.eq(category) : null,
+                        regionDepth1 != null && !regionDepth1.isEmpty() ? QPlace.place.regionDepth1.eq(regionDepth1) : null,
+                        regionDepth2 != null && !regionDepth2.isEmpty() ? QPlace.place.regionDepth2.eq(regionDepth2) : null
+                )
+                .orderBy(QPlace.place.createdAt.desc())
+                .fetch();
     }
 
     //장소명 검색
     public List<Place> findByName(String name, Long memoryId) {
-            return queryFactory.selectFrom(QPlace.place)
-                  .where(
-                          QPlace.place.deletedAt.isNull(),
-                          QPlace.place.name.containsIgnoreCase(name),
-                          QPlace.place.memory.id.eq(memoryId)
-                  )
-                  .fetch();
+        return queryFactory.selectFrom(QPlace.place)
+                .where(
+                        QPlace.place.deletedAt.isNull(),
+                        QPlace.place.name.containsIgnoreCase(name),
+                        QPlace.place.memory.id.eq(memoryId)
+                )
+                .fetch();
     }
 
     /**
@@ -96,7 +96,9 @@ public class PlaceRepository {
                 .execute();
     }
 
-    /** 공식: newAvg = (avgRating * reviewCount - oldRating + newRating) / reviewCount */
+    /**
+     * 공식: newAvg = (avgRating * reviewCount - oldRating + newRating) / reviewCount
+     */
     public void updateRatingOnUpdate(Long placeId, BigDecimal newRating, BigDecimal oldRating) {
         queryFactory.update(QPlace.place)
                 .set(QPlace.place.avgRating,
@@ -160,5 +162,22 @@ public class PlaceRepository {
                         QMemory.memory.deletedAt.isNull(),
                         QPlace.place.deletedAt.isNull()
                 ).fetch();
+    }
+
+    public int getPlaceCount(Long memberId) {
+        Long placeCount = queryFactory.select(QPlace.place.count())
+                .from(QPlace.place)
+                .join(QMemory.memory)
+                .on(QMemory.memory.id.eq(QPlace.place.memory.id))
+                .join(QMemberMemory.memberMemory)
+                .on(QMemberMemory.memberMemory.memory.id.eq(QPlace.place.memory.id))
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull()
+                ).fetchOne();
+
+        return placeCount == null ? 0 : placeCount.intValue();
     }
 }

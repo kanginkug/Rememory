@@ -25,4 +25,9 @@ public class MemberController {
         memberService.delete(memberId);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/me/stats")
+    public ResponseEntity<MemberStatsResponseDTO> getMyStats(@RequestAttribute("memberId") Long memberId) {
+        return ResponseEntity.ok(memberService.getMyStats(memberId));
+    }
 }
