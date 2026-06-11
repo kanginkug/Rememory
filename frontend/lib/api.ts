@@ -392,8 +392,8 @@ export const fetchMemoryPlaces = (
   return apiFetch<MemoryPlace[]>(`/place/${memoryId}${qs ? `?${qs}` : ''}`);
 };
 
-export const deletePlace = (placeId: number) =>
-  apiFetch<void>(`/place/${placeId}`, { method: 'DELETE' });
+export const deletePlace = (memoryId: number, placeId: number) =>
+  apiFetch<void>(`/place/${memoryId}/${placeId}`, { method: 'DELETE' });
 
 export interface CreatePlaceRequest {
   name: string;

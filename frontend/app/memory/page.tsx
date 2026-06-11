@@ -126,7 +126,7 @@ export default function MemoryListPage() {
 
   const handleDeleteMemory = async (memoryId: number) => {
     setSheetId(null);
-    if (!confirm('추억을 삭제하면 장소, 후기 등 모든 데이터가 사라집니다.\n정말 삭제하시겠어요?')) return;
+    if (!confirm('추억을 삭제하시겠어요?')) return;
     try {
       await deleteMemory(memoryId);
       setMemories(prev => prev.filter(m => m.id !== memoryId));

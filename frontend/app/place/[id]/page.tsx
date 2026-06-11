@@ -188,7 +188,7 @@ export default function MemoryPlacePage() {
   const handleDeletePlace = async (placeId: number) => {
     setPlaceMoreId(null);
     if (!confirm('장소를 삭제하시겠어요?')) return;
-    try { await deletePlace(placeId); setPlaces(prev => prev.filter(p => p.id !== placeId)); }
+    try { await deletePlace(memoryId, placeId); setPlaces(prev => prev.filter(p => p.id !== placeId)); }
     catch (e) { alert((e as Error).message); }
   };
 
