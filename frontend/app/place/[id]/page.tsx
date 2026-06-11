@@ -7,7 +7,6 @@ import ImageLightbox from '@/components/ImageLightbox';
 import {
   fetchMemory,
   fetchMemoryPlaces,
-  fetchMemoryMembers,
   createInvitation,
   leaveMemory,
   deleteMemory,
@@ -90,7 +89,6 @@ export default function MemoryPlacePage() {
   const [memory,  setMemory]  = useState<MemoryDetail | null>(null);
   const [places,  setPlaces]  = useState<MemoryPlace[]>([]);
   const [members,        setMembers]        = useState<Member[]>([]);
-  const [membersLoading, setMembersLoading] = useState(false);
 
   const [descExpanded,  setDescExpanded]  = useState(false);
   const [descOverflows, setDescOverflows] = useState(false);
@@ -154,15 +152,8 @@ export default function MemoryPlacePage() {
     return map;
   }, [places]);
 
-  const handleOpenMemberSheet = async () => {
+  const handleOpenMemberSheet = () => {
     setMemberSheet(true);
-    if (members.length > 0) return;
-    setMembersLoading(true);
-    try {
-      const data = await fetchMemoryMembers(memoryId);
-      setMembers(data);
-    } catch { /* ignore */ }
-    finally { setMembersLoading(false); }
   };
 
   const handleInvite = async () => {
@@ -543,9 +534,7 @@ export default function MemoryPlacePage() {
             <div className="sheet-handle" />
             <div className="sheet-title">멤버 {members.length}명</div>
             <div className="sheet-body">
-              {membersLoading ? (
-                <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8', fontSize: 14 }}>불러오는 중...</div>
-              ) : members.map(m => (
+              {members.map(m => (
                 <div key={m.memberId} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px' }}>
                   {m.profileImageUrl
                     ? <img src={m.profileImageUrl} alt={m.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} onError={e => { (e.currentTarget as HTMLImageElement).replaceWith(document.createElement('div')); }} />
