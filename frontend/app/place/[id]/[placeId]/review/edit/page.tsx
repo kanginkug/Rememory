@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
   fetchPlace,
   fetchMyReview,
@@ -78,9 +78,11 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
 
 export default function EditReviewPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { id, placeId } = useParams<{ id: string; placeId: string }>();
   const memoryId   = Number(id);
   const placeIdNum = Number(placeId);
+  const backTo = searchParams.get('from') === 'my-reviews' ? '/my/reviews' : `/place/${memoryId}/${placeIdNum}`;
 
   const [place,           setPlace]           = useState<PlaceDetail | null>(null);
   const [myReview,        setMyReview]        = useState<PlaceReview | null>(null);
@@ -177,7 +179,7 @@ export default function EditReviewPage() {
 
       if (photoTasks.length > 0) await Promise.all(photoTasks);
 
-      router.replace(`/place/${memoryId}/${placeIdNum}`);
+      router.replace(backTo);
     } catch (e) {
       alert((e as Error).message);
     } finally {
@@ -199,7 +201,7 @@ export default function EditReviewPage() {
     <div className="app-container">
 
       <header className="app-header">
-        <button className="back-btn" onClick={() => router.push(`/place/${memoryId}/${placeIdNum}`)}>
+        <button className="back-btn" onClick={() => router.push(backTo)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
