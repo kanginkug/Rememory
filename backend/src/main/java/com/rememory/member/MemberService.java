@@ -52,4 +52,16 @@ public class MemberService {
         BigDecimal reviewAvg = reviewRepository.getReviewAvg(memberId);
         return MemberStatsResponseDTO.from(memoryCount, placeCount, reviewAvg);
     }
+
+    @Transactional
+    public void updateMyInfo(Long memberId, UpdateMemberRequestDTO dto) {
+        Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        member.updateInfo(dto.getName());
+    }
+
+    @Transactional
+    public void updateMyProfileImg(Long memberId, UpdateMemberPhotoRequestDTO dto) {
+        Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        member.updateProfileImg(dto.getImageUrl());
+    }
 }
