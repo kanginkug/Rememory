@@ -167,44 +167,6 @@ public class PlaceService {
         }
     }
 
-    @Transactional
-    public void updatePlacePhoto(Long memoryId, Long memberId, Long placeId, UpdatePlacePhotoRequestDTO updatePlacePhotoRequestDTO) {
-        Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-
-        if(memoryRepository.findOne(memoryId).isEmpty()) {
-            throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
-        }
-
-        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
-            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
-        }
-
-        Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
-
-        List<Long> ppIdList = updatePlacePhotoRequestDTO.getPlacePhotoIdList();
-        List<String> photoUrlList = updatePlacePhotoRequestDTO.getPhotoUrlList();
-
-        if(ppIdList.size() != photoUrlList.size()) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST);
-        }
-
-        Map<Long, PlacePhoto> photoMap = ppRepository.findAllByPlaceId(placeId).stream()
-                .collect(Collectors.toMap(PlacePhoto::getId, p -> p));
-
-        for(int i = 0; i < ppIdList.size(); i++) {
-            PlacePhoto placePhoto = photoMap.get(ppIdList.get(i));
-            if(placePhoto == null) {
-                throw new BusinessException(ErrorCode.PLACE_PHOTO_NOT_FOUND);
-            }
-            if(!placePhoto.getCreator().getId().equals(memberId)) {
-                throw new BusinessException(ErrorCode.PLACE_PHOTO_ACCESS_DENIED);
-            }
-            uploadService.delete(placePhoto.getImageUrl());
-            placePhoto.delete();
-            ppRepository.save(PlacePhoto.create(place, member, photoUrlList.get(i)));
-        }
-    }
-
     // 장소 사진 삭제 (작성자 본인만 가능)
     @Transactional
     public void deletePlacePhoto(Long memoryId, Long memberId, Long placeId, DeletePlacePhotoRequestDTO deletePlacePhotoRequestDTO){

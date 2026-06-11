@@ -83,13 +83,6 @@ public class PlaceController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // 장소 사진 수정(사용 안하는 API인지 확인 필요)
-    @PutMapping(value = "/{memoryId}/{placeId}/photo")
-    public ResponseEntity<Void> updatePlacePhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @PathVariable("placeId") Long placeId, @RequestBody @Valid UpdatePlacePhotoRequestDTO updatePlacePhotoRequestDTO) {
-        placeService.updatePlacePhoto(memoryId, memberId, placeId, updatePlacePhotoRequestDTO);
-        return ResponseEntity.noContent().build();
-    }
-
     // 장소 사진 삭제 (본인만 가능)
     @DeleteMapping("/{memoryId}/{placeId}/photo")
     public ResponseEntity<Void> deletePlacePhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @PathVariable("placeId") Long placeId,
