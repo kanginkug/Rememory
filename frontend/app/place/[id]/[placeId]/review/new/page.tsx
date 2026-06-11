@@ -146,7 +146,7 @@ export default function CreateReviewPage() {
     <div className="app-container">
 
       <header className="app-header">
-        <button className="back-btn" onClick={() => router.back()}>
+        <button className="back-btn" onClick={() => router.push(`/place/${memoryId}/${placeIdNum}`)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
