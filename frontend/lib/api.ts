@@ -161,6 +161,12 @@ export interface PresignedUrlResponse {
 
 export const fetchMe = () => apiFetch<Member>('/members/me');
 
+export const updateMe = (name: string) =>
+  apiFetch<void>('/members/me', { method: 'PUT', body: JSON.stringify({ name }) });
+
+export const updateMePhoto = (imageUrl: string) =>
+  apiFetch<void>('/members/me/photo', { method: 'PUT', body: JSON.stringify({ imageUrl }) });
+
 export const deleteMe = () => apiFetch<void>('/members/me', { method: 'DELETE' });
 
 export const fetchBestPlaces = () =>
