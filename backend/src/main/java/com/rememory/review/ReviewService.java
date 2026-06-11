@@ -237,4 +237,25 @@ public class ReviewService {
         }
 
     }
+
+    public List<ReviewDetailResponseDTO> findAllMyReview(Long memberId) {
+        List<Review> reviewList = reviewRepository.findAllMyReview(memberId);
+        List<Long> reviewIdList = reviewList.stream().map(Review::getId).toList();
+        List<ReviewPhoto> reviewPhotoList = rpRepository.findAllByReviewIdList(reviewIdList);
+
+        Map<Long, List<ReviewPhotoResponseDTO>> photoMap = reviewPhotoList.stream()
+                .collect(groupingBy(
+                        p -> p.getReview().getId(),
+                        mapping(ReviewPhotoResponseDTO::from, toList())
+                ));
+
+        List<ReviewDetailResponseDTO> rdResponseDTOList = new ArrayList<>();
+        for(Review review : reviewList) {
+            List<ReviewPhotoResponseDTO> rpResponseDTOList = photoMap.getOrDefault(review.getId(), List.of());
+
+            rdResponseDTOList.add(ReviewDetailResponseDTO.from(review, review.getPlace().getMemory().getId(), review.getPlace().getId(), rpResponseDTOList));
+        }
+
+        return rdResponseDTOList;
+    }
 }

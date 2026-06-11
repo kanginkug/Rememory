@@ -73,4 +73,10 @@ public class ReviewController {
         reviewService.deleteReviewPhoto(memoryId, memberId, reviewId, deleteReviewPhotoRequestDTO.getReviewPhotoIdList());
         return ResponseEntity.noContent().build();
     }
+
+    //내 전체 리뷰 목록
+    @GetMapping("/my")
+    public ResponseEntity<List<ReviewDetailResponseDTO>> findAllMyReview(@RequestAttribute("memberId") Long memberId) {
+        return ResponseEntity.ok(reviewService.findAllMyReview(memberId));
+    }
 }

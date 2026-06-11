@@ -123,4 +123,22 @@ public class ReviewRepository {
                 .limit(10)
                 .fetch();
     }
+
+    public List<Review> findAllMyReview(Long memberId) {
+        return queryFactory.selectFrom(QReview.review)
+                .join(QReview.review.member, QMember.member).fetchJoin()
+                .join(QReview.review.place, QPlace.place).fetchJoin()
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
+                .join(QMemberMemory.memberMemory).on(QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id))
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QReview.review.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull(),
+                        QReview.review.deletedAt.isNull()
+                )
+                .orderBy(QReview.review.createdAt.desc())
+                .fetch();
+    }
 }
