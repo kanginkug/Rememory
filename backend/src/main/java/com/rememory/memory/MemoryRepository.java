@@ -85,4 +85,19 @@ public class MemoryRepository {
                 .execute();
     }
 
+    public int getMemoryCount(Long memberId) {
+        Long memoryCount = queryFactory.select(QMemory.memory.count())
+                .from(QMemory.memory)
+                .join(QMemberMemory.memberMemory)
+                .on(
+                        QMemory.memory.id.eq(QMemberMemory.memberMemory.memory.id)
+                )
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull()
+                ).fetchOne();
+        return memoryCount == null ? 0 : memoryCount.intValue();
+    }
+
 }
