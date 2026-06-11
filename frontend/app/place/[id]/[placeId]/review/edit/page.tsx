@@ -204,7 +204,7 @@ export default function EditReviewPage() {
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
-        <h1 className="page-title">리뷰 수정</h1>
+        <h1 className="page-title">후기 수정</h1>
         <div className="header-empty" />
       </header>
 
@@ -270,7 +270,7 @@ export default function EditReviewPage() {
 
           {/* 리뷰 내용 */}
           <div className="input-field">
-            <label className="field-label">리뷰 내용</label>
+            <label className="field-label">후기 내용</label>
             <div className="review-textarea-wrap">
               <textarea
                 className="review-textarea"

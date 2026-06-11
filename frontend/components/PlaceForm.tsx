@@ -4,11 +4,31 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { searchPlaces, type Category, type PlacePhoto, type PlaceSearchResult } from '@/lib/api';
 
-const CATEGORY_CHIPS: { value: Category; label: string }[] = [
-  { value: 'RESTAURANT',    label: '🍽️ 식당' },
-  { value: 'CAFE',          label: '🧋 카페' },
-  { value: 'ACCOMMODATION', label: '🛏️ 숙소' },
-  { value: 'ATTRACTION',    label: '🎡 관광지' },
+const CATEGORY_CHIPS: { value: Category; label: string; icon: React.ReactNode }[] = [
+  { value: 'RESTAURANT', label: '맛집', icon: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/>
+      <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7"/>
+    </svg>
+  )},
+  { value: 'CAFE', label: '카페', icon: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+      <line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/>
+    </svg>
+  )},
+  { value: 'ACCOMMODATION', label: '숙소', icon: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/>
+    </svg>
+  )},
+  { value: 'ATTRACTION', label: '관광지', icon: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/>
+      <line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/>
+      <line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>
+    </svg>
+  )},
 ];
 
 export type KakaoPlace = PlaceSearchResult;
@@ -127,9 +147,9 @@ export default function PlaceForm({
 
   const handleAddPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    const toAdd = Array.from(e.target.files).slice(0, 4 - totalPhotoCount);
-    setNewPhotos(prev => [...prev, ...toAdd]);
-    setNewPhotoUrls(prev => [...prev, ...toAdd.map(f => URL.createObjectURL(f))]);
+    const toAdd = Array.from(e.target.files);
+    setNewPhotos(prev => [...toAdd, ...prev]);
+    setNewPhotoUrls(prev => [...toAdd.map(f => URL.createObjectURL(f)), ...prev]);
     e.target.value = '';
   };
 
@@ -212,10 +232,10 @@ export default function PlaceForm({
                 <button
                   key={chip.value}
                   type="button"
-                  className={`cat-chip${category === chip.value ? ' active' : ''}`}
+                  className={`cat-chip cat-chip-${chip.value.toLowerCase()}${category === chip.value ? ' active' : ''}`}
                   onClick={() => setCategory(chip.value)}
                 >
-                  {chip.label}
+                  {chip.icon} {chip.label}
                 </button>
               ))}
             </div>
@@ -321,24 +341,22 @@ export default function PlaceForm({
               onChange={handleAddPhoto}
             />
             <div className="photo-grid">
-              {totalPhotoCount < 4 && (
-                <div className="photo-slot photo-add" onClick={() => fileRef.current?.click()}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
-                    <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                  <span>사진 추가</span>
-                </div>
-              )}
-              {existingPhotos.map(photo => (
-                <div key={photo.placePhotoId} className="photo-slot">
-                  <img src={photo.imageUrl} alt="장소 사진" />
-                  <button type="button" className="photo-remove-btn" onClick={() => handleRemoveExisting(photo.placePhotoId)}>✕</button>
-                </div>
-              ))}
+              <div className="photo-slot photo-add" onClick={() => fileRef.current?.click()}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>사진 추가</span>
+              </div>
               {newPhotoUrls.map((url, i) => (
                 <div key={`new-${i}`} className="photo-slot">
                   <img src={url} alt={`새 사진 ${i + 1}`} />
                   <button type="button" className="photo-remove-btn" onClick={() => handleRemoveNew(i)}>✕</button>
+                </div>
+              ))}
+              {existingPhotos.map(photo => (
+                <div key={photo.placePhotoId} className="photo-slot">
+                  <img src={photo.imageUrl} alt="장소 사진" />
+                  <button type="button" className="photo-remove-btn" onClick={() => handleRemoveExisting(photo.placePhotoId)}>✕</button>
                 </div>
               ))}
             </div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import ImageLightbox from '@/components/ImageLightbox';
 import {
   fetchPlace,
   fetchPlaceReviewsSorted,
@@ -75,6 +76,7 @@ export default function PlaceDetailPage() {
   const descRef = useRef<HTMLParagraphElement>(null);
 
   const [placeMenuSheet, setPlaceMenuSheet] = useState(false);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) { router.replace('/login'); return; }
@@ -209,12 +211,14 @@ export default function PlaceDetailPage() {
 
           {photos.length > 0 && (
             <div className="image-scroll-view">
-              {photos.map(photo => (
+              {photos.map((photo, i) => (
                 <img
                   key={photo.placePhotoId}
                   className="scroll-img"
                   src={photo.imageUrl}
                   alt="장소 사진"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setLightbox({ images: photos.map(p => p.imageUrl), index: i })}
                   onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/no-place.png'; }}
                 />
               ))}
@@ -304,8 +308,11 @@ export default function PlaceDetailPage() {
                 <div className="review-card">
                   {myReview.rpResponseDTOList?.length > 0 && (
                     <div className="card-img-row">
-                      {myReview.rpResponseDTOList.slice(0, 3).map(p => (
-                        <img key={p.reviewPhotoId} className="card-img" src={p.photoUrl} alt="후기 사진" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                      {myReview.rpResponseDTOList.slice(0, 3).map((p, i) => (
+                        <img key={p.reviewPhotoId} className="card-img" src={p.photoUrl} alt="후기 사진"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setLightbox({ images: myReview.rpResponseDTOList.map(x => x.photoUrl), index: i })}
+                          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                       ))}
                     </div>
                   )}
@@ -332,8 +339,11 @@ export default function PlaceDetailPage() {
                 <div key={r.reviewId} className="other-review-card">
                   {r.rpResponseDTOList?.length > 0 && (
                     <div className="card-img-row">
-                      {r.rpResponseDTOList.slice(0, 3).map(p => (
-                        <img key={p.reviewPhotoId} className="card-img" src={p.photoUrl} alt="후기 사진" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                      {r.rpResponseDTOList.slice(0, 3).map((p, i) => (
+                        <img key={p.reviewPhotoId} className="card-img" src={p.photoUrl} alt="후기 사진"
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => setLightbox({ images: r.rpResponseDTOList.map(x => x.photoUrl), index: i })}
+                          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                       ))}
                     </div>
                   )}
@@ -373,6 +383,10 @@ export default function PlaceDetailPage() {
           </Link>
         ))}
       </nav>
+
+      {lightbox && (
+        <ImageLightbox images={lightbox.images} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
+      )}
 
       {/* 장소 메뉴 시트 */}
       {placeMenuSheet && (

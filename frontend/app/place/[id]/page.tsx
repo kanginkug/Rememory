@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import ImageLightbox from '@/components/ImageLightbox';
 import {
   fetchMemory,
   fetchMemoryPlaces,
@@ -203,6 +204,12 @@ export default function MemoryPlacePage() {
   const avgRating = memory?.avgRating ?? 0;
   const starPct   = (avgRating / 5) * 100;
 
+  const totalPhotoCount = useMemo(
+    () => places.reduce((sum, p) => sum + p.placePhotoList.length, 0),
+    [places]
+  );
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+
   return (
     <div style={{ background: '#BFDBF3', minHeight: '100dvh' }}>
       <header className="app-header">
@@ -286,6 +293,18 @@ export default function MemoryPlacePage() {
             </div>
           )}
 
+          {/* 추억 대표 사진 */}
+          {memory?.imageUrl && (
+            <div className="memory-hero" onClick={() => setLightbox({ images: [memory.imageUrl!], index: 0 })}>
+              <img
+                className="memory-hero-img"
+                src={memory.imageUrl}
+                alt="추억 대표 사진"
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
+          )}
+
           {/* 요약 카드 */}
           <div className="summary-card">
             <div className="summary-item">
@@ -298,7 +317,7 @@ export default function MemoryPlacePage() {
               <div className="summary-value">{avgRating > 0 ? avgRating.toFixed(1) : '-'}</div>
               {avgRating > 0 && (
                 <div className="stars">
-                  <svg width="66" height="13" viewBox="0 0 66 13">
+                  <svg width="72" height="13" viewBox="0 0 72 13">
                     <defs><clipPath id="starFill"><rect x="0" y="0" width={`${starPct}%`} height="13" /></clipPath></defs>
                     <text x="0" y="11" fontSize="13" letterSpacing="1" fill="#e2e8f0">★★★★★</text>
                     <text x="0" y="11" fontSize="13" letterSpacing="1" fill="#ffb800" clipPath="url(#starFill)">★★★★★</text>
@@ -387,7 +406,7 @@ export default function MemoryPlacePage() {
               <Link key={place.id} href={`/place/${memoryId}/${place.id}`} className="place-card">
                 <img
                   className="place-img"
-                  src={place.placePhotoList[0]?.imageUrl ?? CATEGORY_FALLBACK[place.category]}
+                  src={place.placePhotoList.at(-1)?.imageUrl ?? CATEGORY_FALLBACK[place.category]}
                   alt={place.name}
                   onError={e => { (e.currentTarget as HTMLImageElement).src = CATEGORY_FALLBACK[place.category]; }}
                 />
@@ -442,6 +461,10 @@ export default function MemoryPlacePage() {
           ))}
         </nav>
       </div>
+
+      {lightbox && (
+        <ImageLightbox images={lightbox.images} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
+      )}
 
       {/* ── 바텀시트 ── */}
 
