@@ -140,7 +140,7 @@ export default function HomePage() {
                   <div key={place.id} className="place-card" onClick={() => router.push(`/place/${place.memoryId}/${place.id}`)} style={{ cursor: 'pointer' }}>
                     <img
                       className="card-image"
-                      src={place.placePhotoList?.[0]?.imageUrl ?? REVIEW_FALLBACK[place.category]}
+                      src={place.placePhotoList?.at(-1)?.imageUrl ?? REVIEW_FALLBACK[place.category]}
                       alt={place.name}
                       onError={e => { (e.currentTarget as HTMLImageElement).src = REVIEW_FALLBACK[place.category]; }}
                     />
@@ -165,7 +165,7 @@ export default function HomePage() {
                           {place.avgRating.toFixed(1)}
                         </span>
                         {place.reviewCount > 0 && (
-                          <span className="review-count">리뷰 {place.reviewCount}개</span>
+                          <span className="review-count">후기 {place.reviewCount}개</span>
                         )}
                       </div>
                     </div>
@@ -217,18 +217,18 @@ export default function HomePage() {
             </section>
           )}
 
-          {/* 내 추억 최근 리뷰 */}
+          {/* 내 추억 최근 후기 */}
           {reviews.length > 0 && (
             <section className="scroll-section">
               <div className="section-header">
-                <h2>내 추억 최근 리뷰</h2>
+                <h2>내 추억 최근 후기</h2>
               </div>
               <div className="horizontal-scroll review-cards">
                 {reviews.map(rev => (
                   <div key={rev.reviewId} className="review-card" onClick={() => router.push(`/place/${rev.memoryId}/${rev.placeId}`)} style={{ cursor: 'pointer' }}>
                     <img
                       className="review-img"
-                      src={rev.rpResponseDTOList?.[0]?.photoUrl ?? REVIEW_FALLBACK[rev.placeCategory] ?? '/images/no-place.png'}
+                      src={rev.rpResponseDTOList?.at(-1)?.photoUrl ?? REVIEW_FALLBACK[rev.placeCategory] ?? '/images/no-place.png'}
                       alt={rev.placeName}
                       onError={e => { (e.currentTarget as HTMLImageElement).src = REVIEW_FALLBACK[rev.placeCategory] ?? '/images/no-place.png'; }}
                     />
