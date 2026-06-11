@@ -158,20 +158,6 @@ export default function MemoryListPage() {
           className="object-contain"
           style={{ height: 50, mixBlendMode: 'multiply' }}
         />
-        <button
-          className="absolute flex items-center justify-center"
-          style={{ right: 20, top: '58%', transform: 'translateY(-50%)' }}
-        >
-          <img
-            src="/images/bell_icon_transparent.png"
-            alt="알림"
-            style={{
-              height: 22,
-              width: 'auto',
-              filter: 'brightness(0) saturate(100%) invert(20%) sepia(40%) saturate(500%) hue-rotate(330deg) brightness(55%)',
-            }}
-          />
-        </button>
       </header>
 
       {/* Content */}
