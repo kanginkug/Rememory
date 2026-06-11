@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchMe, fetchMemoryList, removeToken, type Member, type Memory } from '@/lib/api';
+import { fetchMe, fetchMemoryList, removeToken, deleteMe, type Member, type Memory } from '@/lib/api';
 
 const NAV_ITEMS = [
   { label: '홈',        href: '/home',   d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
@@ -46,6 +46,17 @@ export default function MyPage() {
   const handleLogout = () => {
     removeToken();
     router.replace('/login');
+  };
+
+  const handleWithdraw = async () => {
+    if (!confirm('정말 탈퇴하시겠습니까?\n탈퇴 후에도 동일 계정으로 재로그인 시 복구할 수 있습니다.')) return;
+    try {
+      await deleteMe();
+      removeToken();
+      router.replace('/login');
+    } catch (e) {
+      alert((e as Error).message);
+    }
   };
 
   return (
@@ -175,7 +186,7 @@ export default function MyPage() {
               <span className="menu-title">로그아웃</span>
               <span className="chevron-right">{CHEVRON}</span>
             </div>
-            <div className="menu-item menu-danger" style={{ cursor: 'pointer' }}>
+            <div className="menu-item menu-danger" style={{ cursor: 'pointer' }} onClick={handleWithdraw}>
               <div className="menu-icon mi-red">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="3 6 5 6 21 6" />
