@@ -137,9 +137,9 @@ export default function PlaceDetailPage() {
   };
 
   const handlePlaceDelete = async () => {
-    if (!confirm('장소를 삭제하시겠어요?\n장소에 등록된 모든 후기도 함께 삭제됩니다.')) return;
+    if (!confirm('장소를 삭제하시겠어요?')) return;
     try {
-      await deletePlace(placeIdNum);
+      await deletePlace(memoryId, placeIdNum);
       router.replace(`/memory/${memoryId}`);
     } catch (e) {
       alert((e as Error).message);
