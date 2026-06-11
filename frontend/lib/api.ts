@@ -161,6 +161,8 @@ export interface PresignedUrlResponse {
 
 export const fetchMe = () => apiFetch<Member>('/members/me');
 
+export const deleteMe = () => apiFetch<void>('/members/me', { method: 'DELETE' });
+
 export const fetchBestPlaces = () =>
   apiFetch<BestPlace[]>('/place/best');
 
