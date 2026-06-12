@@ -118,7 +118,17 @@ export default function HomePage() {
 
       {/* 고정 배너 */}
       <div ref={bannerRef} className="banner-section" id="bannerSection">
-        <img src="/images/mainBanner.png" alt="메인 배너" className="main-banner" fetchPriority="high" />
+        <img src="/images/mainBanner.webp" alt="메인 배너" className="main-banner" fetchPriority="high"
+          onLoad={() => {
+            const header = headerRef.current;
+            const banner = bannerRef.current;
+            const spacer = spacerRef.current;
+            if (!header || !banner || !spacer) return;
+            const hh = header.offsetHeight;
+            banner.style.top = (hh - 1) + 'px';
+            spacer.style.height = (hh + banner.offsetHeight - 36) + 'px';
+          }}
+        />
       </div>
 
       <div className="app-container">
