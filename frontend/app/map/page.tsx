@@ -85,11 +85,8 @@ export default function MapPage() {
     const { maps } = window.kakao;
     const validPlaces = places.filter(p => p.latitude && p.longitude);
 
-    const center = validPlaces.length > 0
-      ? new maps.LatLng(validPlaces[0].latitude, validPlaces[0].longitude)
-      : new maps.LatLng(37.5665, 126.9780);
-
-    const map = new maps.Map(mapRef.current, { center, level: 7 });
+    const center = new maps.LatLng(36.5, 127.8);
+    const map = new maps.Map(mapRef.current, { center, level: 13 });
 
     validPlaces.forEach(place => {
       const color = PIN_COLOR[place.category];
