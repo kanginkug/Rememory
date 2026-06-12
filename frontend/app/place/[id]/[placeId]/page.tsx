@@ -156,7 +156,7 @@ export default function PlaceDetailPage() {
     Promise.allSettled([
       fetchPlace(memoryId, placeIdNum),
       fetchPlaceReviewsSorted(memoryId, placeIdNum, 'DATE_DESC'),
-      fetchMyReview(memoryId, placeIdNum),
+      fetchMyReview(memoryId, placeIdNum).catch(() => null),
     ]).then(([p, r, m]) => {
       if (p.status === 'fulfilled') setPlace(p.value);
       if (r.status === 'fulfilled') setReviews(r.value ?? []);
@@ -182,7 +182,7 @@ export default function PlaceDetailPage() {
   const loadReviews = async (sort: ReviewSortType) => {
     const [r, m] = await Promise.allSettled([
       fetchPlaceReviewsSorted(memoryId, placeIdNum, sort),
-      fetchMyReview(memoryId, placeIdNum),
+      fetchMyReview(memoryId, placeIdNum).catch(() => null),
     ]);
     if (r.status === 'fulfilled') setReviews(r.value ?? []);
     if (m.status === 'fulfilled') setMyReview(m.value ?? null);

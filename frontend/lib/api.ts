@@ -50,8 +50,16 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     let message = `오류가 발생했습니다. (${res.status})`;
     try {
       const body = await res.json();
-      if (typeof body?.message === 'string') message = body.message;
-    } catch {}
+      if (typeof body?.message === 'string') {
+        message = body.message;
+        if (res.status === 400 && body.message.includes('memberId')) {
+          logout();
+          throw new Error('Unauthorized');
+        }
+      }
+    } catch (e) {
+      if ((e as Error).message === 'Unauthorized') throw e;
+    }
     throw new Error(message);
   }
   const ct = res.headers.get('content-type');
