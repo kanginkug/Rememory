@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   fetchBestPlaces,
@@ -50,6 +50,7 @@ export default function HomePage() {
       router.replace('/login');
       return;
     }
+    window.history.scrollRestoration = 'manual';
     setMounted(true);
     window.scrollTo(0, 0);
 
@@ -64,21 +65,28 @@ export default function HomePage() {
     });
   }, [router]);
 
+  const syncLayout = useCallback(() => {
+    const header = headerRef.current;
+    const banner = bannerRef.current;
+    const spacer = spacerRef.current;
+    if (!header || !banner || !spacer) return;
+    const hh = header.offsetHeight;
+    banner.style.top = (hh - 1) + 'px';
+    spacer.style.height = (hh + banner.offsetHeight - 36) + 'px';
+  }, []);
+
   useEffect(() => {
     if (!mounted) return;
-    function syncLayout() {
-      const header = headerRef.current;
-      const banner = bannerRef.current;
-      const spacer = spacerRef.current;
-      if (!header || !banner || !spacer) return;
-      const hh = header.offsetHeight;
-      banner.style.top = (hh - 1) + 'px';
-      spacer.style.height = (hh + banner.offsetHeight - 36) + 'px';
-    }
     syncLayout();
     window.addEventListener('resize', syncLayout);
-    return () => window.removeEventListener('resize', syncLayout);
-  }, [mounted]);
+    const ro = new ResizeObserver(syncLayout);
+    const banner = bannerRef.current;
+    if (banner) ro.observe(banner);
+    return () => {
+      window.removeEventListener('resize', syncLayout);
+      ro.disconnect();
+    };
+  }, [mounted, syncLayout]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -93,6 +101,7 @@ export default function HomePage() {
       banner.style.opacity = String(1 - t);
       header.style.background = `rgb(${lerp(from.r, to.r, t)},${lerp(from.g, to.g, t)},${lerp(from.b, to.b, t)})`;
     }
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [mounted]);

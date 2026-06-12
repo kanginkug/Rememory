@@ -258,8 +258,17 @@ export const fetchPlaceReviews = (memoryId: number, placeId: number) =>
 export const fetchPlaceReviewsSorted = (memoryId: number, placeId: number, sortType: ReviewSortType) =>
   apiFetch<PlaceReview[]>(`/review/memory/${memoryId}/place/${placeId}/sort?sortTypeReview=${sortType}`);
 
-export const fetchMyReview = (memoryId: number, placeId: number) =>
-  apiFetch<PlaceReview>(`/review/memory/${memoryId}/place/${placeId}`);
+export const fetchMyReview = async (memoryId: number, placeId: number): Promise<PlaceReview | null> => {
+  const token = getToken();
+  const res = await fetch(`${BASE_URL}/api/review/memory/${memoryId}/place/${placeId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (!res.ok) return null;
+  return res.json();
+};
 
 export const createReview = (body: CreateReviewRequest) =>
   apiFetch<void>('/review', {
