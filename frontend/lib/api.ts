@@ -13,8 +13,27 @@ export function removeToken() {
   localStorage.removeItem('accessToken');
 }
 
+function isTokenInvalid(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return typeof payload.exp === 'number' && payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
+function logout() {
+  removeToken();
+  if (typeof window !== 'undefined') window.location.href = '/login';
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
+
+  if (token && isTokenInvalid(token)) {
+    logout();
+    throw new Error('Unauthorized');
+  }
   const res = await fetch(`${BASE_URL}/api${path}`, {
     ...init,
     headers: {
@@ -24,8 +43,7 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
   if (res.status === 401) {
-    removeToken();
-    if (typeof window !== 'undefined') window.location.href = '/login';
+    logout();
     throw new Error('Unauthorized');
   }
   if (!res.ok) {
