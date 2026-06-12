@@ -13,8 +13,27 @@ export function removeToken() {
   localStorage.removeItem('accessToken');
 }
 
+function isTokenInvalid(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return typeof payload.exp === 'number' && payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
+function logout() {
+  removeToken();
+  if (typeof window !== 'undefined') window.location.href = '/login';
+}
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getToken();
+
+  if (token && isTokenInvalid(token)) {
+    logout();
+    throw new Error('Unauthorized');
+  }
   const res = await fetch(`${BASE_URL}/api${path}`, {
     ...init,
     headers: {
@@ -24,16 +43,23 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
   if (res.status === 401) {
-    removeToken();
-    if (typeof window !== 'undefined') window.location.href = '/login';
+    logout();
     throw new Error('Unauthorized');
   }
   if (!res.ok) {
     let message = `오류가 발생했습니다. (${res.status})`;
     try {
       const body = await res.json();
-      if (typeof body?.message === 'string') message = body.message;
-    } catch {}
+      if (typeof body?.message === 'string') {
+        message = body.message;
+        if (res.status === 400 && body.message.includes('memberId')) {
+          logout();
+          throw new Error('Unauthorized');
+        }
+      }
+    } catch (e) {
+      if ((e as Error).message === 'Unauthorized') throw e;
+    }
     throw new Error(message);
   }
   const ct = res.headers.get('content-type');
