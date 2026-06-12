@@ -16,12 +16,79 @@ import {
   type ReviewSortType,
 } from '@/lib/api';
 
-const SORT_OPTIONS: { label: string; value: ReviewSortType }[] = [
-  { label: '최신순',    value: 'DATE_DESC'   },
-  { label: '오래된순',  value: 'DATE_ASC'    },
-  { label: '별점높은순', value: 'RATING_DESC' },
-  { label: '별점낮은순', value: 'RATING_ASC'  },
-];
+type SortCategory = 'DATE' | 'VISITED' | 'RATING';
+type SortOrder = 'DESC' | 'ASC';
+
+function toReviewSortType(category: SortCategory, order: SortOrder): ReviewSortType {
+  return `${category}_${order}` as ReviewSortType;
+}
+
+function SortDropdown({ value, options, onChange }: {
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find(o => o.value === value);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 4,
+          padding: '7px 12px 7px 14px',
+          borderRadius: 20,
+          border: '1.5px solid #e2e8f0',
+          fontSize: 12, fontWeight: 700,
+          color: '#475569', background: '#fff',
+          cursor: 'pointer', outline: 'none',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {selected?.label}
+        <span style={{ fontSize: 10, transition: 'transform 0.2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>▾</span>
+      </button>
+      {open && (
+        <ul style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0,
+          background: '#fff', borderRadius: 14,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
+          border: '1.5px solid #e2e8f0',
+          padding: '6px 0', margin: 0, listStyle: 'none',
+          zIndex: 100, minWidth: '100%', overflow: 'hidden',
+        }}>
+          {options.map(opt => (
+            <li
+              key={opt.value}
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              style={{
+                padding: '9px 18px',
+                fontSize: 12, fontWeight: opt.value === value ? 700 : 500,
+                color: opt.value === value ? '#475569' : '#94a3b8',
+                background: opt.value === value ? '#f1f5f9' : 'transparent',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {opt.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 const NAV_ITEMS = [
   { label: '홈',        href: '/home',   d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
@@ -69,7 +136,8 @@ export default function PlaceDetailPage() {
   const [reviews,  setReviews]  = useState<PlaceReview[]>([]);
   const [myReview, setMyReview] = useState<PlaceReview | null>(null);
   const [loading,  setLoading]  = useState(true);
-  const [sortType, setSortType] = useState<ReviewSortType>('DATE_DESC');
+  const [sortCategory, setSortCategory] = useState<SortCategory>('DATE');
+  const [sortOrder,    setSortOrder]    = useState<SortOrder>('DESC');
 
   const [descExpanded,  setDescExpanded]  = useState(false);
   const [descOverflows, setDescOverflows] = useState(false);
@@ -111,7 +179,7 @@ export default function PlaceDetailPage() {
     return () => { document.body.style.overflow = ''; };
   }, [anySheet]);
 
-  const loadReviews = async (sort: string) => {
+  const loadReviews = async (sort: ReviewSortType) => {
     const [r, m] = await Promise.allSettled([
       fetchPlaceReviewsSorted(memoryId, placeIdNum, sort),
       fetchMyReview(memoryId, placeIdNum),
@@ -120,9 +188,14 @@ export default function PlaceDetailPage() {
     if (m.status === 'fulfilled') setMyReview(m.value ?? null);
   };
 
-  const handleSortChange = (sort: ReviewSortType) => {
-    setSortType(sort);
-    loadReviews(sort);
+  const handleCategoryChange = (category: SortCategory) => {
+    setSortCategory(category);
+    loadReviews(toReviewSortType(category, sortOrder));
+  };
+
+  const handleOrderChange = (order: SortOrder) => {
+    setSortOrder(order);
+    loadReviews(toReviewSortType(sortCategory, order));
   };
 
   const handleDelete = async () => {
@@ -130,7 +203,7 @@ export default function PlaceDetailPage() {
     try {
       await deleteReview(memoryId, placeIdNum, myReview.reviewId);
       setMyReview(null);
-      await loadReviews(sortType);
+      await loadReviews(toReviewSortType(sortCategory, sortOrder));
     } catch (e) {
       alert((e as Error).message);
     }
@@ -264,17 +337,25 @@ export default function PlaceDetailPage() {
           </div>
         ) : (
           <>
-            {/* 정렬 탭 */}
-            <div className="filter-container" style={{ paddingBottom: 16 }}>
-              {SORT_OPTIONS.map(opt => (
-                <button
-                  key={opt.value}
-                  className={`chip${sortType === opt.value ? ' active' : ''}`}
-                  onClick={() => handleSortChange(opt.value)}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            {/* 정렬 드롭다운 */}
+            <div style={{ display: 'flex', gap: 8, paddingBottom: 16 }}>
+              <SortDropdown
+                value={sortCategory}
+                onChange={v => handleCategoryChange(v as SortCategory)}
+                options={[
+                  { value: 'DATE',    label: '등록일' },
+                  { value: 'VISITED', label: '방문일' },
+                  { value: 'RATING',  label: '별점'   },
+                ]}
+              />
+              <SortDropdown
+                value={sortOrder}
+                onChange={v => handleOrderChange(v as SortOrder)}
+                options={sortCategory === 'RATING'
+                  ? [{ value: 'DESC', label: '높은순' }, { value: 'ASC', label: '낮은순' }]
+                  : [{ value: 'DESC', label: '최신순' }, { value: 'ASC', label: '오래된순' }]
+                }
+              />
             </div>
 
             {/* 내 후기 */}

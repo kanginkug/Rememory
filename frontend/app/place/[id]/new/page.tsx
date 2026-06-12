@@ -14,7 +14,7 @@ export default function CreatePlacePage() {
     locationTab, kakaoPlace, depth1, depth2, newPhotos,
   }: PlaceFormValues) => {
     let locationInfo: {
-      address?: string; kakaoPlaceId?: string;
+      address?: string; kakaoPlaceId?: string; kakaoPlaceName?: string;
       latitude?: string; longitude?: string;
       regionDepth1?: string; regionDepth2?: string;
     } = {};
