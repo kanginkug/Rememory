@@ -23,6 +23,7 @@ interface MemoryFormProps {
     startDate?: string | null;
     endDate?: string | null;
     imageUrl?: string | null;
+    showHistoryToNew?: boolean;
   };
   onSubmit: (values: MemoryFormValues) => Promise<void>;
 }
@@ -48,6 +49,7 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
     setStartDate(initialData.startDate ?? '');
     setEndDate(initialData.endDate ?? '');
     setPreviewUrl(initialData.imageUrl ?? '');
+    setShowHistory(initialData.showHistoryToNew ?? true);
   }, [initialData]);
 
   const isActive = name.trim() !== '' && description.trim() !== '';
