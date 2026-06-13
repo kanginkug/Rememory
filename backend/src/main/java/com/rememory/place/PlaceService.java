@@ -31,7 +31,7 @@ public class PlaceService {
     private final MemberMemoryRepository mmRepository;
     private final UploadService uploadService;
 
-    // 장소 생성 + 사진 업로드 + placeCount 갱신
+    /** 장소 생성 + 사진 업로드 + placeCount 갱신 */
     @Transactional
     public void save(Long memoryId, Long creatorId, CreatePlaceRequestDTO cpRequestDTO){
         Member creator = memberRepository.findOne(creatorId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
@@ -52,14 +52,14 @@ public class PlaceService {
         }
     }
 
-    // 추억 내 전체 장소 조회 (대표 사진 포함, N+1 방지 IN 쿼리)
+    /** 추억 내 전체 장소 조회 (대표 사진 포함, N+1 방지 IN 쿼리) */
     public List<PlaceDetailResponseDTO> findAllByMemoryId(Long memberId, Long memoryId) {
         certification(memoryId, memberId);
         List<Place> placeList = placeRepository.findAllByMemoryId(memoryId);
         return toResponseDTOList(placeList);
     }
 
-    // 내 베스트 장소 조회 (내 모든 추억 기준, 평점 높은 순)
+    /** 내 베스트 장소 조회 (내 모든 추억 기준, 평점 높은 순) */
     public List<PlaceBestResponseDTO> findBestPlace(Long memberId) {
         if(memberRepository.findOne(memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
@@ -79,21 +79,21 @@ public class PlaceService {
                 .toList();
     }
 
-    // 카테고리·지역(depth1/depth2) 필터 적용 조회
+    /** 카테고리·지역(depth1/depth2) 필터 적용 조회 */
     public List<PlaceDetailResponseDTO> sortPlaceByType(Long memberId, Long memoryId, Category category, String regionDepth1, String regionDepth2) {
         certification(memoryId, memberId);
         List<Place> placeList = placeRepository.findAllByCategoryAndRegion(memoryId, category, regionDepth1, regionDepth2);
         return toResponseDTOList(placeList);
     }
 
-    // 장소명으로 검색
+    /** 장소명으로 검색 */
     public List<PlaceDetailResponseDTO> searchByName(Long memberId, Long memoryId, String name) {
         certification(memoryId, memberId);
         List<Place> placeList = placeRepository.findByName(name, memoryId);
         return toResponseDTOList(placeList);
     }
 
-    // 장소 상세 조회 + 전체 사진 목록
+    /** 장소 상세 조회 + 전체 사진 목록 */
     public PlaceDetailResponseDTO detailPlace(Long memberId, Long memoryId, Long placeId) {
         certification(memoryId, memberId);
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
@@ -133,7 +133,7 @@ public class PlaceService {
         memoryRepository.recalculateRating(memoryId);
     }
 
-    // 장소 정보 수정
+    /** 장소 정보 수정 */
     @Transactional
     public void updatePlace(Long memoryId, Long memberId, Long placeId, UpdatePlaceRequestDTO upReuqestDTO) {
         certification(memoryId, memberId);
@@ -143,7 +143,7 @@ public class PlaceService {
                 upReuqestDTO.getLatitude(), upReuqestDTO.getLongitude(), upReuqestDTO.getRegionDepth1(), upReuqestDTO.getRegionDepth2(), upReuqestDTO.getVisitedAt());
     }
 
-    // 장소 사진 업로드 (최대 5장 제한)
+    /** 장소 사진 업로드 (최대 5장 제한) */
     @Transactional
     public void savePlacePhoto(Long memoryId, Long memberId, Long placeId, List<String> photoUrlList) {
         Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
@@ -167,7 +167,7 @@ public class PlaceService {
         }
     }
 
-    // 장소 사진 삭제 (작성자 본인만 가능)
+    /** 장소 사진 삭제 (작성자 본인만 가능) */
     @Transactional
     public void deletePlacePhoto(Long memoryId, Long memberId, Long placeId, DeletePlacePhotoRequestDTO deletePlacePhotoRequestDTO){
         certification(memoryId, memberId);
@@ -190,7 +190,7 @@ public class PlaceService {
         placePhotoList.forEach(PlacePhoto::delete);
     }
 
-    // 멤버·추억 존재 여부 및 추억 접근 권한 통합 검증
+    /** 멤버·추억 존재 여부 및 추억 접근 권한 통합 검증 */
     private void certification(Long memoryId, Long memberId){
 
         if(memoryRepository.findOne(memoryId).isEmpty()) {
@@ -201,8 +201,8 @@ public class PlaceService {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
     }
-    // Repository에서 조회한 PlaceList를 ResponseDTOList로 변환하는 메서드
 
+    /** Repository에서 조회한 PlaceList를 ResponseDTOList로 변환 */
     private List<PlaceDetailResponseDTO> toResponseDTOList(List<Place> placeList) {
         if (placeList.isEmpty()) return List.of();
         List<Long> placeIds = placeList.stream().map(Place::getId).toList();

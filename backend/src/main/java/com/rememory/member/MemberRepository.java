@@ -23,7 +23,7 @@ public class MemberRepository {
         return Optional.ofNullable(em.find(Member.class, id));
     }
 
-    //로그인 정보 조회 및 중복 회원가입 조회
+    /** 로그인 정보 조회 및 중복 회원가입 조회 */
     public Optional<Member> findByOauthProviderAndOauthId(String oauthProvider, String oauthId) {
         try{
             Member member = em.createQuery("select m from Member m where m.oauthProvider = :oauthProvider and m.oauthId = :oauthId", Member.class)

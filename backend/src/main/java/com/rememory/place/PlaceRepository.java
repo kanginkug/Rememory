@@ -56,7 +56,7 @@ public class PlaceRepository {
                 .fetch();
     }
 
-    //카테고리, 지역 별 조회
+    /** 카테고리, 지역 별 조회 */
     public List<Place> findAllByCategoryAndRegion(Long memoryId, Category category, String regionDepth1, String regionDepth2) {
 
         return queryFactory.selectFrom(QPlace.place)
@@ -71,7 +71,7 @@ public class PlaceRepository {
                 .fetch();
     }
 
-    //장소명 검색
+    /** 장소명 검색 */
     public List<Place> findByName(String name, Long memoryId) {
         return queryFactory.selectFrom(QPlace.place)
                 .where(
