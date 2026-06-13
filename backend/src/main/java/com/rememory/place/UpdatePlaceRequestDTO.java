@@ -16,6 +16,7 @@ import java.time.LocalDate;
 public class UpdatePlaceRequestDTO {
 
     @NotBlank
+    @Size(max = 30)
     private String name;
 
     @NotNull
