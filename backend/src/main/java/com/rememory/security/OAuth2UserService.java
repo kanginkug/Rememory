@@ -17,6 +17,7 @@ import java.util.Map;
 public class OAuth2UserService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
 
+    /** 카카오/구글 OAuth2 로그인 처리: 최초 로그인 시 자동 회원가입, 탈퇴 회원 복구 */
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {

@@ -17,6 +17,7 @@ public class MemberMemoryRepository {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
 
+    /** 추억-멤버 매핑 저장 */
     public void save(MemberMemory memberMemory) {
         em.persist(memberMemory);
     }
@@ -49,6 +50,7 @@ public class MemberMemoryRepository {
         );
     }
 
+    /** 특정 추억의 전체 활성 멤버 조회 */
     public List<MemberMemory> findAll(Long memoryId) {
         return queryFactory
                 .selectFrom(QMemberMemory.memberMemory)
@@ -74,6 +76,7 @@ public class MemberMemoryRepository {
         return count != null ? count.intValue() : 0;
     }
 
+    /** 특정 추억의 활성 멤버 목록 조회 */
     public List<MemberMemory> findActiveByMemoryId(Long memoryId) {
         return queryFactory
                 .selectFrom(QMemberMemory.memberMemory)

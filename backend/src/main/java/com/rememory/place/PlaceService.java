@@ -192,9 +192,6 @@ public class PlaceService {
 
     // 멤버·추억 존재 여부 및 추억 접근 권한 통합 검증
     private void certification(Long memoryId, Long memberId){
-        if(memberRepository.findOne(memberId).isEmpty()) {
-            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
-        }
 
         if(memoryRepository.findOne(memoryId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
@@ -221,6 +218,7 @@ public class PlaceService {
                 .toList();
     }
 
+    /** 내 모든 추억의 장소 좌표 목록 조회 (지도 뷰용) */
     public List<PlaceMapResponseDTO> findAllPlaceInfo(Long memberId) {
         return placeRepository.findAllPlaceInfo(memberId).stream().map(PlaceMapResponseDTO::from).toList();
     }

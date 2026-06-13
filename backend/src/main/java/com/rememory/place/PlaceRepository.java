@@ -23,10 +23,12 @@ public class PlaceRepository {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
 
+    /** 장소 저장 */
     public void save(Place place) {
         em.persist(place);
     }
 
+    /** memoryId + placeId로 장소 단건 조회 (삭제된 장소 제외) */
     public Optional<Place> findOne(Long memoryId, Long placeId) {
         try {
             return Optional.ofNullable(
@@ -43,6 +45,7 @@ public class PlaceRepository {
         }
     }
 
+    /** 추억 내 전체 장소 목록 조회 (등록일 최신순) */
     public List<Place> findAllByMemoryId(Long memoryId) {
         return queryFactory.selectFrom(QPlace.place)
                 .where(
@@ -133,6 +136,7 @@ public class PlaceRepository {
                 .execute();
     }
 
+    /** 평점 높은 순 베스트 장소 5개 조회 (내 모든 참여 추억 기준) */
     public List<Place> findBestPlace(Long memberId) {
         return queryFactory.selectFrom(QPlace.place)
                 .join(QPlace.place.memory, QMemory.memory).fetchJoin()
@@ -151,6 +155,7 @@ public class PlaceRepository {
                 .fetch();
     }
 
+    /** 내 모든 추억의 전체 장소 목록 조회 (지도 뷰용) */
     public List<Place> findAllPlaceInfo(Long memberId) {
         return queryFactory.selectFrom(QPlace.place)
                 .join(QPlace.place.memory, QMemory.memory).fetchJoin()
@@ -164,6 +169,7 @@ public class PlaceRepository {
                 ).fetch();
     }
 
+    /** 내 등록 장소 수 조회 */
     public int getPlaceCount(Long memberId) {
         Long placeCount = queryFactory.select(QPlace.place.count())
                 .from(QPlace.place)

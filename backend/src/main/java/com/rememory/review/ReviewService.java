@@ -129,9 +129,6 @@ public class ReviewService {
 
     // 멤버·추억 존재 여부 및 추억 접근 권한 통합 검증
     private void certification(Long memoryId, Long memberId){
-        if(memberRepository.findOne(memberId).isEmpty()) {
-            throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
-        }
 
         if(memoryRepository.findOne(memoryId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
@@ -238,6 +235,7 @@ public class ReviewService {
 
     }
 
+    /** 내 전체 후기 목록 조회 (등록일 최신순, 사진 포함) */
     public List<ReviewDetailResponseDTO> findAllMyReview(Long memberId) {
         List<Review> reviewList = reviewRepository.findAllMyReview(memberId);
         List<Long> reviewIdList = reviewList.stream().map(Review::getId).toList();

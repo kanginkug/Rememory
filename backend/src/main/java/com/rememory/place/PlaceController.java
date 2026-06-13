@@ -23,6 +23,7 @@ public class PlaceController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /** GET /api/place/all - 내 전체 장소 좌표 목록 (지도 뷰용) */
     @GetMapping("/all")
     public ResponseEntity<List<PlaceMapResponseDTO >> findAllPlaceInfo(@RequestAttribute("memberId") Long memberId) {
         return ResponseEntity.ok(placeService.findAllPlaceInfo(memberId));
@@ -91,6 +92,7 @@ public class PlaceController {
         return ResponseEntity.noContent().build();
     }
 
+    /** GET /api/place/search - 카카오 키워드 장소 검색 */
     @GetMapping("/search")
     public ResponseEntity<List<PlaceSearchResponseDTO>> searchKakaoPlace(@RequestParam String query) {
         return ResponseEntity.ok(kakaoPlaceSearchService.searchByKeyword(query));

@@ -13,10 +13,12 @@ public class MemberRepository {
     @PersistenceContext
     private EntityManager em;
 
+    /** 회원 저장 */
     public void save(Member member) {
         em.persist(member);
     }
 
+    /** PK로 회원 단건 조회 */
     public Optional<Member> findOne(Long id) {
         return Optional.ofNullable(em.find(Member.class, id));
     }

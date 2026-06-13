@@ -25,12 +25,14 @@ public class UploadService {
     private String region;
     private final S3Client s3Client;
 
+    /** S3 Presigned URL 일괄 생성 */
     public List<PresignedUrlResponseDTO> generatePresignedUrls(String folder, int count) {
         return IntStream.range(0, count)
                 .mapToObj(i -> generate(folder))
                 .toList();
     }
 
+    /** S3 Presigned PUT URL 단건 생성, imageUrl(최종 접근 URL)과 함께 반환 */
     private PresignedUrlResponseDTO generate(String folder) {
         String key = folder + "/" + UUID.randomUUID();
 
@@ -48,6 +50,7 @@ public class UploadService {
         return new PresignedUrlResponseDTO(presigned.url().toString(), imageUrl);
     }
 
+    /** S3 객체 삭제 (imageUrl에서 key 추출) */
     public void delete(String imageUrl) {
         String key = imageUrl.substring(imageUrl.indexOf(".amazonaws.com/") + ".amazonaws.com/".length());
 
@@ -56,6 +59,7 @@ public class UploadService {
                 .key(key));
     }
 
+    /** S3 객체 일괄 삭제 */
     public void deleteAll(List<String> imageUrls) {
         imageUrls.forEach(this::delete);
     }

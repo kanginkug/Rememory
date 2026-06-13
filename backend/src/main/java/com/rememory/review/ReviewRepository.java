@@ -26,10 +26,12 @@ public class ReviewRepository {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
 
+    /** 후기 저장 */
     public void save(Review review) {
         em.persist(review);
     }
 
+    /** PK로 후기 단건 조회 (삭제된 후기 제외) */
     public Optional<Review> findOne(Long reviewId) {
         try {
             return Optional.ofNullable(
@@ -42,6 +44,7 @@ public class ReviewRepository {
         }
     }
 
+    /** 특정 장소의 전체 후기 조회 (삭제 제외, member/place/memory fetch join) */
     public List<Review> findAllByPlaceId(Long placeId) {
             return queryFactory.selectFrom(QReview.review)
                             .join(QReview.review.member, QMember.member).fetchJoin()
@@ -107,6 +110,7 @@ public class ReviewRepository {
         }
     }
 
+    /** 최근 작성한 후기 10개 조회 (등록일 최신순) */
     public List<Review> findRecentReview(Long memberId) {
         return queryFactory.selectFrom(QReview.review)
                 .join(QReview.review.member, QMember.member).fetchJoin()
@@ -125,6 +129,7 @@ public class ReviewRepository {
                 .fetch();
     }
 
+    /** 내 전체 후기 조회 (등록일 최신순) */
     public List<Review> findAllMyReview(Long memberId) {
         return queryFactory.selectFrom(QReview.review)
                 .join(QReview.review.member, QMember.member).fetchJoin()
@@ -143,6 +148,7 @@ public class ReviewRepository {
                 .fetch();
     }
 
+    /** 내 별점 평균 조회 (소수점 1자리, 후기 없으면 0.0) */
     public BigDecimal getReviewAvg(Long memberId) {
         Double reviewAvg =  queryFactory.select(QReview.review.rating.avg())
                 .from(QReview.review)

@@ -16,8 +16,10 @@ public class MemoryDetailResponseDTO {
     private Long id;
     private String name;
     private BigDecimal avgRating;
+    private Boolean showHistoryToNew;
     private int placeCount;
     private int memberCount;
+    private Long creatorId;
     private List<MemberInfoDTO> memberInfoDTOList;
     private String description;
     private LocalDate startDate;
@@ -29,8 +31,10 @@ public class MemoryDetailResponseDTO {
                 memory.getId(),
                 memory.getName(),
                 memory.getAvgRating(),
+                memory.getShowHistoryToNew(),
                 memory.getPlaceCount(),
                 memory.getMemberCount(),
+                memory.getCreator().getId(),
                 memberInfoDTOList,
                 memory.getDescription(),
                 memory.getStartDate(),

@@ -19,6 +19,7 @@ import java.util.List;
 public class UploadController {
         private final UploadService uploadService;
 
+        /** POST /api/upload/presigned-urls - S3 Presigned URL 목록 생성 */
         @PostMapping("/presigned-urls")
         public ResponseEntity<List<PresignedUrlResponseDTO>> getPresignedUrls(@RequestBody @Valid PresignedUrlRequestDTO requestDTO) {
             return ResponseEntity.ok(uploadService.generatePresignedUrls(requestDTO.getFolder(), requestDTO.getCount()));
