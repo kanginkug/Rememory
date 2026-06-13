@@ -26,6 +26,7 @@ export default function CreateMemoryPage() {
       photoUrl,
       startDate: startDate || null,
       endDate: endDate || null,
+      showHistoryToNew: showHistory,
     });
     router.replace('/memory');
   };
