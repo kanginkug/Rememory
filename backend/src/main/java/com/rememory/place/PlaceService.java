@@ -2,6 +2,7 @@ package com.rememory.place;
 
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
+import com.rememory.common.s3.service.UploadService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import com.rememory.memory.MemberMemoryRepository;
@@ -28,6 +29,7 @@ public class PlaceService {
     private final MemoryRepository memoryRepository;
     private final ReviewRepository reviewRepository;
     private final MemberMemoryRepository mmRepository;
+    private final UploadService uploadService;
 
     // 장소 생성 + 사진 업로드 + placeCount 갱신
     @Transactional
@@ -39,7 +41,7 @@ public class PlaceService {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
-        Place place = Place.create(memory, creator, cpRequestDTO.getName(), cpRequestDTO.getDescription(), cpRequestDTO.getCategory(), cpRequestDTO.getAddress(), cpRequestDTO.getKakaoPlaceId(),
+        Place place = Place.create(memory, creator, cpRequestDTO.getName(), cpRequestDTO.getDescription(), cpRequestDTO.getCategory(), cpRequestDTO.getAddress(), cpRequestDTO.getKakaoPlaceId(), cpRequestDTO.getKakaoPlaceName(),
                 cpRequestDTO.getLatitude(), cpRequestDTO.getLongitude(), cpRequestDTO.getRegionDepth1(), cpRequestDTO.getRegionDepth2(), cpRequestDTO.getVisitedAt());
 
         placeRepository.save(place);
@@ -48,8 +50,6 @@ public class PlaceService {
         if(cpRequestDTO.getPhotoUrlList() != null && !cpRequestDTO.getPhotoUrlList().isEmpty()){
             savePlacePhoto(memoryId, creatorId, place.getId(), cpRequestDTO.getPhotoUrlList());
         }
-        int newPlaceCount = memoryRepository.findPlaceCount(memoryId);
-        memory.updatePlaceCount(newPlaceCount);
     }
 
     // 추억 내 전체 장소 조회 (대표 사진 포함, N+1 방지 IN 쿼리)
@@ -60,11 +60,23 @@ public class PlaceService {
     }
 
     // 내 베스트 장소 조회 (내 모든 추억 기준, 평점 높은 순)
-    public List<PlaceDetailResponseDTO> findBestPlace(Long memberId) {
+    public List<PlaceBestResponseDTO> findBestPlace(Long memberId) {
         if(memberRepository.findOne(memberId).isEmpty()) {
             throw new BusinessException(ErrorCode.MEMBER_NOT_FOUND);
         }
-        return toResponseDTOList(placeRepository.findBestPlace(memberId));
+        List<Place> bestPlaces = placeRepository.findBestPlace(memberId);
+        if (bestPlaces.isEmpty()) return List.of();
+        List<Long> placeIds = bestPlaces.stream().map(Place::getId).toList();
+        Map<Long, PlacePhotoResponseDTO> thumbMap = ppRepository.findThumbByPlaceIdList(placeIds);
+
+        return bestPlaces.stream()
+                .map(place -> {
+                    List<PlacePhotoResponseDTO> photos = thumbMap.containsKey(place.getId())
+                            ? List.of(thumbMap.get(place.getId()))
+                            : List.of();
+                    return PlaceBestResponseDTO.from(place, photos);
+                })
+                .toList();
     }
 
     // 카테고리·지역(depth1/depth2) 필터 적용 조회
@@ -110,13 +122,15 @@ public class PlaceService {
             throw new BusinessException(ErrorCode.PLACE_HAS_REVIEWS);
         }
 
-        ppRepository.findAllByPlaceId(placeId).forEach(PlacePhoto::delete);
+        List<PlacePhoto> urls = ppRepository.findAllByPlaceId(placeId);
+        List<String> photoUrls = urls.stream()
+                .map(PlacePhoto::getImageUrl)
+                .toList();
+        uploadService.deleteAll(photoUrls);
+        urls.forEach(PlacePhoto::delete);
         place.delete();
         memoryRepository.updatePlaceCount(memoryId, -1);
         memoryRepository.recalculateRating(memoryId);
-
-        int newPlaceCount = memoryRepository.findPlaceCount(memoryId);
-        memory.updatePlaceCount(newPlaceCount);
     }
 
     // 장소 정보 수정
@@ -125,7 +139,7 @@ public class PlaceService {
         certification(memoryId, memberId);
 
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
-        place.update(upReuqestDTO.getName(), upReuqestDTO.getDescription(), upReuqestDTO.getCategory(), upReuqestDTO.getAddress(), upReuqestDTO.getKakaoPlaceId(),
+        place.update(upReuqestDTO.getName(), upReuqestDTO.getDescription(), upReuqestDTO.getCategory(), upReuqestDTO.getAddress(), upReuqestDTO.getKakaoPlaceId(), upReuqestDTO.getKakaoPlaceName(),
                 upReuqestDTO.getLatitude(), upReuqestDTO.getLongitude(), upReuqestDTO.getRegionDepth1(), upReuqestDTO.getRegionDepth2(), upReuqestDTO.getVisitedAt());
     }
 
@@ -153,43 +167,6 @@ public class PlaceService {
         }
     }
 
-    @Transactional
-    public void updatePlacePhoto(Long memoryId, Long memberId, Long placeId, UpdatePlacePhotoRequestDTO updatePlacePhotoRequestDTO) {
-        Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-
-        if(memoryRepository.findOne(memoryId).isEmpty()) {
-            throw new BusinessException(ErrorCode.MEMORY_NOT_FOUND);
-        }
-
-        if(mmRepository.findActiveByMemoryIdAndMemberId(memoryId, memberId).isEmpty()){
-            throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
-        }
-
-        Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
-
-        List<Long> ppIdList = updatePlacePhotoRequestDTO.getPlacePhotoIdList();
-        List<String> photoUrlList = updatePlacePhotoRequestDTO.getPhotoUrlList();
-
-        if(ppIdList.size() != photoUrlList.size()) {
-            throw new BusinessException(ErrorCode.INVALID_REQUEST);
-        }
-
-        Map<Long, PlacePhoto> photoMap = ppRepository.findAllByPlaceId(placeId).stream()
-                .collect(Collectors.toMap(PlacePhoto::getId, p -> p));
-
-        for(int i = 0; i < ppIdList.size(); i++) {
-            PlacePhoto placePhoto = photoMap.get(ppIdList.get(i));
-            if(placePhoto == null) {
-                throw new BusinessException(ErrorCode.PLACE_PHOTO_NOT_FOUND);
-            }
-            if(!placePhoto.getCreator().getId().equals(memberId)) {
-                throw new BusinessException(ErrorCode.PLACE_PHOTO_ACCESS_DENIED);
-            }
-            placePhoto.delete();
-            ppRepository.save(PlacePhoto.create(place, member, photoUrlList.get(i)));
-        }
-    }
-
     // 장소 사진 삭제 (작성자 본인만 가능)
     @Transactional
     public void deletePlacePhoto(Long memoryId, Long memberId, Long placeId, DeletePlacePhotoRequestDTO deletePlacePhotoRequestDTO){
@@ -206,6 +183,10 @@ public class PlaceService {
                 throw new BusinessException(ErrorCode.PLACE_PHOTO_ACCESS_DENIED);
             }
         }
+        List<String> urls = placePhotoList.stream()
+                        .map(PlacePhoto::getImageUrl)
+                                .toList();
+        uploadService.deleteAll(urls);
         placePhotoList.forEach(PlacePhoto::delete);
     }
 
@@ -235,5 +216,9 @@ public class PlaceService {
                     return PlaceDetailResponseDTO.from(place, photos);
                 })
                 .toList();
+    }
+
+    public List<PlaceMapResponseDTO> findAllPlaceInfo(Long memberId) {
+        return placeRepository.findAllPlaceInfo(memberId).stream().map(PlaceMapResponseDTO::from).toList();
     }
 }

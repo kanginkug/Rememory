@@ -28,7 +28,7 @@ public class ReviewPhoto {
 
     private String imageUrl;
 
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
 
@@ -42,7 +42,7 @@ public class ReviewPhoto {
 
     @PrePersist
     protected void onCreate() {
-        this.createAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     public void update(String imageUrl) {

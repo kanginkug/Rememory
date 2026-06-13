@@ -64,4 +64,12 @@ public class Member {
     public void restore() {
         this.deletedAt = null;
     }
+
+    public void updateInfo(String name) {
+        this.name = name;
+    }
+
+    public void updateProfileImg(String imageUrl) {
+        this.profileImageUrl = imageUrl;
+    }
 }

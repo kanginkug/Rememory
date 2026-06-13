@@ -12,6 +12,7 @@ import java.time.LocalDate;
 public class CreateMemoryRequestDTO {
 
     @NotBlank
+    @Size(max = 30)
     private String memoryName;
 
     @NotBlank

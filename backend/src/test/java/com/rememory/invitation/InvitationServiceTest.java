@@ -53,14 +53,14 @@ class InvitationServiceTest {
     @DisplayName("초대 링크 생성 성공")
     void save_성공() {
         // when & then - 예외 없이 실행되면 성공
-        assertThatCode(() -> invitationService.save(memory.getId(), invitor.getId(), 5))
+        assertThatCode(() -> invitationService.save(memory.getId(), invitor.getId()))
                 .doesNotThrowAnyException();
     }
 
     @Test
     @DisplayName("추억 멤버가 아닌 사람이 초대 링크 생성 시 BusinessException 발생")
     void save_비멤버_예외발생() {
-        assertThatThrownBy(() -> invitationService.save(memory.getId(), invitedMember.getId(), 5))
+        assertThatThrownBy(() -> invitationService.save(memory.getId(), invitedMember.getId()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
     }
@@ -68,7 +68,7 @@ class InvitationServiceTest {
     @Test
     @DisplayName("없는 멤버로 초대 링크 생성 시 BusinessException 발생")
     void save_없는멤버_예외발생() {
-        assertThatThrownBy(() -> invitationService.save(memory.getId(), 999999L, 5))
+        assertThatThrownBy(() -> invitationService.save(memory.getId(), 999999L))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.MEMBER_NOT_FOUND.getMessage());
     }
@@ -76,7 +76,7 @@ class InvitationServiceTest {
     @Test
     @DisplayName("없는 추억으로 초대 링크 생성 시 BusinessException 발생")
     void save_없는추억_예외발생() {
-        assertThatThrownBy(() -> invitationService.save(999999L, invitor.getId(), 5))
+        assertThatThrownBy(() -> invitationService.save(999999L, invitor.getId()))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage(ErrorCode.MEMORY_NOT_FOUND.getMessage());
     }
@@ -87,7 +87,7 @@ class InvitationServiceTest {
     @DisplayName("초대 수락 성공 - MemberMemory 저장")
     void agreeInvite_성공() {
         // given
-        Invitation invitation = Invitation.create(memory, invitor, 5);
+        Invitation invitation = Invitation.create(memory, invitor);
         invitationRepository.save(invitation);
 
         // when
@@ -103,7 +103,7 @@ class InvitationServiceTest {
     @DisplayName("초대 수락 성공 - usedCount 증가")
     void agreeInvite_usedCount_증가() {
         // given
-        Invitation invitation = Invitation.create(memory, invitor, 5);
+        Invitation invitation = Invitation.create(memory, invitor);
         invitationRepository.save(invitation);
 
         // when
@@ -125,7 +125,7 @@ class InvitationServiceTest {
     @DisplayName("이미 참가한 멤버가 초대 수락 시 BusinessException 발생")
     void agreeInvite_이미참가_예외발생() {
         // given - invitor는 이미 MemberMemory에 있음
-        Invitation invitation = Invitation.create(memory, invitor, 5);
+        Invitation invitation = Invitation.create(memory, invitor);
         invitationRepository.save(invitation);
 
         // when & then
@@ -142,7 +142,7 @@ class InvitationServiceTest {
         mmRepository.save(pastMemberMemory);
         pastMemberMemory.leftMemory(); // leftAt 세팅
 
-        Invitation invitation = Invitation.create(memory, invitor, 5);
+        Invitation invitation = Invitation.create(memory, invitor);
         invitationRepository.save(invitation);
 
         // when
@@ -162,7 +162,7 @@ class InvitationServiceTest {
         mmRepository.save(pastMemberMemory);
         pastMemberMemory.leftMemory();
 
-        Invitation invitation = Invitation.create(memory, invitor, 5);
+        Invitation invitation = Invitation.create(memory, invitor);
         invitationRepository.save(invitation);
 
         // when

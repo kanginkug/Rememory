@@ -30,6 +30,12 @@ public class MemoryController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{memoryId}")
+    public ResponseEntity<Void> deleteMemory(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId) {
+        memoryService.deleteMemory(memoryId, memberId);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{memoryId}")
     public ResponseEntity<MemoryDetailResponseDTO> findMemory(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId) {
         return ResponseEntity.ok(memoryService.findMemory(memberId, memoryId));
@@ -47,7 +53,7 @@ public class MemoryController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{memoryId}/image")
+    @PostMapping("/{memoryId}/photo")
     public ResponseEntity<Void> saveMemoryPhoto(
             @RequestAttribute("memberId") Long memberId,
             @PathVariable("memoryId") Long memoryId,
@@ -57,7 +63,7 @@ public class MemoryController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @DeleteMapping("/{memoryId}/image")
+    @DeleteMapping("/{memoryId}/photo")
     public ResponseEntity<Void> deleteMemoryPhoto(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId) {
         memoryService.deleteMemoryPhoto(memoryId, memberId);
         return ResponseEntity.noContent().build();

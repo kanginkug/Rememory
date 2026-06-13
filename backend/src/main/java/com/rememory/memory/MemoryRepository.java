@@ -85,13 +85,19 @@ public class MemoryRepository {
                 .execute();
     }
 
-    public int findPlaceCount(Long memoryId) {
-         Long placeCount = queryFactory.select(QMemory.memory.count())
+    public int getMemoryCount(Long memberId) {
+        Long memoryCount = queryFactory.select(QMemory.memory.count())
                 .from(QMemory.memory)
+                .join(QMemberMemory.memberMemory)
+                .on(
+                        QMemory.memory.id.eq(QMemberMemory.memberMemory.memory.id)
+                )
                 .where(
-                        QMemory.memory.id.eq(memoryId)
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull()
                 ).fetchOne();
-        return placeCount == null ? 0 : placeCount.intValue();
+        return memoryCount == null ? 0 : memoryCount.intValue();
     }
 
 }

@@ -82,10 +82,6 @@ public class Memory {
         this.deletedAt = LocalDateTime.now();
     }
 
-    public void updatePlaceCount(int placeCount) {
-        this.placeCount = placeCount;
-    }
-
     public void plusMemberCount() {
         this.memberCount++;
     }

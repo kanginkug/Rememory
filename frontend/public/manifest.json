@@ -1,0 +1,24 @@
+{
+  "name": "Rememory",
+  "short_name": "Rememory",
+  "description": "친구들과 함께 추억을 기록하고 별점·후기를 공유하는 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#BFDBF3",
+  "theme_color": "#7F77DD",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
