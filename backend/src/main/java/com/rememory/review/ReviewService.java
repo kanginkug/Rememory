@@ -64,7 +64,7 @@ public class ReviewService {
         memoryRepository.recalculateRating(memoryId);
     }
 
-    // 특정 장소에 대한 내 후기 단건 조회
+    /** 특정 장소에 대한 내 후기 단건 조회 */
     public ReviewDetailResponseDTO findMyReview(Long memoryId, Long memberId, Long placeId) {
         certification(memoryId, memberId);
         Review review = reviewRepository.findByPlaceIdAndMemberId(placeId, memberId).orElseThrow(() -> new BusinessException(ErrorCode.REVIEW_NOT_FOUND));
@@ -76,7 +76,7 @@ public class ReviewService {
         return ReviewDetailResponseDTO.from(review, memoryId, placeId, rpResponseDTOList);
     }
 
-    // 특정 장소 전체 후기 조회
+    /** 특정 장소 전체 후기 조회 */
     public List<ReviewDetailResponseDTO> findAllByPlaceId(Long memoryId, Long memberId, Long placeId) {
         certification(memoryId, memberId);
 
@@ -84,7 +84,7 @@ public class ReviewService {
         return toResponseDTOList(reviewList, memoryId, placeId);
     }
 
-    // 정렬 타입 적용 후기 조회
+    /** 정렬 타입 적용 후기 조회 */
     public List<ReviewDetailResponseDTO> sortByReviewType(Long memberId, Long memoryId, Long placeId, SortTypeReview sortTypeReview) {
         certification(memoryId, memberId);
 
@@ -92,7 +92,7 @@ public class ReviewService {
         return toResponseDTOList(reviewList, memoryId, placeId);
     }
 
-    // 후기 수정 + Place·Memory 별점 재계산
+    /** 후기 수정 + Place·Memory 별점 재계산 */
     @Transactional
     public void updateReview(Long updater, Long reviewId, UpdateReviewRequestDTO updateReviewRequestDTO) {
         Long memoryId = updateReviewRequestDTO.getMemoryId();
@@ -109,7 +109,7 @@ public class ReviewService {
         memoryRepository.recalculateRating(memoryId);
     }
 
-    // 후기 삭제 + Place·Memory 별점 재계산
+    /** 후기 삭제 + Place·Memory 별점 재계산 */
     @Transactional
     public void deleteReview(Long deleter, Long reviewId, Long memoryId, Long placeId) {
         certification(memoryId, deleter);
@@ -127,7 +127,7 @@ public class ReviewService {
         memoryRepository.recalculateRating(memoryId);
     }
 
-    // 멤버·추억 존재 여부 및 추억 접근 권한 통합 검증
+    /** 멤버·추억 존재 여부 및 추억 접근 권한 통합 검증 */
     private void certification(Long memoryId, Long memberId){
 
         if(memoryRepository.findOne(memoryId).isEmpty()) {
@@ -139,7 +139,7 @@ public class ReviewService {
         }
     }
 
-    // Review 엔티티 리스트 → DTO 리스트 변환
+    /** Review 엔티티 리스트 → DTO 리스트 변환 */
     private List<ReviewDetailResponseDTO> toResponseDTOList(List<Review> reviewList, Long memoryId, Long placeId) {
         List<Long> reviewIdList = reviewList.stream().map(Review::getId).toList();
         List<ReviewPhoto> reviewPhotoList = rpRepository.findAllByReviewIdList(reviewIdList);
@@ -160,7 +160,7 @@ public class ReviewService {
         return rdResponseDTOList;
     }
 
-    // 최근 작성한 후기 조회
+    /** 최근 작성한 후기 조회 */
     public List<ReviewDetailResponseDTO> findRecentReview(Long memberId) {
         List<Review> reviewList = reviewRepository.findRecentReview(memberId);
         List<Long> reviewIdList = reviewList.stream().map(Review::getId).toList();
@@ -182,7 +182,7 @@ public class ReviewService {
         return rdResponseDTOList;
     }
 
-    // 리뷰 사진 업로드
+    /** 리뷰 사진 업로드 */
     @Transactional
     public void saveReviewPhoto(Long memoryId, Long memberId, Long reviewId, List<String> photoUrlList) {
         Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
@@ -210,7 +210,7 @@ public class ReviewService {
 
     }
 
-    // 리뷰 사진 삭제
+    /** 리뷰 사진 삭제 */
     @Transactional
     public void deleteReviewPhoto(Long memoryId, Long memberId, Long reviewId, List<Long> reviewPhotoIdList){
         if(memberRepository.findOne(memberId).isEmpty()) {

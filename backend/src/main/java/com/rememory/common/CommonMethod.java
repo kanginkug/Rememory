@@ -20,8 +20,10 @@ public class CommonMethod {
     @Value("${upload.profile-dir:uploads/profile}")
     private String profileUploadDir;
 
-    // MIME 타입 검증 후 UUID 파일명 리턴
-    // MIME 타입 기반 검증만 수행하며 Magic Bytes 검증은 미구현 (TODO S8)
+    /**
+     * MIME 타입 검증 후 UUID 파일명 리턴
+     * MIME 타입 기반 검증만 수행하며 Magic Bytes 검증은 미구현 (TODO S8)
+     */
     public String madePhotoUrl(MultipartFile file) {
 
         String contentType = file.getContentType();

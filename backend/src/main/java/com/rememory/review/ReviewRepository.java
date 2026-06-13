@@ -89,7 +89,7 @@ public class ReviewRepository {
                 .fetch();
     }
 
-    // 내가 쓴 리뷰 조회 및 1인 1후기 중복 체크
+    /** 내가 쓴 리뷰 조회 및 1인 1후기 중복 체크 */
     public Optional<Review> findByPlaceIdAndMemberId(Long PlaceId, Long memberId) {
         try {
             return Optional.ofNullable(
