@@ -218,6 +218,7 @@ public class PlaceService {
                 .toList();
     }
 
+    /** 내 모든 추억의 장소 좌표 목록 조회 (지도 뷰용) */
     public List<PlaceMapResponseDTO> findAllPlaceInfo(Long memberId) {
         return placeRepository.findAllPlaceInfo(memberId).stream().map(PlaceMapResponseDTO::from).toList();
     }

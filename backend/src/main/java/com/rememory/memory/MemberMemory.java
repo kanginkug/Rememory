@@ -30,6 +30,7 @@ public class MemberMemory {
 
     private LocalDateTime leftAt;
 
+    /** 정적 팩토리: 추억 참여 기록 생성, 참여일 자동 세팅 */
     public static MemberMemory create(Member member, Memory memory) {
         MemberMemory memberMemory = new MemberMemory();
         memberMemory.member = member;
@@ -43,5 +44,6 @@ public class MemberMemory {
         this.leftAt = LocalDateTime.now();
     }
 
+    /** 재참여(나갔다가 재초대) 시 leftAt 초기화 */
     public void comebackMember() {this.leftAt = null;}
 }

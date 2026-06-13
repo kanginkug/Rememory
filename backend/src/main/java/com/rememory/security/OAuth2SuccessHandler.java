@@ -23,6 +23,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
 
+    /** OAuth2 인증 성공 후 JWT 발급 및 프론트 콜백 URL로 리다이렉트 */
     @Override
     public void onAuthenticationSuccess(@NonNull HttpServletRequest request,
                                         @NonNull HttpServletResponse response,

@@ -235,6 +235,7 @@ public class ReviewService {
 
     }
 
+    /** 내 전체 후기 목록 조회 (등록일 최신순, 사진 포함) */
     public List<ReviewDetailResponseDTO> findAllMyReview(Long memberId) {
         List<Review> reviewList = reviewRepository.findAllMyReview(memberId);
         List<Long> reviewIdList = reviewList.stream().map(Review::getId).toList();

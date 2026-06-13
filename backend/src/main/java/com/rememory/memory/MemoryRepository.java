@@ -20,6 +20,7 @@ public class MemoryRepository {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
 
+    /** 추억 저장 */
     public void save(Memory memory) {
 
         em.persist(memory);
@@ -56,6 +57,7 @@ public class MemoryRepository {
                 .fetch();
     }
 
+    /** PK로 추억 단건 조회 */
     public Optional<Memory> findOne(Long memoryId) {
         return Optional.ofNullable(em.find(Memory.class, memoryId));
     }
@@ -85,6 +87,7 @@ public class MemoryRepository {
                 .execute();
     }
 
+    /** 내 참여 추억 수 조회 */
     public int getMemoryCount(Long memberId) {
         Long memoryCount = queryFactory.select(QMemory.memory.count())
                 .from(QMemory.memory)

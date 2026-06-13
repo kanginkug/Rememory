@@ -24,6 +24,7 @@ public class KakaoPlaceSearchService {
 
     private final RestTemplate restTemplate;
 
+    /** 카카오 키워드 장소 검색 API 호출 후 결과 반환 */
     public List<PlaceSearchResponseDTO> searchByKeyword(String query) {
         URI uri = UriComponentsBuilder
                 .fromUriString("https://dapi.kakao.com/v2/local/search/keyword.json")
