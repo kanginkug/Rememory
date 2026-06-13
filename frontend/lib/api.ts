@@ -136,6 +136,7 @@ export interface MemoryDetail {
   startDate: string | null;
   endDate: string | null;
   imageUrl: string | null;
+  showHistoryToNew: boolean;
   memberInfoDTOList?: Member[];
 }
 
@@ -178,6 +179,7 @@ export interface CreateMemoryRequest {
   photoUrl?: string | null;
   startDate?: string | null;
   endDate?: string | null;
+  showHistoryToNew: boolean;
 }
 
 export interface PresignedUrlResponse {
