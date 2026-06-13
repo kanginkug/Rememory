@@ -49,7 +49,7 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
     setStartDate(initialData.startDate ?? '');
     setEndDate(initialData.endDate ?? '');
     setPreviewUrl(initialData.imageUrl ?? '');
-    if (initialData.showHistoryToNew !== undefined) setShowHistory(initialData.showHistoryToNew);
+    setShowHistory(initialData.showHistoryToNew ?? true);
   }, [initialData]);
 
   const isActive = name.trim() !== '' && description.trim() !== '';
