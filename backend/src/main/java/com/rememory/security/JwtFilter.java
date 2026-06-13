@@ -17,8 +17,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-// JWT 인증 필터: 매 요청마다 한 번씩 실행(OncePerRequestFilter)되어 토큰을 검증한다
-// Authorization 헤더(Bearer) 에서 토큰을 추출한다
+/**
+ * JWT 인증 필터: 매 요청마다 한 번씩 실행(OncePerRequestFilter)되어 토큰을 검증한다
+ * Authorization 헤더(Bearer) 에서 토큰을 추출한다
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtFilter  extends OncePerRequestFilter {
@@ -26,7 +28,7 @@ public class JwtFilter  extends OncePerRequestFilter {
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
 
-    // 요청에서 JWT를 추출해 검증하고, 유효한 경우 SecurityContext에 인증 정보를 설정한다
+    /** 요청에서 JWT를 추출해 검증하고, 유효한 경우 SecurityContext에 인증 정보를 설정한다 */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -49,7 +51,7 @@ public class JwtFilter  extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // Authorization 헤더 내 토큰 추출
+    /** Authorization 헤더 내 토큰 추출 */
     private String extractToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if(header != null && header.startsWith("Bearer ")) {
@@ -59,7 +61,7 @@ public class JwtFilter  extends OncePerRequestFilter {
         }
     }
 
-    // SecurityContext에 인증 정보 등록
+    /** SecurityContext에 인증 정보 등록 */
     private void setAuthentication(HttpServletRequest request, Claims claims) {
         Long memberId = Long.parseLong(claims.getSubject());
 

@@ -42,6 +42,7 @@ public class Member {
 
     private LocalDateTime deletedAt;
 
+    /** 정적 팩토리: 신규 회원 생성 */
     public static Member create(String name, String email, String profileImageUrl, String oauthProvider, String oauthId) {
         Member member = new Member();
         member.name = name;
@@ -52,16 +53,29 @@ public class Member {
         return member;
     }
 
+    /** 최초 저장 시 생성일 자동 세팅 */
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
+    /** Soft delete: 탈퇴 처리 */
     public void delete() {
         this.deletedAt = LocalDateTime.now();
     }
 
+    /** 탈퇴 취소 시 계정 복구 */
     public void restore() {
         this.deletedAt = null;
+    }
+
+    /** 닉네임 변경 */
+    public void updateInfo(String name) {
+        this.name = name;
+    }
+
+    /** 프로필 이미지 URL 변경 */
+    public void updateProfileImg(String imageUrl) {
+        this.profileImageUrl = imageUrl;
     }
 }

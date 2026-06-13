@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,10 +26,12 @@ public class ReviewRepository {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
 
+    /** 후기 저장 */
     public void save(Review review) {
         em.persist(review);
     }
 
+    /** PK로 후기 단건 조회 (삭제된 후기 제외) */
     public Optional<Review> findOne(Long reviewId) {
         try {
             return Optional.ofNullable(
@@ -41,12 +44,18 @@ public class ReviewRepository {
         }
     }
 
+    /** 특정 장소의 전체 후기 조회 (삭제 제외, member/place/memory fetch join) */
     public List<Review> findAllByPlaceId(Long placeId) {
-            return em.createQuery("select r from Review r " +
-                                      "where r.place.id = :placeId and r.deletedAt is null " +
-                                      "order by r.createdAt desc", Review.class)
-                        .setParameter("placeId", placeId)
-                        .getResultList();
+            return queryFactory.selectFrom(QReview.review)
+                            .join(QReview.review.member, QMember.member).fetchJoin()
+                            .join(QReview.review.place, QPlace.place).fetchJoin()
+                            .join(QPlace.place.memory, QMemory.memory).fetchJoin()
+                            .where(
+                                    QReview.review.place.id.eq(placeId),
+                                    QReview.review.deletedAt.isNull(),
+                                    QPlace.place.deletedAt.isNull(),
+                                    QMemory.memory.deletedAt.isNull()
+                            ).fetch();
     }
 
     /**
@@ -67,17 +76,20 @@ public class ReviewRepository {
         };
 
         return queryFactory.selectFrom(QReview.review)
-                .join(QPlace.place)
-                .on(QReview.review.place.id.eq(QPlace.place.id))
+                .join(QReview.review.member, QMember.member).fetchJoin()
+                .join(QReview.review.place, QPlace.place).fetchJoin()
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
                 .where(
                         QReview.review.place.id.eq(placeId),
-                        QReview.review.deletedAt.isNull()
+                        QReview.review.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull(),
+                        QMemory.memory.deletedAt.isNull()
                 )
                 .orderBy(orderSpecifier, QReview.review.id.desc())
                 .fetch();
     }
 
-    // 내가 쓴 리뷰 조회 및 1인 1후기 중복 체크
+    /** 내가 쓴 리뷰 조회 및 1인 1후기 중복 체크 */
     public Optional<Review> findByPlaceIdAndMemberId(Long PlaceId, Long memberId) {
         try {
             return Optional.ofNullable(
@@ -98,8 +110,10 @@ public class ReviewRepository {
         }
     }
 
+    /** 최근 작성한 후기 10개 조회 (등록일 최신순) */
     public List<Review> findRecentReview(Long memberId) {
         return queryFactory.selectFrom(QReview.review)
+                .join(QReview.review.member, QMember.member).fetchJoin()
                 .join(QReview.review.place, QPlace.place).fetchJoin()
                 .join(QPlace.place.memory, QMemory.memory).fetchJoin()
                 .join(QMemberMemory.memberMemory).on(QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id))
@@ -113,5 +127,35 @@ public class ReviewRepository {
                 .orderBy(QReview.review.createdAt.desc())
                 .limit(10)
                 .fetch();
+    }
+
+    /** 내 전체 후기 조회 (등록일 최신순) */
+    public List<Review> findAllMyReview(Long memberId) {
+        return queryFactory.selectFrom(QReview.review)
+                .join(QReview.review.member, QMember.member).fetchJoin()
+                .join(QReview.review.place, QPlace.place).fetchJoin()
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
+                .join(QMemberMemory.memberMemory).on(QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id))
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QReview.review.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull(),
+                        QReview.review.deletedAt.isNull()
+                )
+                .orderBy(QReview.review.createdAt.desc())
+                .fetch();
+    }
+
+    /** 내 별점 평균 조회 (소수점 1자리, 후기 없으면 0.0) */
+    public BigDecimal getReviewAvg(Long memberId) {
+        Double reviewAvg =  queryFactory.select(QReview.review.rating.avg())
+                .from(QReview.review)
+                .where(
+                        QReview.review.member.id.eq(memberId),
+                        QReview.review.deletedAt.isNull()
+                ).fetchOne();
+        return reviewAvg == null ? BigDecimal.valueOf(0.0) : BigDecimal.valueOf(reviewAvg).setScale(1, RoundingMode.HALF_UP);
     }
 }

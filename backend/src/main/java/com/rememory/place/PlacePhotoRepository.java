@@ -20,10 +20,12 @@ public class PlacePhotoRepository {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
 
+    /** 장소 사진 저장 */
     public void save(PlacePhoto placePhoto) {
         em.persist(placePhoto);
     }
 
+    /** 장소의 전체 사진 목록 조회 (등록일 최신순, 삭제 제외) */
     public List<PlacePhoto> findAllByPlaceId(Long placeId) {
 
         return em.createQuery("select pp " +
@@ -35,6 +37,7 @@ public class PlacePhotoRepository {
                     .getResultList();
     }
 
+    /** 장소 사진 단건 조회 (삭제된 사진 제외) */
     public Optional<PlacePhoto> findOne(Long placePhotoId) {
         try {
             return Optional.ofNullable(
@@ -47,6 +50,7 @@ public class PlacePhotoRepository {
         }
     }
 
+    /** 장소 목록의 대표 사진(최신 1장씩) IN 쿼리 일괄 조회 - N+1 방지, 중복 시 최신 사진 유지 */
     public Map<Long, PlacePhotoResponseDTO> findThumbByPlaceIdList(List<Long> placeIdList) {
         QPlacePhoto pp = QPlacePhoto.placePhoto;
 
@@ -66,6 +70,7 @@ public class PlacePhotoRepository {
                 ));
     }
 
+    /** 장소의 현재 사진 수 조회 (최대 5장 제한 체크용) */
     public int countByPlaceId(Long placeId) {
          Long photoCount = queryFactory.select(QPlacePhoto.placePhoto.count())
                 .from(QPlacePhoto.placePhoto)

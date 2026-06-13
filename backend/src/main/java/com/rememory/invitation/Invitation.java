@@ -43,6 +43,7 @@ public class Invitation {
 
     private LocalDateTime expiresAt;
 
+    /** 정적 팩토리: 초대 링크 생성, UUID 코드 발급 */
     public static Invitation create(Memory memory, Member inviter) {
         Invitation invitation = new Invitation();
         invitation.memory = memory;
@@ -53,12 +54,14 @@ public class Invitation {
         return invitation;
     }
 
+    /** 최초 저장 시 생성일 + 만료일(3일 후) 자동 세팅 */
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.expiresAt = LocalDateTime.now().plusDays(3); // 초대 링크 유효 기간 3일
     }
 
+    /** 초대 수락 시 사용 횟수 증가 */
     public void plusUsedCount(){
         this.usedCount++;
     }

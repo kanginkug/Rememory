@@ -12,8 +12,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
-// JWT Access Token 생성·파싱·검증을 담당하는 컴포넌트
-// HS256 알고리즘을 사용하며, 토큰 페이로드에 memberId를 포함한다
+/**
+ * JWT Access Token 생성·파싱·검증을 담당하는 컴포넌트
+ * HS256 알고리즘을 사용하며, 토큰 페이로드에 memberId를 포함한다
+ */
 @Component
 public class JwtProvider {
     private final Key key;
@@ -31,7 +33,7 @@ public class JwtProvider {
         this.expirationMs = expirationsMs;
     }
 
-    // Access Token 생성: subject=memberId, 만료시간 설정 후 HS256으로 서명한다
+    /** Access Token 생성: subject=memberId, 만료시간 설정 후 HS256으로 서명한다 */
     public String createToken(Long memberId) {
         return Jwts.builder()
                 .setSubject(String.valueOf(memberId))
@@ -41,9 +43,10 @@ public class JwtProvider {
                 .compact();
     }
 
-    // 토큰 파싱: 서명을 검증하고 Claims(페이로드)를 반환한다
-    // 토큰 유효성 검사: 파싱 성공 여부로 유효성을 판단하며 예외는 false로 변환한다
-    // 서명 불일치·만료 등 이상이 있으면 JwtException을 던진다
+    /**
+     * 토큰 파싱: 서명을 검증하고 Claims(페이로드)를 반환한다
+     * 서명 불일치·만료 등 이상이 있으면 JwtException을 던진다
+     */
     public Claims parseToken(String token){
         try {
             Claims claims =  Jwts.parserBuilder()
@@ -68,7 +71,7 @@ public class JwtProvider {
         }
     }
 
-    // 토큰의 남은 만료 시간 반환 (밀리초)
+    /** 토큰의 남은 만료 시간 반환 (밀리초) */
     public long getRemainingExpiration(String token) {
         Date expiration = parseToken(token).getExpiration();
         return expiration.getTime() - System.currentTimeMillis();

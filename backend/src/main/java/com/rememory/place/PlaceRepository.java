@@ -23,10 +23,12 @@ public class PlaceRepository {
     private EntityManager em;
     private final JPAQueryFactory queryFactory;
 
-    public void save(Place place){
+    /** 장소 저장 */
+    public void save(Place place) {
         em.persist(place);
     }
 
+    /** memoryId + placeId로 장소 단건 조회 (삭제된 장소 제외) */
     public Optional<Place> findOne(Long memoryId, Long placeId) {
         try {
             return Optional.ofNullable(
@@ -43,40 +45,41 @@ public class PlaceRepository {
         }
     }
 
+    /** 추억 내 전체 장소 목록 조회 (등록일 최신순) */
     public List<Place> findAllByMemoryId(Long memoryId) {
-            return queryFactory.selectFrom(QPlace.place)
-                    .where(
-                            QPlace.place.deletedAt.isNull(),
-                            QPlace.place.memory.id.eq(memoryId)
-                    )
-                    .orderBy(QPlace.place.createdAt.desc())
-                    .fetch();
+        return queryFactory.selectFrom(QPlace.place)
+                .where(
+                        QPlace.place.deletedAt.isNull(),
+                        QPlace.place.memory.id.eq(memoryId)
+                )
+                .orderBy(QPlace.place.createdAt.desc())
+                .fetch();
     }
 
-    //카테고리, 지역 별 조회
+    /** 카테고리, 지역 별 조회 */
     public List<Place> findAllByCategoryAndRegion(Long memoryId, Category category, String regionDepth1, String regionDepth2) {
 
-            return queryFactory.selectFrom(QPlace.place)
-                    .where(
-                            QPlace.place.memory.id.eq(memoryId),
-                            QPlace.place.deletedAt.isNull(),
-                            category != null ? QPlace.place.category.eq(category) : null,
-                            regionDepth1 != null && !regionDepth1.isEmpty() ? QPlace.place.regionDepth1.eq(regionDepth1) : null,
-                            regionDepth2 != null && !regionDepth2.isEmpty() ? QPlace.place.regionDepth2.eq(regionDepth2) : null
-                    )
-                    .orderBy(QPlace.place.createdAt.desc())
-                    .fetch();
+        return queryFactory.selectFrom(QPlace.place)
+                .where(
+                        QPlace.place.memory.id.eq(memoryId),
+                        QPlace.place.deletedAt.isNull(),
+                        category != null ? QPlace.place.category.eq(category) : null,
+                        regionDepth1 != null && !regionDepth1.isEmpty() ? QPlace.place.regionDepth1.eq(regionDepth1) : null,
+                        regionDepth2 != null && !regionDepth2.isEmpty() ? QPlace.place.regionDepth2.eq(regionDepth2) : null
+                )
+                .orderBy(QPlace.place.createdAt.desc())
+                .fetch();
     }
 
-    //장소명 검색
+    /** 장소명 검색 */
     public List<Place> findByName(String name, Long memoryId) {
-            return queryFactory.selectFrom(QPlace.place)
-                  .where(
-                          QPlace.place.deletedAt.isNull(),
-                          QPlace.place.name.containsIgnoreCase(name),
-                          QPlace.place.memory.id.eq(memoryId)
-                  )
-                  .fetch();
+        return queryFactory.selectFrom(QPlace.place)
+                .where(
+                        QPlace.place.deletedAt.isNull(),
+                        QPlace.place.name.containsIgnoreCase(name),
+                        QPlace.place.memory.id.eq(memoryId)
+                )
+                .fetch();
     }
 
     /**
@@ -96,7 +99,9 @@ public class PlaceRepository {
                 .execute();
     }
 
-    /** 공식: newAvg = (avgRating * reviewCount - oldRating + newRating) / reviewCount */
+    /**
+     * 공식: newAvg = (avgRating * reviewCount - oldRating + newRating) / reviewCount
+     */
     public void updateRatingOnUpdate(Long placeId, BigDecimal newRating, BigDecimal oldRating) {
         queryFactory.update(QPlace.place)
                 .set(QPlace.place.avgRating,
@@ -131,9 +136,10 @@ public class PlaceRepository {
                 .execute();
     }
 
+    /** 평점 높은 순 베스트 장소 5개 조회 (내 모든 참여 추억 기준) */
     public List<Place> findBestPlace(Long memberId) {
         return queryFactory.selectFrom(QPlace.place)
-                .join(QMemory.memory).on(QPlace.place.memory.id.eq(QMemory.memory.id))
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
                 .join(QMemberMemory.memberMemory).on(QMemory.memory.id.eq(QMemberMemory.memberMemory.memory.id))
                 .where(
                         QMemberMemory.memberMemory.member.id.eq(memberId),
@@ -147,5 +153,37 @@ public class PlaceRepository {
                 )
                 .limit(5)
                 .fetch();
+    }
+
+    /** 내 모든 추억의 전체 장소 목록 조회 (지도 뷰용) */
+    public List<Place> findAllPlaceInfo(Long memberId) {
+        return queryFactory.selectFrom(QPlace.place)
+                .join(QPlace.place.memory, QMemory.memory).fetchJoin()
+                .join(QMemberMemory.memberMemory)
+                .on(QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id))
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull()
+                ).fetch();
+    }
+
+    /** 내 등록 장소 수 조회 */
+    public int getPlaceCount(Long memberId) {
+        Long placeCount = queryFactory.select(QPlace.place.count())
+                .from(QPlace.place)
+                .join(QMemory.memory)
+                .on(QMemory.memory.id.eq(QPlace.place.memory.id))
+                .join(QMemberMemory.memberMemory)
+                .on(QMemberMemory.memberMemory.memory.id.eq(QPlace.place.memory.id))
+                .where(
+                        QMemberMemory.memberMemory.member.id.eq(memberId),
+                        QMemberMemory.memberMemory.leftAt.isNull(),
+                        QMemory.memory.deletedAt.isNull(),
+                        QPlace.place.deletedAt.isNull()
+                ).fetchOne();
+
+        return placeCount == null ? 0 : placeCount.intValue();
     }
 }

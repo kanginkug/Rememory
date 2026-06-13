@@ -103,8 +103,8 @@ export default function MemoryListPage() {
       const link = `${window.location.origin}/invite/${inviteCode}`;
       await navigator.clipboard.writeText(link);
       alert('초대 링크가 클립보드에 복사됐습니다.');
-    } catch {
-      alert('초대 링크 생성에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 
@@ -119,19 +119,19 @@ export default function MemoryListPage() {
     try {
       await leaveMemory(memoryId);
       setMemories(prev => prev.filter(m => m.id !== memoryId));
-    } catch {
-      alert('추억 나가기에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 
   const handleDeleteMemory = async (memoryId: number) => {
     setSheetId(null);
-    if (!confirm('추억을 삭제하면 장소, 후기 등 모든 데이터가 사라집니다.\n정말 삭제하시겠어요?')) return;
+    if (!confirm('추억을 삭제하시겠어요?')) return;
     try {
       await deleteMemory(memoryId);
       setMemories(prev => prev.filter(m => m.id !== memoryId));
-    } catch {
-      alert('추억 삭제에 실패했습니다.');
+    } catch (e) {
+      alert((e as Error).message);
     }
   };
 
@@ -143,26 +143,21 @@ export default function MemoryListPage() {
         className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] z-20 flex justify-center items-end"
         style={{ background: '#BFDBF3', padding: '10px 20px 2px', height: 62 }}
       >
+        <button
+          className="absolute flex items-center justify-center"
+          style={{ left: 20, top: '58%', transform: 'translateY(-50%)' }}
+          onClick={() => router.push('/home')}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
         <img
           src="/images/default_phrase.png"
           alt="Rememory"
           className="object-contain"
           style={{ height: 50, mixBlendMode: 'multiply' }}
         />
-        <button
-          className="absolute flex items-center justify-center"
-          style={{ right: 20, top: '58%', transform: 'translateY(-50%)' }}
-        >
-          <img
-            src="/images/bell_icon_transparent.png"
-            alt="알림"
-            style={{
-              height: 22,
-              width: 'auto',
-              filter: 'brightness(0) saturate(100%) invert(20%) sepia(40%) saturate(500%) hue-rotate(330deg) brightness(55%)',
-            }}
-          />
-        </button>
       </header>
 
       {/* Content */}

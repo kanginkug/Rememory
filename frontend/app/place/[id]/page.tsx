@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import ImageLightbox from '@/components/ImageLightbox';
 import {
   fetchMemory,
   fetchMemoryPlaces,
-  fetchMemoryMembers,
   createInvitation,
   leaveMemory,
   deleteMemory,
@@ -43,6 +43,13 @@ const CATEGORY_ICON: Record<string, React.ReactNode> = {
       <line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>
     </svg>
   ),
+};
+
+const CATEGORY_FALLBACK: Record<Category, string> = {
+  RESTAURANT:    '/images/no_reveiw_restaurant.png',
+  ATTRACTION:    '/images/no_review_attraction.png',
+  ACCOMMODATION: '/images/no_review_accommodation.png',
+  CAFE:          '/images/no_review_cafe.png',
 };
 
 const CATEGORY_TAG: Record<Category, string> = {
@@ -82,7 +89,6 @@ export default function MemoryPlacePage() {
   const [memory,  setMemory]  = useState<MemoryDetail | null>(null);
   const [places,  setPlaces]  = useState<MemoryPlace[]>([]);
   const [members,        setMembers]        = useState<Member[]>([]);
-  const [membersLoading, setMembersLoading] = useState(false);
 
   const [descExpanded,  setDescExpanded]  = useState(false);
   const [descOverflows, setDescOverflows] = useState(false);
@@ -146,15 +152,8 @@ export default function MemoryPlacePage() {
     return map;
   }, [places]);
 
-  const handleOpenMemberSheet = async () => {
+  const handleOpenMemberSheet = () => {
     setMemberSheet(true);
-    if (members.length > 0) return;
-    setMembersLoading(true);
-    try {
-      const data = await fetchMemoryMembers(memoryId);
-      setMembers(data);
-    } catch { /* ignore */ }
-    finally { setMembersLoading(false); }
   };
 
   const handleInvite = async () => {
@@ -168,7 +167,7 @@ export default function MemoryPlacePage() {
       const link = `${window.location.origin}/invite/${inviteCode}`;
       await navigator.clipboard.writeText(link);
       alert('초대 링크가 클립보드에 복사됐습니다.');
-    } catch { alert('초대 링크 생성에 실패했습니다.'); }
+    } catch (e) { alert((e as Error).message); }
     setShareSheet(false);
   };
 
@@ -176,30 +175,36 @@ export default function MemoryPlacePage() {
     setMoreSheet(false);
     if (!confirm('정말 이 추억에서 나가시겠어요?')) return;
     try { await leaveMemory(memoryId); router.replace('/memory'); }
-    catch { alert('추억 나가기에 실패했습니다.'); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const handleDeleteMemory = async () => {
     setMoreSheet(false);
-    if (!confirm('추억을 삭제하면 장소, 후기 등 모든 데이터가 사라집니다.\n정말 삭제하시겠어요?')) return;
+    if (!confirm('추억을 삭제하시겠어요?')) return;
     try { await deleteMemory(memoryId); router.replace('/memory'); }
-    catch { alert('추억 삭제에 실패했습니다.'); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const handleDeletePlace = async (placeId: number) => {
     setPlaceMoreId(null);
     if (!confirm('장소를 삭제하시겠어요?')) return;
-    try { await deletePlace(placeId); setPlaces(prev => prev.filter(p => p.id !== placeId)); }
-    catch { alert('장소 삭제에 실패했습니다.'); }
+    try { await deletePlace(memoryId, placeId); setPlaces(prev => prev.filter(p => p.id !== placeId)); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const avgRating = memory?.avgRating ?? 0;
   const starPct   = (avgRating / 5) * 100;
 
+  const totalPhotoCount = useMemo(
+    () => places.reduce((sum, p) => sum + p.placePhotoList.length, 0),
+    [places]
+  );
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+
   return (
     <div style={{ background: '#BFDBF3', minHeight: '100dvh' }}>
       <header className="app-header">
-        <button className="back-btn" onClick={() => router.back()}>
+        <button className="back-btn" onClick={() => router.push('/memory')}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
           </svg>
@@ -279,6 +284,18 @@ export default function MemoryPlacePage() {
             </div>
           )}
 
+          {/* 추억 대표 사진 */}
+          {memory?.imageUrl && (
+            <div className="memory-hero" onClick={() => setLightbox({ images: [memory.imageUrl!], index: 0 })}>
+              <img
+                className="memory-hero-img"
+                src={memory.imageUrl}
+                alt="추억 대표 사진"
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
+          )}
+
           {/* 요약 카드 */}
           <div className="summary-card">
             <div className="summary-item">
@@ -291,7 +308,7 @@ export default function MemoryPlacePage() {
               <div className="summary-value">{avgRating > 0 ? avgRating.toFixed(1) : '-'}</div>
               {avgRating > 0 && (
                 <div className="stars">
-                  <svg width="66" height="13" viewBox="0 0 66 13">
+                  <svg width="72" height="13" viewBox="0 0 72 13">
                     <defs><clipPath id="starFill"><rect x="0" y="0" width={`${starPct}%`} height="13" /></clipPath></defs>
                     <text x="0" y="11" fontSize="13" letterSpacing="1" fill="#e2e8f0">★★★★★</text>
                     <text x="0" y="11" fontSize="13" letterSpacing="1" fill="#ffb800" clipPath="url(#starFill)">★★★★★</text>
@@ -377,12 +394,12 @@ export default function MemoryPlacePage() {
           ) : (
           <div className="place-list">
             {filteredPlaces.map(place => (
-              <Link key={place.id} href={`/memory/${memoryId}/place/${place.id}`} className="place-card">
+              <Link key={place.id} href={`/place/${memoryId}/${place.id}`} className="place-card">
                 <img
                   className="place-img"
-                  src={place.placePhotoList[0]?.imageUrl ?? '/images/no-place.png'}
+                  src={place.placePhotoList.at(-1)?.imageUrl ?? CATEGORY_FALLBACK[place.category]}
                   alt={place.name}
-                  onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/no-place.png'; }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).src = CATEGORY_FALLBACK[place.category]; }}
                 />
                 <div className="place-info">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 4 }}>
@@ -418,7 +435,7 @@ export default function MemoryPlacePage() {
         </div>
 
         {/* FAB */}
-        <button className="fab" onClick={() => router.push(`/memory/${memoryId}/place/new`)}>
+        <button className="fab" onClick={() => router.push(`/place/${memoryId}/new`)}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
           </svg>
@@ -435,6 +452,10 @@ export default function MemoryPlacePage() {
           ))}
         </nav>
       </div>
+
+      {lightbox && (
+        <ImageLightbox images={lightbox.images} startIndex={lightbox.index} onClose={() => setLightbox(null)} />
+      )}
 
       {/* ── 바텀시트 ── */}
 
@@ -513,9 +534,7 @@ export default function MemoryPlacePage() {
             <div className="sheet-handle" />
             <div className="sheet-title">멤버 {members.length}명</div>
             <div className="sheet-body">
-              {membersLoading ? (
-                <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8', fontSize: 14 }}>불러오는 중...</div>
-              ) : members.map(m => (
+              {members.map(m => (
                 <div key={m.memberId} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px' }}>
                   {m.profileImageUrl
                     ? <img src={m.profileImageUrl} alt={m.name} style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} onError={e => { (e.currentTarget as HTMLImageElement).replaceWith(document.createElement('div')); }} />
@@ -565,7 +584,7 @@ export default function MemoryPlacePage() {
         <div className="sheet-overlay open" onClick={() => setPlaceMoreId(null)}>
           <div className="sheet" onClick={e => e.stopPropagation()}>
             <div className="sheet-handle" />
-            <div className="menu-item" onClick={() => { setPlaceMoreId(null); router.push(`/memory/${memoryId}/place/${placeMoreId}/edit`); }}>
+            <div className="menu-item" onClick={() => { setPlaceMoreId(null); router.push(`/place/${memoryId}/${placeMoreId}/edit`); }}>
               <div className="menu-item-icon" style={{ background: '#f1f0ff' }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7F77DD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>

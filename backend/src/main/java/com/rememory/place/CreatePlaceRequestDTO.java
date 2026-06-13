@@ -32,6 +32,8 @@ public class CreatePlaceRequestDTO {
 
     private String kakaoPlaceId;
 
+    private String kakaoPlaceName;
+
     private BigDecimal latitude;
 
     private BigDecimal longitude;

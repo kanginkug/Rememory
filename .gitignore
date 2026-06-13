@@ -65,3 +65,6 @@ backend/API_TEST_RESULTS.md
 
 ### Design Files ###
 frontend/design/
+
+### Seed Data ###
+backend/src/main/resources/db/seed/

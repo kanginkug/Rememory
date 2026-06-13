@@ -24,6 +24,7 @@ public class InvitationService {
     private final MemoryRepository memoryRepository;
     private final MemberMemoryRepository mmRepository;
 
+    /** 초대 링크 생성 및 저장, 생성된 invite code 반환 */
     @Transactional
     public String save(Long memoryId, Long invitorId){
         Member invitor =  memberRepository.findOne(invitorId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));

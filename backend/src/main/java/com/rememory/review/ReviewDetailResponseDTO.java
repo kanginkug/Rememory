@@ -14,6 +14,10 @@ import java.util.List;
 public class ReviewDetailResponseDTO {
     private Long reviewId;
     private Long memberId;
+    private Long memoryId;
+    private Long placeId;
+    private String creatorName;
+    private String profileImageUrl;
     private BigDecimal rating;
     private String content;
     private String placeName;
@@ -23,10 +27,14 @@ public class ReviewDetailResponseDTO {
     private LocalDate visitedAt;
     private LocalDateTime createdAt;
 
-    public static ReviewDetailResponseDTO from(Review review, List<ReviewPhotoResponseDTO> rpResponseDTOList) {
+    public static ReviewDetailResponseDTO from(Review review, Long memoryId, Long placeId, List<ReviewPhotoResponseDTO> rpResponseDTOList) {
         return new ReviewDetailResponseDTO(
           review.getId(),
           review.getMember().getId(),
+          memoryId,
+          placeId,
+          review.getMember().getName(),
+          review.getMember().getProfileImageUrl(),
           review.getRating(),
           review.getContent(),
           review.getPlace().getName(),

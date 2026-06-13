@@ -42,6 +42,7 @@ public class Review {
 
     private LocalDateTime deletedAt;
 
+    /** 정적 팩토리: 신규 후기 생성 */
     public static Review create(Member member, Place place, BigDecimal rating, String content, LocalDate visitedAt) {
         Review review = new Review();
         review.member = member;
@@ -53,6 +54,7 @@ public class Review {
         return review;
     }
 
+    /** 후기 내용·별점 수정, updatedAt 자동 갱신 */
     public void update(BigDecimal rating, String content, LocalDate visitedAt) {
         this.rating = rating;
         this.content = content;
@@ -60,11 +62,13 @@ public class Review {
         this.updatedAt = LocalDateTime.now();
     }
 
+    /** 최초 저장 시 생성일 자동 세팅 */
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
+    /** Soft delete: 후기 삭제 처리 */
     public void delete() {
         this.deletedAt = LocalDateTime.now();
     }
