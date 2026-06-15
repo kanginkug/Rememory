@@ -44,6 +44,7 @@ export default function HomePage() {
   const [bestPlaces, setBestPlaces] = useState<BestPlace[]>([]);
   const [memories,   setMemories]   = useState<Memory[]>([]);
   const [reviews,    setReviews]    = useState<RecentReview[]>([]);
+  const [loaded,     setLoaded]     = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) {
@@ -62,6 +63,7 @@ export default function HomePage() {
       if (p.status === 'fulfilled') setBestPlaces(p.value);
       if (m.status === 'fulfilled') setMemories(m.value);
       if (r.status === 'fulfilled') setReviews(r.value);
+      setLoaded(true);
     });
   }, [router]);
 
@@ -136,17 +138,33 @@ export default function HomePage() {
 
         <main className="app-main">
 
-          {/* 새 추억 만들기 CTA */}
-          <section className="cta-section">
-            <button className="main-cta-btn" onClick={() => router.push('/memory/new')}>
-              <span className="btn-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zm7-10.7h-1.4l-1.4-1.5H7.8L6.4 4.5H5C3.9 4.5 3 5.4 3 6.5v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-12c0-1.1-.9-2-2-2zm-7 11.7a4.7 4.7 0 1 1 0-9.4 4.7 4.7 0 0 1 0 9.4z" />
-                </svg>
-              </span>
-              새 추억 만들기 +
-            </button>
-          </section>
+          {/* 새 추억 만들기 CTA or 빈 상태 */}
+          {loaded && bestPlaces.length === 0 && memories.length === 0 && reviews.length === 0 ? (
+            <section className="no-data-section">
+              <img className="no-data-img" src="/images/home_no_data.png" alt="추억 없음" />
+              <p className="no-data-title">아직 기록된 추억이 없어요.</p>
+              <p className="no-data-desc">소중한 순간들을 기록해보세요.<br />새 추억을 추가하면 이곳에 나타납니다!</p>
+              <button className="main-cta-btn" onClick={() => router.push('/memory/new')}>
+                <span className="btn-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zm7-10.7h-1.4l-1.4-1.5H7.8L6.4 4.5H5C3.9 4.5 3 5.4 3 6.5v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-12c0-1.1-.9-2-2-2zm-7 11.7a4.7 4.7 0 1 1 0-9.4 4.7 4.7 0 0 1 0 9.4z" />
+                  </svg>
+                </span>
+                새 추억 만들기 +
+              </button>
+            </section>
+          ) : (
+            <section className="cta-section">
+              <button className="main-cta-btn" onClick={() => router.push('/memory/new')}>
+                <span className="btn-icon">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4zm7-10.7h-1.4l-1.4-1.5H7.8L6.4 4.5H5C3.9 4.5 3 5.4 3 6.5v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-12c0-1.1-.9-2-2-2zm-7 11.7a4.7 4.7 0 1 1 0-9.4 4.7 4.7 0 0 1 0 9.4z" />
+                  </svg>
+                </span>
+                새 추억 만들기 +
+              </button>
+            </section>
+          )}
 
           {/* 우리 추억 장소 베스트 */}
           {bestPlaces.length > 0 && (
