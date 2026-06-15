@@ -250,42 +250,64 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
             기간 설정
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* 시작일 */}
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '10px 10px', border: '1px solid #EAEAEA', borderRadius: 12,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 12px', border: '1px solid #EAEAEA', borderRadius: 12,
                 fontSize: 13, background: '#FAFAFA',
                 color: startDate ? '#333' : '#94a3b8',
               }}>
-                <span style={{ fontSize: 12 }}>📅</span>
                 <span>{startDate ? startDate.replace(/-/g, '.') : '시작일'}</span>
+                {!startDate && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                )}
               </div>
               <input
                 type="date"
                 value={startDate}
                 max={endDate || undefined}
                 onChange={e => handleStartDateChange(e.target.value)}
-                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', zIndex: 1 }}
               />
+              {startDate && (
+                <button type="button" onClick={() => setStartDate('')}
+                  style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', zIndex: 2, background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 15, lineHeight: 1, padding: '2px 4px' }}>
+                  ✕
+                </button>
+              )}
             </div>
             <span style={{ color: '#777', fontWeight: 700, flexShrink: 0, fontSize: 14 }}>~</span>
+            {/* 종료일 */}
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '10px 10px', border: '1px solid #EAEAEA', borderRadius: 12,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 12px', border: '1px solid #EAEAEA', borderRadius: 12,
                 fontSize: 13, background: '#FAFAFA',
                 color: endDate ? '#333' : '#94a3b8',
               }}>
-                <span style={{ fontSize: 12 }}>📅</span>
                 <span>{endDate ? endDate.replace(/-/g, '.') : '종료일'}</span>
+                {!endDate && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                )}
               </div>
               <input
                 type="date"
                 value={endDate}
                 min={startDate || undefined}
                 onChange={e => handleEndDateChange(e.target.value)}
-                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', zIndex: 1 }}
               />
+              {endDate && (
+                <button type="button" onClick={() => setEndDate('')}
+                  style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', zIndex: 2, background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 15, lineHeight: 1, padding: '2px 4px' }}>
+                  ✕
+                </button>
+              )}
             </div>
           </div>
         </div>
