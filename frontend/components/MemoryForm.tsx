@@ -251,35 +251,41 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '10px 10px', border: '1px solid #EAEAEA', borderRadius: 12,
+                fontSize: 13, background: '#FAFAFA',
+                color: startDate ? '#333' : '#94a3b8',
+              }}>
+                <span style={{ fontSize: 12 }}>📅</span>
+                <span>{startDate ? startDate.replace(/-/g, '.') : '시작일'}</span>
+              </div>
               <input
                 type="date"
                 value={startDate}
                 max={endDate || undefined}
                 onChange={e => handleStartDateChange(e.target.value)}
-                style={{
-                  width: '100%', padding: '10px 6px 10px 26px',
-                  border: '1px solid #EAEAEA', borderRadius: 12,
-                  fontSize: 13, background: '#FAFAFA', outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
               />
-              <span style={{ position: 'absolute', left: 7, top: '50%', transform: 'translateY(-50%)', fontSize: 12, pointerEvents: 'none' }}>📅</span>
             </div>
             <span style={{ color: '#777', fontWeight: 700, flexShrink: 0, fontSize: 14 }}>~</span>
             <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '10px 10px', border: '1px solid #EAEAEA', borderRadius: 12,
+                fontSize: 13, background: '#FAFAFA',
+                color: endDate ? '#333' : '#94a3b8',
+              }}>
+                <span style={{ fontSize: 12 }}>📅</span>
+                <span>{endDate ? endDate.replace(/-/g, '.') : '종료일'}</span>
+              </div>
               <input
                 type="date"
                 value={endDate}
                 min={startDate || undefined}
                 onChange={e => handleEndDateChange(e.target.value)}
-                style={{
-                  width: '100%', padding: '10px 6px 10px 26px',
-                  border: '1px solid #EAEAEA', borderRadius: 12,
-                  fontSize: 13, background: '#FAFAFA', outline: 'none',
-                  boxSizing: 'border-box',
-                }}
+                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
               />
-              <span style={{ position: 'absolute', left: 7, top: '50%', transform: 'translateY(-50%)', fontSize: 12, pointerEvents: 'none' }}>📅</span>
             </div>
           </div>
         </div>
