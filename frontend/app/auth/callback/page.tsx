@@ -15,9 +15,17 @@ function CallbackInner() {
     if (!token) { router.replace('/login'); return; }
 
     localStorage.setItem('accessToken', token);
-    setTimeout(() => setStep(1), 600);
-    setTimeout(() => setStep(2), 1300);
-    setTimeout(() => router.replace('/home'), 2000);
+    const pendingInviteCode = localStorage.getItem('pendingInviteCode');
+    if (pendingInviteCode) {
+      localStorage.removeItem('pendingInviteCode');
+      setTimeout(() => setStep(1), 600);
+      setTimeout(() => setStep(2), 1300);
+      setTimeout(() => router.replace(`/invite/${pendingInviteCode}`), 2000);
+    } else {
+      setTimeout(() => setStep(1), 600);
+      setTimeout(() => setStep(2), 1300);
+      setTimeout(() => router.replace('/home'), 2000);
+    }
   }, [router, searchParams]);
 
   return (
