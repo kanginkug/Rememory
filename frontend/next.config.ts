@@ -19,4 +19,13 @@ export default withPWA({
   aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
   disable: process.env.NODE_ENV === "development",
+  extendDefaultRuntimeCaching: true,
+  workboxOptions: {
+    runtimeCaching: [
+      {
+        urlPattern: /^https:\/\/dapi\.kakao\.com\/.*/i,
+        handler: "NetworkOnly",
+      },
+    ],
+  },
 })(nextConfig);
