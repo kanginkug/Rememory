@@ -63,6 +63,7 @@ export default function MemoryListPage() {
   const [inputValue, setInputValue] = useState('');
   const [sort, setSort] = useState<SortType>('DATE_DESC');
   const [sheetId, setSheetId] = useState<number | null>(null);
+  const [shareData, setShareData] = useState<{ inviteLink: string; memoryName: string } | null>(null);
   const currentKeyword = useRef('');
 
   const load = useCallback((s: SortType, keyword: string) => {
@@ -101,11 +102,30 @@ export default function MemoryListPage() {
     try {
       const { inviteCode } = await createInvitation(memoryId);
       const link = `${window.location.origin}/invite/${inviteCode}`;
-      await navigator.clipboard.writeText(link);
-      alert('초대 링크가 클립보드에 복사됐습니다.');
+      const mem = memories.find(m => m.id === memoryId);
+      setShareData({ inviteLink: link, memoryName: mem?.name ?? '' });
     } catch (e) {
       alert((e as Error).message);
     }
+  };
+
+  const handleKakaoShare = () => {
+    if (!shareData) return;
+    window.Kakao.Share.sendDefault({
+      objectType: 'text',
+      text: `[Rememory] ${shareData.memoryName}에 초대합니다!\n아래 버튼을 눌러 추억에 참여하세요 🎉`,
+      link: { mobileWebUrl: shareData.inviteLink, webUrl: shareData.inviteLink },
+      buttons: [{ title: '추억 참여하기', link: { mobileWebUrl: shareData.inviteLink, webUrl: shareData.inviteLink } }],
+    });
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!shareData) return;
+    try {
+      await navigator.clipboard.writeText(shareData.inviteLink);
+      alert('초대 링크가 복사됐습니다.');
+    } catch (e) { alert('복사에 실패했습니다.'); }
+    setShareData(null);
   };
 
   const handleEdit = (memoryId: number) => {
@@ -367,6 +387,48 @@ export default function MemoryListPage() {
           </Link>
         ))}
       </nav>
+
+      {/* 공유 시트 */}
+      {shareData && (
+        <div
+          className="fixed inset-0 flex items-end justify-center z-50"
+          style={{ background: 'rgba(0,0,0,0.4)' }}
+          onClick={() => setShareData(null)}
+        >
+          <div
+            className="w-full max-w-[450px] bg-white"
+            style={{ borderRadius: '24px 24px 0 0', padding: '12px 20px 40px' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ width: 36, height: 4, background: '#e2e8f0', borderRadius: 2, margin: '0 auto 16px' }} />
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#1e293b', marginBottom: 16, textAlign: 'center' }}>공유하기</p>
+            <button className="kakao-share-btn" onClick={handleKakaoShare}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="#191919">
+                <path d="M12 3C6.477 3 2 6.597 2 11.05c0 2.9 1.733 5.456 4.345 7.01l-1.107 4.1a.3.3 0 0 0 .444.333l4.835-3.17A12.03 12.03 0 0 0 12 19.1c5.523 0 10-3.597 10-8.05S17.523 3 12 3z" />
+              </svg>
+              카카오톡으로 공유하기
+            </button>
+            <button
+              onClick={handleCopyShareLink}
+              style={{
+                width: '100%', padding: '14px 0', marginTop: 10, borderRadius: 14,
+                border: '1.5px solid #e2e8f0', background: '#fff',
+                fontSize: 15, fontWeight: 700, color: '#475569', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+              </svg>
+              링크 복사
+            </button>
+            <p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', paddingTop: 12 }}>
+              링크를 받은 사람은 로그인 후 자동으로 추억에 참여돼요
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* More Bottom Sheet */}
       {sheetId !== null && (
