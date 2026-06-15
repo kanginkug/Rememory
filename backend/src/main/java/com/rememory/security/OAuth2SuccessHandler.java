@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -23,13 +24,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
 
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     /** OAuth2 인증 성공 후 JWT 발급 및 프론트 콜백 URL로 리다이렉트 */
     @Override
     public void onAuthenticationSuccess(@NonNull HttpServletRequest request,
                                         @NonNull HttpServletResponse response,
                                         @NonNull Authentication authentication) throws IOException {
 
-        // 카카오/구글 유저 정보 추출
         OAuth2User oAuth2User = (OAuth2User) Objects.requireNonNull(authentication.getPrincipal());
 
         String provider = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
@@ -46,8 +49,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String token = jwtProvider.createToken(member.getId());
 
-        // 프론트로 토큰과 함께 리다이렉트 (배포 전 HttpOnly 쿠키 방식으로 변경 예정)
         getRedirectStrategy().sendRedirect(request, response,
-                "http://localhost:3000/auth/callback?token=" + token);
+                frontendUrl + "/auth/callback?token=" + token);
     }
 }
