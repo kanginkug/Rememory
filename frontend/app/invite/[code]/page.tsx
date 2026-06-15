@@ -22,13 +22,15 @@ export default function InvitePage() {
     agreeInvitation(code)
       .then(() => router.replace('/home'))
       .catch((err: Error) => {
-        setStatus('error');
-        if (err.message.includes('INVITATION_EXPIRED')) {
-          setErrorMsg('초대 링크가 만료되었습니다.');
-        } else if (err.message.includes('INVITATION_MAX_USES_EXCEEDED')) {
-          setErrorMsg('초대 링크 사용 횟수를 초과했습니다.');
-        } else if (err.message.includes('MEMBER_MEMORY_ALREADY_EXISTS')) {
+        if (err.message.includes('이미 참가한')) {
           router.replace('/home');
+          return;
+        }
+        setStatus('error');
+        if (err.message.includes('만료된')) {
+          setErrorMsg('초대 링크가 만료되었습니다.');
+        } else if (err.message.includes('사용 횟수')) {
+          setErrorMsg('초대 링크 사용 횟수를 초과했습니다.');
         } else {
           setErrorMsg('초대 링크가 유효하지 않습니다.');
         }
