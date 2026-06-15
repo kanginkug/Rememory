@@ -128,7 +128,6 @@ export interface MemoryDetail {
   id: number;
   name: string;
   avgRating: number;
-  showHistoryToNew: boolean;
   placeCount: number;
   memberCount: number;
   creatorId: number;
