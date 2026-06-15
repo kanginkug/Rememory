@@ -332,6 +332,9 @@ export const createMemory = (body: CreateMemoryRequest) =>
 export const createInvitation = (memoryId: number) =>
   apiFetch<{ inviteCode: string }>(`/invitation/memory/${memoryId}`, { method: 'POST' });
 
+export const agreeInvitation = (inviteCode: string) =>
+  apiFetch<void>(`/invitation/agree/${inviteCode}`, { method: 'POST' });
+
 export const leaveMemory = (memoryId: number) =>
   apiFetch<void>(`/memory/${memoryId}/left`, { method: 'DELETE' });
 
