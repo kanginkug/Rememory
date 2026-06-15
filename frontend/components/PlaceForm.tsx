@@ -259,13 +259,22 @@ export default function PlaceForm({
           {/* 방문일 */}
           <div className="input-field">
             <label className="field-label">방문일</label>
-            <div className="date-input-wrapper">
+            <div style={{ position: 'relative' }}>
+              <div className={`date-trigger${visitedAt ? '' : ' empty'}`}>
+                <span>{visitedAt ? visitedAt.replace(/-/g, '.') : '날짜 선택'}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={visitedAt ? '#475569' : '#94a3b8'} strokeWidth="2" strokeLinecap="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
               <input
                 type="date"
                 value={visitedAt}
                 onChange={e => setVisitedAt(e.target.value)}
+                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
               />
-              <span className="calendar-icon">📅</span>
             </div>
           </div>
 
