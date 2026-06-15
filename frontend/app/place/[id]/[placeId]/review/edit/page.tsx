@@ -96,12 +96,6 @@ export default function EditReviewPage() {
   const [newPreviews,     setNewPreviews]     = useState<string[]>([]);
   const [submitting,      setSubmitting]      = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
-  const dateInputRef  = useRef<HTMLInputElement>(null);
-
-  const openDatePicker = () => {
-    try { (dateInputRef.current as HTMLInputElement & { showPicker?: () => void })?.showPicker?.(); }
-    catch { dateInputRef.current?.click(); }
-  };
 
   const keptPhotos  = existingPhotos.filter(p => !removedPhotoIds.includes(p.reviewPhotoId));
   const totalPhotos = keptPhotos.length + newPhotos.length;
@@ -248,26 +242,23 @@ export default function EditReviewPage() {
           {/* 방문일 */}
           <div className="input-field">
             <label className="field-label">방문일</label>
-            <button
-              type="button"
-              className={`date-trigger${visitedAt ? '' : ' empty'}`}
-              onClick={openDatePicker}
-            >
-              <span>{visitedAt ? visitedAt.replace(/-/g, '.') : '날짜 선택'}</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={visitedAt ? '#475569' : '#94a3b8'} strokeWidth="2" strokeLinecap="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </button>
-            <input
-              ref={dateInputRef}
-              type="date"
-              value={visitedAt}
-              onChange={e => setVisitedAt(e.target.value)}
-              style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', width: '1px', height: '1px' }}
-            />
+            <div style={{ position: 'relative' }}>
+              <div className={`date-trigger${visitedAt ? '' : ' empty'}`}>
+                <span>{visitedAt ? visitedAt.replace(/-/g, '.') : '날짜 선택'}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={visitedAt ? '#475569' : '#94a3b8'} strokeWidth="2" strokeLinecap="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
+              <input
+                type="date"
+                value={visitedAt}
+                onChange={e => setVisitedAt(e.target.value)}
+                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer' }}
+              />
+            </div>
           </div>
 
           {/* 리뷰 내용 */}
