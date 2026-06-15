@@ -17,6 +17,12 @@
 /.next/
 /out/
 
+# pwa (auto-generated on build)
+/public/sw.js
+/public/sw.js.map
+/public/workbox-*.js
+/public/workbox-*.js.map
+
 # production
 /build
 
@@ -39,3 +45,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# api docs (internal)
+API.md
+
+# local dev files
+PAGES.md
+/bug

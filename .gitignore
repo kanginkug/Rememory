@@ -38,12 +38,33 @@ out/
 
 .env
 docker/.env
+backend/.env
 
 node_modules/
 /package.json
 /package-lock.json
 
 CLAUDE.md
+CONVENTIONS.md
 .claude/
 todo.md
+BLOG.md
 firebase-service-account.json
+
+### QueryDSL Generated ###
+**/src/main/generated/
+
+### Test ###
+backend/src/test/resources/application.properties
+
+### Uploads ###
+backend/uploads/
+
+### Local Test Results ###
+backend/API_TEST_RESULTS.md
+
+### Design Files ###
+frontend/design/
+
+### Seed Data ###
+backend/src/main/resources/db/seed/

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/style.css";
 
 :root {
   --background: #ffffff;
@@ -12,15 +13,33 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.bell-img { display: none; }
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.login-bg {
+  background-image: url('/images/login-bg.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-color: #BFDBF3;
+}
+
+.memory-desc-card .place-desc-wrap { position: relative; }
+.memory-desc-card .memory-desc-text.place-desc-clamped { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.memory-desc-card .memory-desc-text.place-desc-expanded { display: block; overflow: visible; margin-bottom: 4px; }
+.memory-desc-card .desc-toggle-btn { border: none; padding: 0; font-size: 11px; font-weight: 700; color: #7F77DD; cursor: pointer; background: none; }
+.memory-desc-card .place-desc-clamped ~ .desc-toggle-btn { position: absolute; bottom: 0; right: 0; background: linear-gradient(to right, transparent, white 30%); padding-left: 20px; }
+.memory-desc-card .place-desc-expanded ~ .desc-toggle-btn { position: static; display: block; }

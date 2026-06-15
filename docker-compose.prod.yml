@@ -1,0 +1,25 @@
+services:
+  app:
+    image: inkug/rememory-app:latest
+    container_name: rememory-app
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - backend/.env  
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      RDS_URL: ${RDS_URL}
+      RDS_USER: ${RDS_USER}
+      RDS_PASSWORD: ${RDS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      FRONTEND_URL: ${FRONTEND_URL}
+      COOKIE_SECURE: ${COOKIE_SECURE}
+      UPLOAD_DIR: ${UPLOAD_DIR}
+      FIREBASE_SERVICE_ACCOUNT_PATH: ${FIREBASE_SERVICE_ACCOUNT_PATH}

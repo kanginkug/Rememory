@@ -1,16 +1,22 @@
 package com.rememory.member;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
-import org.springframework.context.annotation.Description;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Table(
+    name = "member",
+    uniqueConstraints = @UniqueConstraint(
+            name = "uk_oauth",
+            columnNames = {"oauth_provider", "oauth_id"}
+    )
+)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
 
     @Id
@@ -35,4 +41,41 @@ public class Member {
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
+
+    /** 정적 팩토리: 신규 회원 생성 */
+    public static Member create(String name, String email, String profileImageUrl, String oauthProvider, String oauthId) {
+        Member member = new Member();
+        member.name = name;
+        member.email = email;
+        member.profileImageUrl = profileImageUrl;
+        member.oauthProvider = oauthProvider;
+        member.oauthId = oauthId;
+        return member;
+    }
+
+    /** 최초 저장 시 생성일 자동 세팅 */
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    /** Soft delete: 탈퇴 처리 */
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    /** 탈퇴 취소 시 계정 복구 */
+    public void restore() {
+        this.deletedAt = null;
+    }
+
+    /** 닉네임 변경 */
+    public void updateInfo(String name) {
+        this.name = name;
+    }
+
+    /** 프로필 이미지 URL 변경 */
+    public void updateProfileImg(String imageUrl) {
+        this.profileImageUrl = imageUrl;
+    }
 }
