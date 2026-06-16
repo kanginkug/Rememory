@@ -9,6 +9,11 @@ const STEPS = [
     desc: '소중한 순간들을 추억으로 기록해보세요.\n친구들과 함께 추억을 공유할 수 있어요.',
   },
   {
+    image: '/images/guide/memory_invitation.png',
+    title: '친구를 추억에 초대하려면?',
+    desc: '추억 카드의 ··· 버튼을 누르면\n초대하기 메뉴가 나타나요.\n초대하기를 눌러 친구를 초대해보세요!',
+  },
+  {
     image: '/images/guide/inviation_guide.png',
     title: '친구 초대하기',
     desc: '초대 코드로 친구를 추억에 초대해보세요.\n초대된 친구만 해당 추억의 장소와 후기를\n공유할 수 있어요.',
