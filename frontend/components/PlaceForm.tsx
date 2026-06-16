@@ -100,8 +100,7 @@ export default function PlaceForm({
   const queryRef    = useRef<HTMLInputElement>(null);
   const visitedAtRef = useRef<HTMLInputElement>(null);
 
-  const openPicker = (ref: React.RefObject<HTMLInputElement | null>) => {
-    const el = ref.current;
+  const openPicker = (el: HTMLInputElement | null) => {
     if (!el) return;
     if (typeof (el as HTMLInputElement & { showPicker?: () => void }).showPicker === 'function') {
       (el as HTMLInputElement & { showPicker: () => void }).showPicker();
@@ -271,7 +270,7 @@ export default function PlaceForm({
           <div className="input-field">
             <label className="field-label">방문일</label>
             <div style={{ position: 'relative' }}>
-              <div className={`date-trigger${visitedAt ? '' : ' empty'}`} onClick={() => openPicker(visitedAtRef)} style={{ cursor: 'pointer' }}>
+              <div className={`date-trigger${visitedAt ? '' : ' empty'}`} onClick={() => openPicker(visitedAtRef.current)} style={{ cursor: 'pointer' }}>
                 <span>{visitedAt ? visitedAt.replace(/-/g, '.') : '날짜 선택'}</span>
                 {!visitedAt ? (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
