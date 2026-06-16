@@ -37,11 +37,11 @@ export default function CreatePlacePage() {
     }
 
     try {
-      let imageUrlList: string[] | undefined;
+      let photoUrlList: string[] | undefined;
       if (newPhotos.length > 0) {
         const slots = await fetchPresignedUrls('place', newPhotos.length);
         await Promise.all(slots.map((slot, i) => uploadToS3(slot.presignedUrl, newPhotos[i])));
-        imageUrlList = slots.map(s => s.imageUrl);
+        photoUrlList = slots.map(s => s.imageUrl);
       }
 
       await createPlace(memoryId, {
@@ -49,7 +49,7 @@ export default function CreatePlacePage() {
         category,
         description: description.trim() || undefined,
         visitedAt: visitedAt || undefined,
-        imageUrlList,
+        photoUrlList,
         ...locationInfo,
       });
 
