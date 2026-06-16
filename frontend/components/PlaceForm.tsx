@@ -100,7 +100,7 @@ export default function PlaceForm({
   const queryRef    = useRef<HTMLInputElement>(null);
   const visitedAtRef = useRef<HTMLInputElement>(null);
 
-  const openPicker = (ref: React.RefObject<HTMLInputElement>) => {
+  const openPicker = (ref: React.RefObject<HTMLInputElement | null>) => {
     const el = ref.current;
     if (!el) return;
     if (typeof (el as HTMLInputElement & { showPicker?: () => void }).showPicker === 'function') {
