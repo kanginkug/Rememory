@@ -26,6 +26,10 @@ export default withPWA({
         urlPattern: /^https:\/\/dapi\.kakao\.com\/.*/i,
         handler: "NetworkOnly",
       },
+      {
+        urlPattern: /^https:\/\/api\.rememory\.me\/.*/i,
+        handler: "NetworkOnly",
+      },
     ],
   },
 })(nextConfig);
