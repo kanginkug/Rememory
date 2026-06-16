@@ -34,8 +34,7 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
   const startDateRef  = useRef<HTMLInputElement>(null);
   const endDateRef    = useRef<HTMLInputElement>(null);
 
-  const openPicker = (ref: React.RefObject<HTMLInputElement | null>) => {
-    const el = ref.current;
+  const openPicker = (el: HTMLInputElement | null) => {
     if (!el) return;
     if (typeof (el as HTMLInputElement & { showPicker?: () => void }).showPicker === 'function') {
       (el as HTMLInputElement & { showPicker: () => void }).showPicker();
@@ -271,7 +270,7 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
                   fontSize: 13, background: '#FAFAFA',
                   color: startDate ? '#333' : '#94a3b8', cursor: 'pointer',
                 }}
-                onClick={() => openPicker(startDateRef)}
+                onClick={() => openPicker(startDateRef.current)}
               >
                 <span>{startDate ? startDate.replace(/-/g, '.') : '시작일'}</span>
                 {!startDate ? (
@@ -304,7 +303,7 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
                   fontSize: 13, background: '#FAFAFA',
                   color: endDate ? '#333' : '#94a3b8', cursor: 'pointer',
                 }}
-                onClick={() => openPicker(endDateRef)}
+                onClick={() => openPicker(endDateRef.current)}
               >
                 <span>{endDate ? endDate.replace(/-/g, '.') : '종료일'}</span>
                 {!endDate ? (
