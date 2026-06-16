@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   fetchPlace,
@@ -84,6 +84,16 @@ export default function CreateReviewPage() {
   const [photos,     setPhotos]     = useState<File[]>([]);
   const [previews,   setPreviews]   = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const visitedAtRef = useRef<HTMLInputElement>(null);
+  const openPicker = () => {
+    const el = visitedAtRef.current;
+    if (!el) return;
+    if (typeof (el as HTMLInputElement & { showPicker?: () => void }).showPicker === 'function') {
+      (el as HTMLInputElement & { showPicker: () => void }).showPicker();
+    } else {
+      el.click();
+    }
+  };
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) { router.replace('/login'); return; }
@@ -188,29 +198,29 @@ export default function CreateReviewPage() {
           <div className="input-field">
             <label className="field-label">방문일</label>
             <div style={{ position: 'relative' }}>
-              <div className={`date-trigger${visitedAt ? '' : ' empty'}`}>
+              <div className={`date-trigger${visitedAt ? '' : ' empty'}`} onClick={openPicker} style={{ cursor: 'pointer' }}>
                 <span>{visitedAt ? visitedAt.replace(/-/g, '.') : '날짜 선택'}</span>
-                {!visitedAt && (
+                {!visitedAt ? (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" />
                     <line x1="16" y1="2" x2="16" y2="6" />
                     <line x1="8" y1="2" x2="8" y2="6" />
                     <line x1="3" y1="10" x2="21" y2="10" />
                   </svg>
+                ) : (
+                  <button type="button" onClick={e => { e.stopPropagation(); setVisitedAt(''); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}>
+                    ✕
+                  </button>
                 )}
               </div>
               <input
+                ref={visitedAtRef}
                 type="date"
                 value={visitedAt}
                 onChange={e => setVisitedAt(e.target.value)}
-                style={{ position: 'absolute', inset: 0, opacity: 0, width: '100%', height: '100%', cursor: 'pointer', zIndex: 1 }}
+                style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none', width: 1, height: 1 }}
               />
-              {visitedAt && (
-                <button type="button" onClick={() => setVisitedAt('')}
-                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 2, background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}>
-                  ✕
-                </button>
-              )}
             </div>
           </div>
 
