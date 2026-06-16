@@ -6,10 +6,7 @@ import { useRouter } from 'next/navigation';
 import { fetchAllPlaces, CATEGORY_LABEL, type PlaceMapItem, type Category } from '@/lib/api';
 
 declare global {
-  interface Window {
-    kakao: any;
-    __kakaoMapPinClick: (id: number) => void;
-  }
+  interface Window { kakao: any; }
 }
 
 const PIN_COLOR: Record<Category, string> = {
@@ -74,12 +71,6 @@ export default function MapPage() {
   }, []);
 
   useEffect(() => {
-    window.__kakaoMapPinClick = (id: number) => {
-      setSelected(places.find(p => p.placeId === id) ?? null);
-    };
-  }, [places]);
-
-  useEffect(() => {
     if (!kakaoReady || !mapRef.current) return;
 
     const { maps } = window.kakao;
@@ -91,23 +82,27 @@ export default function MapPage() {
     validPlaces.forEach(place => {
       const color = PIN_COLOR[place.category];
       const emoji = PIN_EMOJI[place.category];
-      const content = [
-        `<div onclick="event.stopPropagation();window.__kakaoMapPinClick(${place.placeId})"`,
-        ` style="position:relative;cursor:pointer;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.15));">`,
-        `<svg width="40" height="50" viewBox="0 0 44 54">`,
+      const svg = [
+        `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" viewBox="0 0 44 54">`,
         `<path d="M22 0C9.8 0 0 9.8 0 22c0 15 19 30.3 21.2 31.8.5.3 1.1.3 1.6 0C25 52.3 44 37 44 22 44 9.8 34.2 0 22 0z" fill="${color}"/>`,
         `<circle cx="22" cy="21" r="14" fill="white"/>`,
+        `<text x="22" y="27" text-anchor="middle" font-size="14">${emoji}</text>`,
         `</svg>`,
-        `<span style="position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:14px;">${emoji}</span>`,
-        `</div>`,
       ].join('');
 
-      new maps.CustomOverlay({
+      const markerImage = new maps.MarkerImage(
+        `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
+        new maps.Size(40, 50),
+        { offset: new maps.Point(20, 50) },
+      );
+
+      const marker = new maps.Marker({
         map,
         position: new maps.LatLng(place.latitude, place.longitude),
-        content,
-        yAnchor: 1,
+        image: markerImage,
       });
+
+      maps.event.addListener(marker, 'click', () => setSelected(place));
     });
 
     maps.event.addListener(map, 'click', () => setSelected(null));
