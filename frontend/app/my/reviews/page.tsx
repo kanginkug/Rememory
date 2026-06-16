@@ -31,9 +31,9 @@ const STAR_PATH = 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.6
 function Stars({ rating, id }: { rating: number; id: number }) {
   return (
     <>
-      <svg style={{ display: 'none', position: 'absolute' }}>
+      <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
         <defs>
-          <linearGradient id={`hg-${id}`}>
+          <linearGradient id={`hg-${id}`} x1="0" x2="1" y1="0" y2="0">
             <stop offset="50%" stopColor="#FFCC00" />
             <stop offset="50%" stopColor="#E2E8F0" />
           </linearGradient>
