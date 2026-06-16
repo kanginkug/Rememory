@@ -213,7 +213,7 @@ export default function PlaceDetailPage() {
     if (!confirm('장소를 삭제하시겠어요?')) return;
     try {
       await deletePlace(memoryId, placeIdNum);
-      router.replace(`/memory/${memoryId}`);
+      router.replace(`/place/${memoryId}`);
     } catch (e) {
       alert((e as Error).message);
     }
