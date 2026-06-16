@@ -835,11 +835,11 @@ body.page-review-mgmt .review-desc-toggle { border: none; padding: 0; font-size:
 body.page-review-mgmt .review-desc-clamped ~ .review-desc-toggle { position: absolute; bottom: 0; right: 0; background: linear-gradient(to right, transparent, white 30%); padding-left: 20px; }
 body.page-review-mgmt .review-desc-expanded ~ .review-desc-toggle { position: static; display: block; background: none; padding-left: 0; }
 
-body.page-review-mgmt .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-body.page-review-mgmt .visit-date { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+body.page-review-mgmt .card-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: auto; gap: 6px; }
+body.page-review-mgmt .visit-date { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 4px; flex: 1 1 auto; min-width: 0; }
 body.page-review-mgmt .visit-date svg { width: 12px; height: 12px; flex-shrink: 0; }
 
-body.page-review-mgmt .action-group { display: flex; gap: 6px; }
+body.page-review-mgmt .action-group { display: flex; gap: 6px; flex-shrink: 0; }
 body.page-review-mgmt .btn { background: #fff; border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; cursor: pointer; }
 body.page-review-mgmt .btn svg { width: 12px; height: 12px; }
 body.page-review-mgmt .btn-edit   { border: 1px solid #cbd5e1; color: #475569; }
@@ -860,12 +860,12 @@ body.page-create-review .place-summary-addr { display: flex; align-items: flex-s
 body.page-create-review .place-summary-addr svg { flex-shrink: 0; margin-top: 1px; }
 body.page-create-review .place-summary-addr span { word-break: keep-all; line-height: 1.4; }
 
-body.page-create-review .star-rating-wrap { display: flex; align-items: center; gap: 18px; padding: 10px 0 6px; }
-body.page-create-review .star-rating-row { display: flex; align-items: center; gap: 6px; }
-body.page-create-review .star-btn { background: none; border: none; cursor: pointer; padding: 0; line-height: 1; width: 49px; height: 49px; display: flex; align-items: center; justify-content: center; }
-body.page-create-review .star-btn svg { width: 43px; height: 43px; display: block; overflow: visible; }
+body.page-create-review .star-rating-wrap { display: flex; align-items: center; gap: 12px; padding: 10px 0 6px; }
+body.page-create-review .star-rating-row { display: flex; align-items: center; gap: 4px; flex: 1 1 auto; min-width: 0; }
+body.page-create-review .star-btn { background: none; border: none; cursor: pointer; padding: 0; line-height: 1; flex: 1 1 0; max-width: 49px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+body.page-create-review .star-btn svg { width: 100%; height: 100%; max-width: 43px; max-height: 43px; display: block; overflow: visible; }
 body.page-create-review .star-score-row { display: flex; align-items: baseline; justify-content: center; gap: 6px; margin-top: 2px; }
-body.page-create-review .star-score { font-size: 24px; font-weight: 800; color: #1e293b; }
+body.page-create-review .star-score { font-size: clamp(18px, 5.5vw, 24px); font-weight: 800; color: #1e293b; flex-shrink: 0; min-width: 40px; }
 body.page-create-review .star-hint { font-size: 12px; color: #94a3b8; font-weight: 500; margin-top: 4px; text-align: center; }
 
 body.page-create-review .date-trigger,
