@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import OnboardingGuide from '@/components/OnboardingGuide';
 import {
   fetchBestPlaces,
   fetchRecentMemories,
@@ -40,11 +41,12 @@ export default function HomePage() {
   const headerRef = useRef<HTMLElement>(null);
   const bannerRef  = useRef<HTMLDivElement>(null);
   const spacerRef  = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const [mounted,    setMounted]    = useState(false);
   const [bestPlaces, setBestPlaces] = useState<BestPlace[]>([]);
   const [memories,   setMemories]   = useState<Memory[]>([]);
   const [reviews,    setReviews]    = useState<RecentReview[]>([]);
   const [loaded,     setLoaded]     = useState(false);
+  const [showGuide,  setShowGuide]  = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) {
@@ -54,6 +56,7 @@ export default function HomePage() {
     window.history.scrollRestoration = 'manual';
     setMounted(true);
     window.scrollTo(0, 0);
+    if (!localStorage.getItem('onboarded')) setShowGuide(true);
 
     Promise.allSettled([
       fetchBestPlaces(),
@@ -112,6 +115,7 @@ export default function HomePage() {
 
   return (
     <>
+      {showGuide && <OnboardingGuide onClose={() => setShowGuide(false)} />}
       {/* 고정 헤더 */}
       <header ref={headerRef} className="app-header" id="appHeader">
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
