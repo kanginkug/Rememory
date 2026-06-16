@@ -448,7 +448,7 @@ export interface CreatePlaceRequest {
   longitude?: string;
   regionDepth1?: string;
   regionDepth2?: string;
-  imageUrlList?: string[];
+  photoUrlList?: string[];
 }
 
 export const createPlace = (memoryId: number, req: CreatePlaceRequest) =>
