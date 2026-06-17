@@ -38,18 +38,24 @@ public class Member {
 
     private String oauthId;
 
+    private String refreshToken;
+
+    private LocalDateTime refreshTokenExpiresAt;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
 
     /** 정적 팩토리: 신규 회원 생성 */
-    public static Member create(String name, String email, String profileImageUrl, String oauthProvider, String oauthId) {
+    public static Member create(String name, String email, String profileImageUrl, String oauthProvider, String oauthId, String refreshToken, LocalDateTime refreshTokenExpiresAt) {
         Member member = new Member();
         member.name = name;
         member.email = email;
         member.profileImageUrl = profileImageUrl;
         member.oauthProvider = oauthProvider;
         member.oauthId = oauthId;
+        member.refreshToken = refreshToken;
+        member.refreshTokenExpiresAt = refreshTokenExpiresAt;
         return member;
     }
 
@@ -77,5 +83,11 @@ public class Member {
     /** 프로필 이미지 URL 변경 */
     public void updateProfileImg(String imageUrl) {
         this.profileImageUrl = imageUrl;
+    }
+
+    /** refreshToken 정보 수정 */
+    public void updateRefreshToken(String refreshToken, LocalDateTime refreshTokenExpiresAt){
+        this.refreshToken = refreshToken;
+        this.refreshTokenExpiresAt = refreshTokenExpiresAt;
     }
 }

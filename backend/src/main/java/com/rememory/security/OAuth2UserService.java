@@ -3,6 +3,7 @@ package com.rememory.security;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -10,12 +11,18 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class OAuth2UserService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
+
+    // Refresh Token 유효기간 (기본값: 7일, 밀리초 단위)
+    @Value("${jwt.refresh-expiration-ms:604800000}")
+    private long refreshExpirationMs;
 
     /** 카카오/구글 OAuth2 로그인 처리: 최초 로그인 시 자동 회원가입, 탈퇴 회원 복구 */
     @Override
@@ -55,16 +62,20 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             profileImageUrl = (String) oAuth2User.getAttributes().get("picture");
         }
 
+        String refreshToken = UUID.randomUUID().toString();
+        LocalDateTime refreshTokenExpiresAt = LocalDateTime.now().plusSeconds(refreshExpirationMs / 1000);
+
         // DB 조회 → 없으면 회원가입
         memberRepository.findByOauthProviderAndOauthId(provider, oauthId)
                 .map(existing -> {
                     if(existing.getDeletedAt() != null) {
                         existing.restore(); // 탈퇴회원 - > 계정 복구
                     }
+                    existing.updateRefreshToken(refreshToken, refreshTokenExpiresAt);
                     return existing; // 활성 회원 -> 그대로 반환
                 })
                 .orElseGet(() -> {
-                    Member newMember = Member.create(name, email, profileImageUrl, provider, oauthId);
+                    Member newMember = Member.create(name, email, profileImageUrl, provider, oauthId, refreshToken, refreshTokenExpiresAt);
                     memberRepository.save(newMember);
                     return newMember;
                 });

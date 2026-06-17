@@ -51,7 +51,8 @@ public class SecurityConfig {
                                 res.sendRedirect(frontendUrl + "/login/failed"))
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login/success", "/login/failed").permitAll() // 임시 테스트용
+                        .requestMatchers("/login/success", "/login/failed").permitAll()
+                        .requestMatchers("/api/auth/refresh").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(e -> e
