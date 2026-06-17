@@ -25,6 +25,8 @@ public class CreatePlaceRequestDTO {
 
     private String address;
 
+    private String detailAddress;
+
     @Size(max = 300)
     private String description;
 
