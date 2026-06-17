@@ -54,6 +54,8 @@ public enum ErrorCode {
     TOKEN_INVALID("T002", "유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_MALFORMED("T003", "잘못된 형식의 토큰입니다.", HttpStatus.BAD_REQUEST),
     TOKEN_EMPTY("T004", "토큰이 없습니다.", HttpStatus.BAD_REQUEST),
+    REFRESH_TOKEN_EXPIRED("T005", "리프레시 토큰이 만료됐습니다.", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_INVALID("T006", "유효하지 않은 리프레시 토큰입니다.", HttpStatus.BAD_REQUEST),
 
     // ===== Common =====
     INVALID_REQUEST("C001", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),

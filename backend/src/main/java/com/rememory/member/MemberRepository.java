@@ -1,17 +1,21 @@
 package com.rememory.member;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
+@RequiredArgsConstructor
 public class MemberRepository {
 
     @PersistenceContext
     private EntityManager em;
+    private final JPAQueryFactory queryFactory;
 
     /** 회원 저장 */
     public void save(Member member) {
@@ -32,6 +36,19 @@ public class MemberRepository {
                     .getSingleResult();
             return Optional.of(member);
         } catch (NoResultException e){
+            return Optional.empty();
+        }
+    }
+
+    /** refreshToken 조회 */
+    public Optional<Member> findByRefreshToken(String token) {
+        try {
+            return Optional.ofNullable(queryFactory.selectFrom(QMember.member)
+                    .where(
+                            QMember.member.deletedAt.isNull(),
+                            QMember.member.refreshToken.eq(token)
+                    ).fetchOne());
+        } catch (NoResultException e) {
             return Optional.empty();
         }
     }

@@ -48,8 +48,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .orElseThrow(() -> new AuthenticationServiceException("회원 정보를 찾을 수 없습니다."));
 
         String token = jwtProvider.createToken(member.getId());
+        String refreshToken = member.getRefreshToken();
 
         getRedirectStrategy().sendRedirect(request, response,
-                frontendUrl + "/auth/callback?token=" + token);
+                frontendUrl + "/auth/callback?token=" + token + "&refreshToken=" + refreshToken);
     }
 }
