@@ -169,6 +169,7 @@ export interface BestPlace {
   description: string;
   category: Category;
   address: string;
+  detailAddress: string | null;
   kakaoPlaceId: string | null;
   kakaoPlaceName: string | null;
   latitude: number;
@@ -429,6 +430,7 @@ export interface MemoryPlace {
   name: string;
   category: Category;
   address: string;
+  detailAddress: string | null;
   description: string;
   avgRating: number;
   reviewCount: number;
@@ -443,6 +445,7 @@ export interface PlaceDetail {
   name: string;
   category: Category;
   address: string;
+  detailAddress: string | null;
   description: string;
   kakaoPlaceId: string | null;
   kakaoPlaceName: string | null;
@@ -465,6 +468,7 @@ export interface UpdatePlaceRequest {
   description?: string;
   visitedAt?: string;
   address?: string;
+  detailAddress?: string;
   kakaoPlaceId?: string;
   kakaoPlaceName?: string;
   latitude?: string;
@@ -513,6 +517,7 @@ export interface CreatePlaceRequest {
   description?: string;
   visitedAt?: string;
   address?: string;
+  detailAddress?: string;
   kakaoPlaceId?: string;
   kakaoPlaceName?: string;
   latitude?: string;

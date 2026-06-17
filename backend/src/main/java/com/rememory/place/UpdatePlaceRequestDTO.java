@@ -24,6 +24,8 @@ public class UpdatePlaceRequestDTO {
 
     private String address;
 
+    private String detailAddress;
+
     @Size(max = 300)
     private String description;
 
