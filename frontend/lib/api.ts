@@ -13,6 +13,19 @@ export function removeToken() {
   localStorage.removeItem('accessToken');
 }
 
+export function getRefreshToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('refreshToken');
+}
+
+export function setRefreshToken(token: string) {
+  localStorage.setItem('refreshToken', token);
+}
+
+export function removeRefreshToken() {
+  localStorage.removeItem('refreshToken');
+}
+
 function isTokenInvalid(token: string): boolean {
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -24,28 +37,39 @@ function isTokenInvalid(token: string): boolean {
 
 function logout() {
   removeToken();
+  removeRefreshToken();
   if (typeof window !== 'undefined') window.location.href = '/login';
 }
 
-async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = getToken();
+// 동시 다발적 401 시 refresh 중복 호출 방지
+let refreshingPromise: Promise<string | null> | null = null;
 
-  if (token && isTokenInvalid(token)) {
-    logout();
-    throw new Error('Unauthorized');
-  }
-  const res = await fetch(`${BASE_URL}/api${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...init?.headers,
-    },
-  });
-  if (res.status === 401) {
-    logout();
-    throw new Error('Unauthorized');
-  }
+async function tryRefreshToken(): Promise<string | null> {
+  if (refreshingPromise) return refreshingPromise;
+
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) return null;
+
+  refreshingPromise = fetch(`${BASE_URL}/api/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken }),
+  })
+    .then(async res => {
+      if (!res.ok) return null;
+      const data = await res.json();
+      const newToken: string | undefined = data.accessToken;
+      if (!newToken) return null;
+      setToken(newToken);
+      return newToken;
+    })
+    .catch(() => null)
+    .finally(() => { refreshingPromise = null; });
+
+  return refreshingPromise;
+}
+
+async function parseResponse<T>(res: Response): Promise<T> {
   if (!res.ok) {
     let message = `오류가 발생했습니다. (${res.status})`;
     try {
@@ -65,6 +89,53 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const ct = res.headers.get('content-type');
   if (!ct || !ct.includes('application/json')) return undefined as T;
   return res.json();
+}
+
+function buildHeaders(token: string | null, extra?: HeadersInit): HeadersInit {
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
+}
+
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  let token = getToken();
+
+  // 토큰이 로컬에서 만료된 경우 → 요청 전에 미리 재발급 시도
+  if (token && isTokenInvalid(token)) {
+    const newToken = await tryRefreshToken();
+    if (!newToken) {
+      logout();
+      throw new Error('Unauthorized');
+    }
+    token = newToken;
+  }
+
+  const res = await fetch(`${BASE_URL}/api${path}`, {
+    ...init,
+    headers: buildHeaders(token, init?.headers),
+  });
+
+  // 서버에서 401 → refresh 후 원래 요청 재시도
+  if (res.status === 401) {
+    const newToken = await tryRefreshToken();
+    if (!newToken) {
+      logout();
+      throw new Error('Unauthorized');
+    }
+    const retryRes = await fetch(`${BASE_URL}/api${path}`, {
+      ...init,
+      headers: buildHeaders(newToken, init?.headers),
+    });
+    if (retryRes.status === 401) {
+      logout();
+      throw new Error('Unauthorized');
+    }
+    return parseResponse<T>(retryRes);
+  }
+
+  return parseResponse<T>(res);
 }
 
 // --- Types ---

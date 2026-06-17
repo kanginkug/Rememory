@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense, Fragment } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { setRefreshToken } from '@/lib/api';
 
 const STEPS = ['인증 확인', '정보 확인', '홈으로 이동'];
 
@@ -15,6 +16,8 @@ function CallbackInner() {
     if (!token) { router.replace('/login'); return; }
 
     localStorage.setItem('accessToken', token);
+    const refreshToken = searchParams.get('refreshToken');
+    if (refreshToken) setRefreshToken(refreshToken);
     const pendingInviteCode = localStorage.getItem('pendingInviteCode');
     if (pendingInviteCode) {
       localStorage.removeItem('pendingInviteCode');
