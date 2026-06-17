@@ -353,7 +353,7 @@ export default function PlaceForm({
                   <label style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>상세주소</label>
                   <input
                     type="text"
-                    placeholder="예: 3층 301호"
+                    placeholder="예: 합정동 123-4, 홍대로 1길 5"
                     maxLength={100}
                     value={detailAddress}
                     onChange={e => setDetailAddress(e.target.value)}
