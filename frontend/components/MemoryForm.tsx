@@ -90,17 +90,24 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
   };
 
   return (
+    <div style={{
+      minHeight: '100dvh',
+      background: '#BFDBF3',
+      backgroundImage: "url('/images/make_memory_background.png')",
+      backgroundSize: 'cover',
+      backgroundPosition: 'top center',
+      backgroundRepeat: 'no-repeat',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+    }}>
     <div
-      className="min-h-dvh mx-auto w-full max-w-[450px]"
+      className="w-full max-w-[450px]"
       style={{
-        background: '#BFDBF3',
-        backgroundImage: "url('/images/make_memory_background.png')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'top center',
-        backgroundRepeat: 'no-repeat',
         display: 'flex',
         flexDirection: 'column',
         paddingBottom: 90,
+        minHeight: '100dvh',
       }}
     >
       {/* Header */}
@@ -377,6 +384,7 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
           {submitting ? submittingLabel : submitLabel}
         </button>
       </div>
+    </div>
     </div>
   );
 }
