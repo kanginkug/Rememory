@@ -453,10 +453,12 @@ export default function PlaceDetailPage() {
       </div>
 
       {/* FAB */}
-      <button className="fab" onClick={() => router.push(`/place/${memoryId}/${placeIdNum}/review/new`)}>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
-        후기 작성
-      </button>
+      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 450, pointerEvents: 'none', zIndex: 100 }}>
+        <button className="fab" style={{ position: 'absolute', bottom: 80, right: 20, pointerEvents: 'auto' }} onClick={() => router.push(`/place/${memoryId}/${placeIdNum}/review/new`)}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /></svg>
+          후기 작성
+        </button>
+      </div>
 
       {/* 하단 네비 */}
       <nav className="bottom-nav">

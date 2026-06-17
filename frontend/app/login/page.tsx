@@ -159,7 +159,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-bg relative h-screen overflow-hidden w-full max-w-md mx-auto shadow-2xl">
+    <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center', background: '#BFDBF3' }}>
+    <div className="login-bg relative h-screen overflow-hidden w-full max-w-md shadow-2xl">
       {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
       {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
       <div className="absolute bottom-[2vh] left-0 right-0 flex flex-col items-center">
@@ -201,6 +202,7 @@ export default function LoginPage() {
           에 동의하게 됩니다
         </p>
       </div>
+    </div>
     </div>
   );
 }

@@ -156,7 +156,7 @@ export default function MemoryListPage() {
   };
 
   return (
-    <div style={{ background: '#BFDBF3', minHeight: '100dvh' }}>
+    <div style={{ background: '#BFDBF3', minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
       {/* Fixed Header */}
       <header
@@ -182,7 +182,7 @@ export default function MemoryListPage() {
 
       {/* Content */}
       <div
-        className="relative mx-auto w-full max-w-[450px]"
+        className="relative w-full max-w-[450px]"
         style={{ paddingTop: 62, paddingBottom: 80 }}
       >
         {/* Search */}
