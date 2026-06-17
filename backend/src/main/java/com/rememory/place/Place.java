@@ -14,11 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Table(
-        name = "place",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_place_kakao",
-                columnNames = {"memory_id", "kakao_place_id"}
-        )
+        name = "place"
 )
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Place {
