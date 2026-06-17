@@ -42,6 +42,7 @@ export interface PlaceFormValues {
   kakaoPlace: PlaceSearchResult | null;
   depth1: string;
   depth2: string;
+  detailAddress: string;
   newPhotos: File[];
   removedPhotoIds: number[];
 }
@@ -58,6 +59,7 @@ interface PlaceFormProps {
     kakaoPlaceId?: string | null;
     kakaoPlaceName?: string | null;
     address?: string;
+    detailAddress?: string | null;
     latitude?: number | null;
     longitude?: number | null;
     regionDepth1?: string;
@@ -81,10 +83,11 @@ export default function PlaceForm({
   const [category,    setCategory]    = useState<Category>('RESTAURANT');
   const [description, setDescription] = useState('');
   const [visitedAt,   setVisitedAt]   = useState('');
-  const [locationTab, setLocationTab] = useState<'kakao' | 'manual'>('kakao');
-  const [kakaoPlace,  setKakaoPlace]  = useState<PlaceSearchResult | null>(null);
-  const [depth1,      setDepth1]      = useState('');
-  const [depth2,      setDepth2]      = useState('');
+  const [locationTab,    setLocationTab]    = useState<'kakao' | 'manual'>('kakao');
+  const [kakaoPlace,     setKakaoPlace]     = useState<PlaceSearchResult | null>(null);
+  const [depth1,         setDepth1]         = useState('');
+  const [depth2,         setDepth2]         = useState('');
+  const [detailAddress,  setDetailAddress]  = useState('');
 
   const [existingPhotos,  setExistingPhotos]  = useState<PlacePhoto[]>([]);
   const [removedPhotoIds, setRemovedPhotoIds] = useState<number[]>([]);
@@ -125,6 +128,7 @@ export default function PlaceForm({
       setDepth1(initialData.regionDepth1 ?? '');
       setDepth2(initialData.regionDepth2 ?? '');
     }
+    setDetailAddress(initialData.detailAddress ?? '');
     if (initialData.placePhotoList) setExistingPhotos(initialData.placePhotoList);
   }, [initialData]);
 
@@ -177,6 +181,7 @@ export default function PlaceForm({
         kakaoPlace,
         depth1,
         depth2,
+        detailAddress,
         newPhotos,
         removedPhotoIds,
       });
@@ -333,16 +338,29 @@ export default function PlaceForm({
             )}
 
             {locationTab === 'manual' && (
-              <div className="region-row">
-                <div className="manual-field">
-                  <label>시/도</label>
-                  <input type="text" placeholder="예: 서울" value={depth1} onChange={e => setDepth1(e.target.value)} />
+              <>
+                <div className="region-row">
+                  <div className="manual-field">
+                    <label>시/도</label>
+                    <input type="text" placeholder="예: 서울" value={depth1} onChange={e => setDepth1(e.target.value)} />
+                  </div>
+                  <div className="manual-field">
+                    <label>시/군/구</label>
+                    <input type="text" placeholder="예: 중구" value={depth2} onChange={e => setDepth2(e.target.value)} />
+                  </div>
                 </div>
-                <div className="manual-field">
-                  <label>시/군/구</label>
-                  <input type="text" placeholder="예: 중구" value={depth2} onChange={e => setDepth2(e.target.value)} />
+                <div style={{ marginTop: 10 }}>
+                  <label style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>상세주소</label>
+                  <input
+                    type="text"
+                    placeholder="예: 합정동 123-4, 홍대로 1길 5"
+                    maxLength={100}
+                    value={detailAddress}
+                    onChange={e => setDetailAddress(e.target.value)}
+                    style={{ marginTop: 6 }}
+                  />
                 </div>
-              </div>
+              </>
             )}
           </div>
 

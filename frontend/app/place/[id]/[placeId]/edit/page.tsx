@@ -31,13 +31,14 @@ export default function EditPlacePage() {
 
   const handleSubmit = async ({
     name, category, description, visitedAt,
-    locationTab, kakaoPlace, depth1, depth2,
+    locationTab, kakaoPlace, depth1, depth2, detailAddress,
     newPhotos, removedPhotoIds,
   }: PlaceFormValues) => {
     let locationInfo: {
       address?: string; kakaoPlaceId?: string; kakaoPlaceName?: string;
       latitude?: string; longitude?: string;
       regionDepth1?: string; regionDepth2?: string;
+      detailAddress?: string;
     } = {};
 
     if (locationTab === 'kakao' && kakaoPlace) {
@@ -54,6 +55,7 @@ export default function EditPlacePage() {
       locationInfo = {
         regionDepth1: depth1 || undefined,
         regionDepth2: depth2 || undefined,
+        detailAddress: detailAddress.trim() || undefined,
       };
     }
 
@@ -102,7 +104,7 @@ export default function EditPlacePage() {
       title="장소 수정"
       submitLabel="수정하기"
       submittingLabel="수정 중..."
-      initialData={place ?? undefined}
+      initialData={place ? { ...place, detailAddress: place.detailAddress ?? undefined } : undefined}
       onSubmit={handleSubmit}
     />
   );
