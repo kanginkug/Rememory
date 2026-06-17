@@ -44,6 +44,8 @@ public class Place {
 
     private String address;
 
+    private String detailAddress;
+
     @Column(nullable = true)
     private String kakaoPlaceId; // 해외는 NULL 가능
 
@@ -71,7 +73,7 @@ public class Place {
     private LocalDateTime deletedAt;
 
     /** 정적 팩토리: 신규 장소 생성, 초기 통계(avgRating=0, reviewCount=0) 설정 */
-    public static Place create(Memory memory, Member creator, String name, String description, Category category, String address, String kakaoPlaceId, String kakaoPlaceName,
+    public static Place create(Memory memory, Member creator, String name, String description, Category category, String address, String detailAddress, String kakaoPlaceId, String kakaoPlaceName,
                            BigDecimal latitude, BigDecimal longitude, String regionDepth1, String regionDepth2, LocalDate visitedAt) {
         Place place = new Place();
         place.memory = memory;
@@ -80,6 +82,7 @@ public class Place {
         place.description = description;
         place.category = category;
         place.address = address;
+        place.detailAddress = detailAddress;
         place.kakaoPlaceId = kakaoPlaceId;
         place.kakaoPlaceName = kakaoPlaceName;
         place.latitude = latitude;
@@ -93,12 +96,13 @@ public class Place {
     }
 
     /** 장소 기본 정보 수정 */
-    public void update(String name, String description, Category category, String address, String kakaoPlaceId, String kakaoPlaceName,
+    public void update(String name, String description, Category category, String address, String detailAddress, String kakaoPlaceId, String kakaoPlaceName,
                        BigDecimal latitude, BigDecimal longitude, String regionDepth1, String regionDepth2, LocalDate visitedAt) {
         this.name = name;
         this.description = description;
         this.category = category;
         this.address = address;
+        this.detailAddress = detailAddress;
         this.kakaoPlaceId = kakaoPlaceId;
         this.kakaoPlaceName = kakaoPlaceName;
         this.latitude = latitude;
