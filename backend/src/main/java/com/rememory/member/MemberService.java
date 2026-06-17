@@ -29,13 +29,6 @@ public class MemberService {
         return memberRepository.findByOauthProviderAndOauthId(oauthProvider, oauthId);
     }
 
-    /** 신규 회원 저장 */
-    @Transactional
-    public void join(String name, String email, String profileImageUrl, String oauthProvider, String oauthId) {
-        Member newMember = Member.create(name, email, profileImageUrl, oauthProvider, oauthId);
-        memberRepository.save(newMember);
-    }
-
     /** ID로 회원 단건 조회 */
     public Optional<Member> findOne(Long id) {
         return memberRepository.findOne(id);
