@@ -41,7 +41,7 @@ public class PlaceService {
             throw new BusinessException(ErrorCode.MEMBER_MEMORY_NOT_FOUND);
         }
 
-        Place place = Place.create(memory, creator, cpRequestDTO.getName(), cpRequestDTO.getDescription(), cpRequestDTO.getCategory(), cpRequestDTO.getAddress(), cpRequestDTO.getKakaoPlaceId(), cpRequestDTO.getKakaoPlaceName(),
+        Place place = Place.create(memory, creator, cpRequestDTO.getName(), cpRequestDTO.getDescription(), cpRequestDTO.getCategory(), cpRequestDTO.getAddress(), cpRequestDTO.getDetailAddress(), cpRequestDTO.getKakaoPlaceId(), cpRequestDTO.getKakaoPlaceName(),
                 cpRequestDTO.getLatitude(), cpRequestDTO.getLongitude(), cpRequestDTO.getRegionDepth1(), cpRequestDTO.getRegionDepth2(), cpRequestDTO.getVisitedAt());
 
         placeRepository.save(place);
@@ -139,7 +139,7 @@ public class PlaceService {
         certification(memoryId, memberId);
 
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
-        place.update(upReuqestDTO.getName(), upReuqestDTO.getDescription(), upReuqestDTO.getCategory(), upReuqestDTO.getAddress(), upReuqestDTO.getKakaoPlaceId(), upReuqestDTO.getKakaoPlaceName(),
+        place.update(upReuqestDTO.getName(), upReuqestDTO.getDescription(), upReuqestDTO.getCategory(), upReuqestDTO.getAddress(), upReuqestDTO.getDetailAddress(), upReuqestDTO.getKakaoPlaceId(), upReuqestDTO.getKakaoPlaceName(),
                 upReuqestDTO.getLatitude(), upReuqestDTO.getLongitude(), upReuqestDTO.getRegionDepth1(), upReuqestDTO.getRegionDepth2(), upReuqestDTO.getVisitedAt());
     }
 
