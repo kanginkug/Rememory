@@ -427,6 +427,12 @@ export default function MemoryPlacePage() {
                       </svg>
                     </button>
                   </div>
+                  {(place.address || place.regionDepth1) && (
+                    <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 6 }}>
+                      {place.address || [place.regionDepth1, place.regionDepth2].filter(Boolean).join(' ')}
+                      {place.detailAddress ? ` ${place.detailAddress}` : ''}
+                    </div>
+                  )}
                   <div className={`tag ${CATEGORY_TAG[place.category]}`}>{CATEGORY_LABEL[place.category]}</div>
                   <div className="rating-review">
                     ⭐ {place.avgRating.toFixed(1)} <span>({place.reviewCount})</span>

@@ -11,12 +11,13 @@ export default function CreatePlacePage() {
 
   const handleSubmit = async ({
     name, category, description, visitedAt,
-    locationTab, kakaoPlace, depth1, depth2, newPhotos,
+    locationTab, kakaoPlace, depth1, depth2, detailAddress, newPhotos,
   }: PlaceFormValues) => {
     let locationInfo: {
       address?: string; kakaoPlaceId?: string; kakaoPlaceName?: string;
       latitude?: string; longitude?: string;
       regionDepth1?: string; regionDepth2?: string;
+      detailAddress?: string;
     } = {};
 
     if (locationTab === 'kakao' && kakaoPlace) {
@@ -33,6 +34,7 @@ export default function CreatePlacePage() {
       locationInfo = {
         regionDepth1: depth1 || undefined,
         regionDepth2: depth2 || undefined,
+        detailAddress: detailAddress.trim() || undefined,
       };
     }
 
