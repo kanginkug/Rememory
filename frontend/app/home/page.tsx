@@ -190,11 +190,6 @@ export default function HomePage() {
                         <span className={`category ${CATEGORY_TAG[place.category]}`}>
                           {CATEGORY_LABEL[place.category]}
                         </span>
-                        {place.visitedAt && (
-                          <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500, flexShrink: 0 }}>
-                            {place.visitedAt.slice(0, 10).replace(/-/g, '.')}
-                          </span>
-                        )}
                       </div>
                       <h3 className="place-name">{place.name}</h3>
                       <p className="memory-title">{place.memoryName}</p>

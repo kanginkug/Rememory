@@ -30,7 +30,7 @@ export default function EditPlacePage() {
   }, [memoryId, placeIdNum]);
 
   const handleSubmit = async ({
-    name, category, description, visitedAt,
+    name, category, description,
     locationTab, kakaoPlace, depth1, depth2, detailAddress,
     newPhotos, removedPhotoIds,
   }: PlaceFormValues) => {
@@ -64,7 +64,6 @@ export default function EditPlacePage() {
         name,
         category,
         description: description.trim() || undefined,
-        visitedAt: visitedAt || undefined,
         ...locationInfo,
       });
 

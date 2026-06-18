@@ -37,7 +37,6 @@ export interface PlaceFormValues {
   name: string;
   category: Category;
   description: string;
-  visitedAt: string;
   locationTab: 'kakao' | 'manual';
   kakaoPlace: PlaceSearchResult | null;
   depth1: string;
@@ -55,7 +54,6 @@ interface PlaceFormProps {
     name?: string;
     category?: Category;
     description?: string;
-    visitedAt?: string | null;
     kakaoPlaceId?: string | null;
     kakaoPlaceName?: string | null;
     address?: string;
@@ -82,7 +80,6 @@ export default function PlaceForm({
   const [name,        setName]        = useState('');
   const [category,    setCategory]    = useState<Category>('RESTAURANT');
   const [description, setDescription] = useState('');
-  const [visitedAt,   setVisitedAt]   = useState('');
   const [locationTab,    setLocationTab]    = useState<'kakao' | 'manual'>('kakao');
   const [kakaoPlace,     setKakaoPlace]     = useState<PlaceSearchResult | null>(null);
   const [depth1,         setDepth1]         = useState('');
@@ -112,7 +109,6 @@ export default function PlaceForm({
     if (initialData.name)        setName(initialData.name);
     if (initialData.category)    setCategory(initialData.category);
     if (initialData.description) setDescription(initialData.description);
-    setVisitedAt(initialData.visitedAt ?? '');
     if (initialData.kakaoPlaceId) {
       setKakaoPlace({
         kakaoPlaceId: initialData.kakaoPlaceId,
@@ -176,7 +172,6 @@ export default function PlaceForm({
         name: name.trim(),
         category,
         description,
-        visitedAt,
         locationTab,
         kakaoPlace,
         depth1,
@@ -258,36 +253,6 @@ export default function PlaceForm({
             />
             <div style={{ textAlign: 'right', fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
               {description.length}/300
-            </div>
-          </div>
-
-          {/* 방문일 */}
-          <div className="input-field">
-            <label className="field-label">방문일</label>
-            <div style={{ position: 'relative' }}>
-              <div className={`date-trigger${visitedAt ? '' : ' empty'}`}>
-                <span>{visitedAt ? visitedAt.replace(/-/g, '.') : '날짜 선택'}</span>
-                {!visitedAt && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
-                )}
-              </div>
-              <input
-                type="date"
-                value={visitedAt}
-                onChange={e => setVisitedAt(e.target.value)}
-                style={{ position: 'absolute', top: 0, left: 0, bottom: 0, right: visitedAt ? 44 : 0, opacity: 0, cursor: 'pointer', zIndex: 1 }}
-              />
-              {visitedAt && (
-                <button type="button" onClick={() => setVisitedAt('')}
-                  style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', zIndex: 2, background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', fontSize: 16, lineHeight: 1, padding: '2px 4px' }}>
-                  ✕
-                </button>
-              )}
             </div>
           </div>
 
