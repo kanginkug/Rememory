@@ -322,7 +322,7 @@ export default function MemoryListPage() {
                     {/* Description */}
                     <div style={{ minHeight: 30.8, marginBottom: 2 }}>
                       <p
-                        className="line-clamp-2"
+                        className="line-clamp-2 whitespace-pre-line"
                         style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}
                       >
                         {mem.description}
