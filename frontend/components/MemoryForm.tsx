@@ -84,6 +84,8 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
     setSubmitting(true);
     try {
       await onSubmit({ name: name.trim(), description: description.trim(), startDate, endDate, showHistory, photoFile, photoRemoved });
+    } catch (e) {
+      alert((e as Error).message);
     } finally {
       setSubmitting(false);
     }
