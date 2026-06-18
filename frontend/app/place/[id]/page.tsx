@@ -17,6 +17,7 @@ import {
   type Member,
   type Category,
 } from '@/lib/api';
+import { renderTextWithLinks } from '@/lib/renderTextWithLinks';
 
 const CATEGORY_ICON: Record<string, React.ReactNode> = {
   RESTAURANT: (
@@ -269,7 +270,7 @@ export default function MemoryPlacePage() {
                     wordBreak: 'break-word',
                   }}
                 >
-                  {memory.description}
+                  {renderTextWithLinks(memory.description)}
                 </p>
                 {(descOverflows || descExpanded) && (
                   <button
