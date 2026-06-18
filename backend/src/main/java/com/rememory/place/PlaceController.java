@@ -16,7 +16,7 @@ public class PlaceController {
     private final PlaceService placeService;
     private final KakaoPlaceSearchService kakaoPlaceSearchService;
 
-    // 장소 등록 (사진 선택)
+    /** 장소 등록 (사진 선택) */
     @PostMapping(value = "/{memoryId}")
     public ResponseEntity<Void> createPlace(@RequestAttribute("memberId") Long memberId, @PathVariable("memoryId") Long memoryId, @RequestBody @Valid CreatePlaceRequestDTO cpRequestDTO) {
         placeService.save(memoryId, memberId, cpRequestDTO);
