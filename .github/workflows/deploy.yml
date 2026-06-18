@@ -8,8 +8,9 @@ on:
       - 'backend/**'
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
+    environment: production   # 배포 전 승인 단계 (Required reviewers)
 
     steps:
       - name: Checkout repository
@@ -24,24 +25,26 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Get short commit SHA
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: ./backend
           platforms: linux/amd64
           push: true
-          tags: inkug/rememory-app:latest
+          tags: |
+            inkug/rememory-app:latest
+            inkug/rememory-app:${{ steps.vars.outputs.sha_short }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd ~
-            docker-compose -f docker-compose.prod.yml pull app
-            docker-compose -f docker-compose.prod.yml up -d app
-            docker image prune -f
+      # Docker Hub에 :latest 이미지가 push되면
+      # EC2에서 실행 중인 Watchtower가 자동으로 감지하여 pull + 재시작합니다.
+      # (SSH 접속 없이 배포되므로 22번 포트를 외부에 열 필요가 없습니다)
+      #
+      # 문제가 생겼을 때는 EC2에서 아래 명령으로 이전 커밋 SHA 이미지로 롤백할 수 있습니다.
+      #   docker pull inkug/rememory-app:<이전 sha_short>
+      #   docker tag inkug/rememory-app:<이전 sha_short> inkug/rememory-app:latest
+      #   docker restart rememory-app
