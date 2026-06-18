@@ -98,7 +98,7 @@ export default function OnboardingGuide({ onClose }: { onClose: () => void }) {
           <button
             onClick={() => isLast ? handleClose() : setStep(s => s + 1)}
             style={{
-              flex: 2, padding: '15px 0', borderRadius: 14,
+              flex: 1, padding: '15px 0', borderRadius: 14,
               border: 'none', background: '#7F77DD',
               fontSize: 15, fontWeight: 700, color: '#fff', cursor: 'pointer',
             }}
