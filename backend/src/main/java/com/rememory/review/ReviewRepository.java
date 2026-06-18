@@ -71,8 +71,6 @@ public class ReviewRepository {
             case DATE_DESC -> QReview.review.createdAt.desc();
             case RATING_ASC -> QReview.review.rating.asc();
             case RATING_DESC -> QReview.review.rating.desc();
-            case VISITED_ASC -> QReview.review.visitedAt.asc();
-            case VISITED_DESC -> QReview.review.visitedAt.desc();
         };
 
         return queryFactory.selectFrom(QReview.review)
