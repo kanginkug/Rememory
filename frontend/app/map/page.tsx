@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -57,6 +57,7 @@ export default function MapPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const markerClickedRef = useRef(false);
 
   const [allPlaces, setAllPlaces] = useState<PlaceMapItem[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -65,9 +66,10 @@ export default function MapPage() {
   const [photoMap, setPhotoMap] = useState<Record<number, string>>({});
   const [kakaoReady, setKakaoReady] = useState(false);
 
-  const places = selectedMemoryId
-    ? allPlaces.filter(p => p.memoryId === selectedMemoryId)
-    : allPlaces;
+  const places = useMemo(
+    () => selectedMemoryId ? allPlaces.filter(p => p.memoryId === selectedMemoryId) : allPlaces,
+    [allPlaces, selectedMemoryId],
+  );
 
   useEffect(() => {
     document.body.classList.add('page-map');
@@ -95,7 +97,10 @@ export default function MapPage() {
     const { maps } = window.kakao;
     const center = new maps.LatLng(36.5, 127.8);
     mapInstanceRef.current = new maps.Map(mapRef.current, { center, level: 13 });
-    maps.event.addListener(mapInstanceRef.current, 'click', () => setSelected(null));
+    maps.event.addListener(mapInstanceRef.current, 'click', () => {
+      if (markerClickedRef.current) { markerClickedRef.current = false; return; }
+      setSelected(null);
+    });
   }, [kakaoReady]);
 
   // 마커 교체 (places 변경 시)
@@ -132,7 +137,10 @@ export default function MapPage() {
         image: markerImage,
       });
 
-      maps.event.addListener(marker, 'click', () => setSelected(place));
+      maps.event.addListener(marker, 'click', () => {
+        markerClickedRef.current = true;
+        setSelected(place);
+      });
       markersRef.current.push(marker);
     });
 
