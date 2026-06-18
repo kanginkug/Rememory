@@ -52,6 +52,13 @@ const CATEGORY_FALLBACK: Record<Category, string> = {
   CAFE:          '/images/no_review_cafe.png',
 };
 
+const CATEGORY_EMPTY: Record<Category, { image: string; title: string; desc: string }> = {
+  RESTAURANT:    { image: '/images/no_restaurant.png',   title: '아직 등록된 맛집이 없어요',  desc: '맛있었던 식당을 추가해보세요!' },
+  CAFE:          { image: '/images/no_cafe.png',         title: '아직 등록된 카페가 없어요',  desc: '함께 즐긴 카페를 기록해보세요!' },
+  ACCOMMODATION: { image: '/images/no_room.png',         title: '아직 등록된 숙소가 없어요',  desc: '함께 묵었던 숙소를 추가해보세요!' },
+  ATTRACTION:    { image: '/images/no_accomodation.png', title: '아직 등록된 관광지가 없어요', desc: '함께 방문한 관광지를 기록해보세요!' },
+};
+
 const CATEGORY_TAG: Record<Category, string> = {
   RESTAURANT:    'tag-restaurant',
   CAFE:          'tag-cafe',
@@ -403,6 +410,14 @@ export default function MemoryPlacePage() {
               <div style={{ textAlign: 'center' }}>
                 <p style={{ fontWeight: 700, fontSize: 20, color: '#1e293b', marginBottom: 10 }}>기록된 장소가 없어요</p>
                 <p style={{ fontSize: 15, color: '#64748b', lineHeight: 1.7 }}>이 여행에서 가장 기억에 남는 공간은 어디였나요?<br />지금 바로 첫 장소를 추가해보세요!</p>
+              </div>
+            </div>
+          ) : filteredPlaces.length === 0 && activeCategory !== 'ALL' ? (
+            <div style={{ background: '#fff', borderRadius: 18, padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <img src={CATEGORY_EMPTY[activeCategory].image} alt="장소 없음" style={{ width: '100%', maxWidth: 300 }} />
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ fontWeight: 700, fontSize: 17, color: '#1e293b', marginBottom: 10 }}>{CATEGORY_EMPTY[activeCategory].title}</p>
+                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7 }}>{CATEGORY_EMPTY[activeCategory].desc}</p>
               </div>
             </div>
           ) : (
