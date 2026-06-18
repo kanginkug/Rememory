@@ -4,7 +4,6 @@ import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ImageLightbox from '@/components/ImageLightbox';
-import { showToast } from '@/lib/toast';
 import {
   fetchMemory,
   fetchMemoryPlaces,
@@ -164,7 +163,7 @@ export default function MemoryPlacePage() {
       const { inviteCode } = await createInvitation(memoryId);
       setInviteLink(`${window.location.origin}/invite/${inviteCode}`);
       setShareSheet(true);
-    } catch (e) { showToast((e as Error).message); }
+    } catch (e) { alert((e as Error).message); }
   };
 
   const handleKakaoShare = () => {
@@ -181,8 +180,8 @@ export default function MemoryPlacePage() {
     if (!inviteLink) return;
     try {
       await navigator.clipboard.writeText(inviteLink);
-      showToast('초대 링크가 복사됐습니다.', 'success');
-    } catch (e) { showToast('복사에 실패했습니다.'); }
+      alert('초대 링크가 복사됐습니다.');
+    } catch (e) { alert('복사에 실패했습니다.'); }
     setShareSheet(false);
   };
 
@@ -190,21 +189,21 @@ export default function MemoryPlacePage() {
     setMoreSheet(false);
     if (!confirm('정말 이 추억에서 나가시겠어요?')) return;
     try { await leaveMemory(memoryId); router.replace('/memory'); }
-    catch (e) { showToast((e as Error).message); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const handleDeleteMemory = async () => {
     setMoreSheet(false);
     if (!confirm('추억을 삭제하시겠어요?')) return;
     try { await deleteMemory(memoryId); router.replace('/memory'); }
-    catch (e) { showToast((e as Error).message); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const handleDeletePlace = async (placeId: number) => {
     setPlaceMoreId(null);
     if (!confirm('장소를 삭제하시겠어요?')) return;
     try { await deletePlace(memoryId, placeId); setPlaces(prev => prev.filter(p => p.id !== placeId)); }
-    catch (e) { showToast((e as Error).message); }
+    catch (e) { alert((e as Error).message); }
   };
 
   const avgRating = memory?.avgRating ?? 0;

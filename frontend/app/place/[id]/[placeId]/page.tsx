@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import ImageLightbox from '@/components/ImageLightbox';
-import { showToast } from '@/lib/toast';
 import {
   fetchPlace,
   fetchPlaceReviewsSorted,
@@ -206,7 +205,7 @@ export default function PlaceDetailPage() {
       setMyReview(null);
       await loadReviews(toReviewSortType(sortCategory, sortOrder));
     } catch (e) {
-      showToast((e as Error).message);
+      alert((e as Error).message);
     }
   };
 
@@ -216,7 +215,7 @@ export default function PlaceDetailPage() {
       await deletePlace(memoryId, placeIdNum);
       router.replace(`/place/${memoryId}`);
     } catch (e) {
-      showToast((e as Error).message);
+      alert((e as Error).message);
     }
   };
 

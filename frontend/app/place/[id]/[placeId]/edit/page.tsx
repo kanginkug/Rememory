@@ -12,7 +12,6 @@ import {
   uploadToS3,
   type PlaceDetail,
 } from '@/lib/api';
-import { showToast } from '@/lib/toast';
 
 export default function EditPlacePage() {
   const router = useRouter();
@@ -26,7 +25,7 @@ export default function EditPlacePage() {
   useEffect(() => {
     fetchPlace(memoryId, placeIdNum)
       .then(setPlace)
-      .catch((e: Error) => showToast(e.message))
+      .catch((e: Error) => alert(e.message))
       .finally(() => setLoading(false));
   }, [memoryId, placeIdNum]);
 
@@ -88,7 +87,7 @@ export default function EditPlacePage() {
 
       router.replace(`/place/${memoryId}/${placeIdNum}`);
     } catch (e) {
-      showToast((e as Error).message);
+      alert((e as Error).message);
     }
   };
 
