@@ -309,14 +309,6 @@ export default function PlaceDetailPage() {
               </span>
             </div>
           )}
-          {place?.visitedAt && (
-            <div className="detail-info-line">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" />
-              </svg>
-              <span>{place.visitedAt}</span>
-            </div>
-          )}
           <div className="detail-info-line">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFB800">
               <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />

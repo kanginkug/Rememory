@@ -21,7 +21,7 @@ const STEPS = [
   {
     image: '/images/guide/place_guide.png',
     title: '장소 추가하기',
-    desc: '추억에 다녀온 장소를 추가해보세요.\n카테고리와 방문일, 사진도 함께 남길 수 있어요.',
+    desc: '추억에 다녀온 장소를 추가해보세요.\n카테고리와 사진도 함께 남길 수 있어요.',
   },
   {
     image: '/images/guide/review_guide.png',

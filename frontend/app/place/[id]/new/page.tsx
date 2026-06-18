@@ -10,7 +10,7 @@ export default function CreatePlacePage() {
   const memoryId = Number(params.id);
 
   const handleSubmit = async ({
-    name, category, description, visitedAt,
+    name, category, description,
     locationTab, kakaoPlace, depth1, depth2, detailAddress, newPhotos,
   }: PlaceFormValues) => {
     let locationInfo: {
@@ -50,7 +50,6 @@ export default function CreatePlacePage() {
         name,
         category,
         description: description.trim() || undefined,
-        visitedAt: visitedAt || undefined,
         photoUrlList,
         ...locationInfo,
       });
