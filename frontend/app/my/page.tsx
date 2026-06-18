@@ -8,6 +8,7 @@ import {
   updateMe, updateMePhoto, fetchPresignedUrls, uploadToS3,
   type Member, type MemberStats,
 } from '@/lib/api';
+import { showToast } from '@/lib/toast';
 
 const NAV_ITEMS = [
   { label: '홈',        href: '/home',   d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
@@ -60,7 +61,7 @@ export default function MyPage() {
       setMe(prev => prev ? { ...prev, name: trimmed } : prev);
       setEditingName(false);
     } catch (e) {
-      alert((e as Error).message);
+      showToast((e as Error).message);
     } finally {
       setSavingName(false);
     }
@@ -77,7 +78,7 @@ export default function MyPage() {
       await updateMePhoto(slot.imageUrl);
       setMe(prev => prev ? { ...prev, profileImageUrl: slot.imageUrl } : prev);
     } catch (err) {
-      alert((err as Error).message);
+      showToast((err as Error).message);
     } finally {
       setUploadingPhoto(false);
     }
@@ -95,7 +96,7 @@ export default function MyPage() {
       removeToken();
       router.replace('/login');
     } catch (e) {
-      alert((e as Error).message);
+      showToast((e as Error).message);
     }
   };
 

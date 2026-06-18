@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import PlaceForm, { type PlaceFormValues } from '@/components/PlaceForm';
 import { createPlace, fetchPresignedUrls, uploadToS3 } from '@/lib/api';
+import { showToast } from '@/lib/toast';
 
 export default function CreatePlacePage() {
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function CreatePlacePage() {
 
       router.replace(`/place/${memoryId}`);
     } catch (e) {
-      alert((e as Error).message);
+      showToast((e as Error).message);
     }
   };
 

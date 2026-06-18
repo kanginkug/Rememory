@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchMyReviews, deleteReview, CATEGORY_LABEL, type PlaceReview, type Category } from '@/lib/api';
+import { showToast } from '@/lib/toast';
 
 const NAV_ITEMS = [
   { label: '홈',        href: '/home',   d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
@@ -76,7 +77,7 @@ export default function ReviewManagementPage() {
   useEffect(() => {
     fetchMyReviews()
       .then(setReviews)
-      .catch((e: Error) => alert(e.message))
+      .catch((e: Error) => showToast(e.message))
       .finally(() => setLoading(false));
   }, []);
 
@@ -96,7 +97,7 @@ export default function ReviewManagementPage() {
       setReviews(prev => prev.filter(r => r.reviewId !== deleteTarget.reviewId));
       setDeleteTarget(null);
     } catch (e) {
-      alert((e as Error).message);
+      showToast((e as Error).message);
     } finally {
       setDeleting(false);
     }

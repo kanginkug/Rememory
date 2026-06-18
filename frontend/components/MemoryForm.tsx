@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { showToast } from '@/lib/toast';
 
 export interface MemoryFormValues {
   name: string;
@@ -84,6 +85,8 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
     setSubmitting(true);
     try {
       await onSubmit({ name: name.trim(), description: description.trim(), startDate, endDate, showHistory, photoFile, photoRemoved });
+    } catch (e) {
+      showToast((e as Error).message);
     } finally {
       setSubmitting(false);
     }

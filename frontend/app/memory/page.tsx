@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchMemoryList, createInvitation, leaveMemory, deleteMemory, type Memory, type SortType } from '@/lib/api';
+import { showToast } from '@/lib/toast';
 
 const SORT_OPTIONS: { label: string; value: SortType }[] = [
   { label: '최신순',    value: 'DATE_DESC'   },
@@ -105,7 +106,7 @@ export default function MemoryListPage() {
       const mem = memories.find(m => m.id === memoryId);
       setShareData({ inviteLink: link, memoryName: mem?.name ?? '' });
     } catch (e) {
-      alert((e as Error).message);
+      showToast((e as Error).message);
     }
   };
 
@@ -123,8 +124,8 @@ export default function MemoryListPage() {
     if (!shareData) return;
     try {
       await navigator.clipboard.writeText(shareData.inviteLink);
-      alert('초대 링크가 복사됐습니다.');
-    } catch (e) { alert('복사에 실패했습니다.'); }
+      showToast('초대 링크가 복사됐습니다.', 'success');
+    } catch (e) { showToast('복사에 실패했습니다.'); }
     setShareData(null);
   };
 
@@ -140,7 +141,7 @@ export default function MemoryListPage() {
       await leaveMemory(memoryId);
       setMemories(prev => prev.filter(m => m.id !== memoryId));
     } catch (e) {
-      alert((e as Error).message);
+      showToast((e as Error).message);
     }
   };
 
@@ -151,7 +152,7 @@ export default function MemoryListPage() {
       await deleteMemory(memoryId);
       setMemories(prev => prev.filter(m => m.id !== memoryId));
     } catch (e) {
-      alert((e as Error).message);
+      showToast((e as Error).message);
     }
   };
 

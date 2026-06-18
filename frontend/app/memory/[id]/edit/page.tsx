@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import MemoryForm, { type MemoryFormValues } from '@/components/MemoryForm';
+import { showToast } from '@/lib/toast';
 import {
   fetchMemory,
   updateMemory,
@@ -29,7 +30,7 @@ export default function EditMemoryPage() {
     }
     fetchMemory(memoryId)
       .then(setMemory)
-      .catch((e: Error) => alert(e.message))
+      .catch((e: Error) => showToast(e.message))
       .finally(() => setLoading(false));
   }, [memoryId, router]);
 
