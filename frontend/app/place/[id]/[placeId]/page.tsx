@@ -15,6 +15,7 @@ import {
   type PlaceReview,
   type ReviewSortType,
 } from '@/lib/api';
+import { renderTextWithLinks } from '@/lib/renderTextWithLinks';
 
 type SortCategory = 'DATE' | 'VISITED' | 'RATING';
 type SortOrder = 'DESC' | 'ASC';
@@ -97,20 +98,6 @@ const NAV_ITEMS = [
   { label: '마이페이지', href: '/my',   d: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' },
 ];
 
-function renderTextWithLinks(text: string) {
-  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
-  const parts = text.split(urlRegex);
-  return parts.map((part, i) => {
-    if (!part.match(/^https?:\/\/|^www\./)) return part;
-    const href = part.startsWith('www.') ? `https://${part}` : part;
-    return (
-      <a key={i} href={href} target="_blank" rel="noopener noreferrer"
-        style={{ color: '#7F77DD', textDecoration: 'underline', wordBreak: 'break-all' }}
-        onClick={e => e.stopPropagation()}
-      >{part}</a>
-    );
-  });
-}
 
 function ReviewTextToggle({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
@@ -129,7 +116,7 @@ function ReviewTextToggle({ text }: { text: string }) {
   return (
     <div className="review-text-wrap">
       <p ref={ref} className={`review-text ${expanded ? 'review-text-expanded' : 'review-text-clamped'}`}>
-        {text}
+        {renderTextWithLinks(text)}
       </p>
       {(overflows || expanded) && (
         <button className="review-toggle-btn" onClick={() => setExpanded(e => !e)}>
