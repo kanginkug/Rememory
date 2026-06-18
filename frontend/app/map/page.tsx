@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { fetchAllPlaces, CATEGORY_LABEL, type PlaceMapItem, type Category } from '@/lib/api';
+import { fetchAllPlaces, fetchPlace, CATEGORY_LABEL, type PlaceMapItem, type Category } from '@/lib/api';
 
 declare global {
   interface Window { kakao: any; }
@@ -49,6 +49,7 @@ export default function MapPage() {
   const mapRef = useRef<HTMLDivElement>(null);
   const [places, setPlaces] = useState<PlaceMapItem[]>([]);
   const [selected, setSelected] = useState<PlaceMapItem | null>(null);
+  const [photoMap, setPhotoMap] = useState<Record<number, string>>({});
   const [kakaoReady, setKakaoReady] = useState(false);
 
   useEffect(() => {
@@ -108,7 +109,19 @@ export default function MapPage() {
     maps.event.addListener(map, 'click', () => setSelected(null));
   }, [kakaoReady, places]);
 
-  const thumbSrc = selected ? CATEGORY_FALLBACK[selected.category] : '';
+  useEffect(() => {
+    if (!selected) return;
+    fetchPlace(selected.memoryId, selected.placeId)
+      .then(detail => {
+        const photo = detail.placePhotoList?.[0]?.imageUrl;
+        if (photo) setPhotoMap(prev => ({ ...prev, [selected.placeId]: photo }));
+      })
+      .catch(() => {});
+  }, [selected]);
+
+  const thumbSrc = selected
+    ? (photoMap[selected.placeId] ?? CATEGORY_FALLBACK[selected.category])
+    : '';
   const filledStars = selected ? Math.round(Number(selected.avgRating)) : 0;
 
   return (
@@ -134,7 +147,7 @@ export default function MapPage() {
           <div className="map-place-row">
             <div className="map-thumb">
               <img
-                src={thumbSrc}
+                src={thumbSrc || CATEGORY_FALLBACK[selected.category]}
                 alt={selected.placeName}
                 onError={e => { (e.currentTarget as HTMLImageElement).src = CATEGORY_FALLBACK[selected.category]; }}
               />
