@@ -15,7 +15,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
-    /** 후기 작성 (1인 1후기, 사진 선택) */
+    /** 후기작성 (1인 1후기, 사진 선택) */
     @PostMapping
     public ResponseEntity<Void> createReview(@RequestAttribute("memberId") Long memberId, @RequestBody @Valid CreateUpdateReviewRequestDTO cuReviewRequestDTO) {
         reviewService.save(memberId, cuReviewRequestDTO);
