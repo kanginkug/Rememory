@@ -3,7 +3,15 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { fetchAllPlaces, fetchPlace, CATEGORY_LABEL, type PlaceMapItem, type Category } from '@/lib/api';
+import {
+  fetchAllPlaces,
+  fetchPlace,
+  fetchMemoryList,
+  CATEGORY_LABEL,
+  type PlaceMapItem,
+  type Category,
+  type Memory,
+} from '@/lib/api';
 
 declare global {
   interface Window { kakao: any; }
@@ -47,10 +55,19 @@ const NAV_ITEMS = [
 export default function MapPage() {
   const router = useRouter();
   const mapRef = useRef<HTMLDivElement>(null);
-  const [places, setPlaces] = useState<PlaceMapItem[]>([]);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+
+  const [allPlaces, setAllPlaces] = useState<PlaceMapItem[]>([]);
+  const [memories, setMemories] = useState<Memory[]>([]);
+  const [selectedMemoryId, setSelectedMemoryId] = useState<number | null>(null);
   const [selected, setSelected] = useState<PlaceMapItem | null>(null);
   const [photoMap, setPhotoMap] = useState<Record<number, string>>({});
   const [kakaoReady, setKakaoReady] = useState(false);
+
+  const places = selectedMemoryId
+    ? allPlaces.filter(p => p.memoryId === selectedMemoryId)
+    : allPlaces;
 
   useEffect(() => {
     document.body.classList.add('page-map');
@@ -58,7 +75,8 @@ export default function MapPage() {
   }, []);
 
   useEffect(() => {
-    fetchAllPlaces().then(setPlaces).catch(() => {});
+    fetchAllPlaces().then(setAllPlaces).catch(() => {});
+    fetchMemoryList('DATE_DESC').then(setMemories).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -71,14 +89,25 @@ export default function MapPage() {
     return () => clearInterval(t);
   }, []);
 
+  // 지도 초기화 (한 번만)
   useEffect(() => {
     if (!kakaoReady || !mapRef.current) return;
-
     const { maps } = window.kakao;
-    const validPlaces = places.filter(p => p.latitude && p.longitude);
-
     const center = new maps.LatLng(36.5, 127.8);
-    const map = new maps.Map(mapRef.current, { center, level: 13 });
+    mapInstanceRef.current = new maps.Map(mapRef.current, { center, level: 13 });
+    maps.event.addListener(mapInstanceRef.current, 'click', () => setSelected(null));
+  }, [kakaoReady]);
+
+  // 마커 교체 (places 변경 시)
+  useEffect(() => {
+    if (!kakaoReady || !mapInstanceRef.current) return;
+    const { maps } = window.kakao;
+
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+    setSelected(null);
+
+    const validPlaces = places.filter(p => p.latitude && p.longitude);
 
     validPlaces.forEach(place => {
       const color = PIN_COLOR[place.category];
@@ -98,15 +127,27 @@ export default function MapPage() {
       );
 
       const marker = new maps.Marker({
-        map,
+        map: mapInstanceRef.current,
         position: new maps.LatLng(place.latitude, place.longitude),
         image: markerImage,
       });
 
       maps.event.addListener(marker, 'click', () => setSelected(place));
+      markersRef.current.push(marker);
     });
 
-    maps.event.addListener(map, 'click', () => setSelected(null));
+    // 마커들에 맞게 지도 범위 조정
+    if (validPlaces.length === 0) {
+      mapInstanceRef.current.setCenter(new maps.LatLng(36.5, 127.8));
+      mapInstanceRef.current.setLevel(13);
+    } else if (validPlaces.length === 1) {
+      mapInstanceRef.current.setCenter(new maps.LatLng(validPlaces[0].latitude, validPlaces[0].longitude));
+      mapInstanceRef.current.setLevel(6);
+    } else {
+      const bounds = new maps.LatLngBounds();
+      validPlaces.forEach(p => bounds.extend(new maps.LatLng(p.latitude, p.longitude)));
+      mapInstanceRef.current.setBounds(bounds, 80);
+    }
   }, [kakaoReady, places]);
 
   useEffect(() => {
@@ -126,7 +167,6 @@ export default function MapPage() {
 
   return (
     <>
-      {/* 지도 배경 */}
       <div ref={mapRef} className="map-full" />
 
       {/* 헤더 */}
@@ -140,7 +180,56 @@ export default function MapPage() {
         <img src="/images/bell_icon_transparent.png" alt="알림" className="bell-img" />
       </header>
 
-{/* 바텀시트 */}
+      {/* 추억 선택 셀렉트 */}
+      <div style={{
+        position: 'fixed',
+        top: 64,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'calc(100% - 32px)',
+        maxWidth: 418,
+        zIndex: 30,
+      }}>
+        <div style={{ position: 'relative' }}>
+          <select
+            value={selectedMemoryId ?? ''}
+            onChange={e => setSelectedMemoryId(e.target.value === '' ? null : Number(e.target.value))}
+            style={{
+              width: '100%',
+              padding: '11px 40px 11px 16px',
+              borderRadius: 14,
+              border: 'none',
+              background: 'white',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+              fontSize: 14,
+              fontWeight: 600,
+              color: '#1e293b',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+          >
+            <option value="">전체 추억</option>
+            {memories.map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
+            ))}
+          </select>
+          <svg
+            style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+        {selectedMemoryId && (
+          <div style={{ marginTop: 6, textAlign: 'center', fontSize: 12, color: '#64748b', background: 'rgba(255,255,255,0.85)', borderRadius: 8, padding: '3px 10px', display: 'inline-block', marginLeft: '50%', transform: 'translateX(-50%)' }}>
+            장소 {places.filter(p => p.latitude && p.longitude).length}개
+          </div>
+        )}
+      </div>
+
+      {/* 바텀시트 */}
       {selected && (
         <div className="map-bottom-sheet">
           <div className="map-sheet-handle" />
