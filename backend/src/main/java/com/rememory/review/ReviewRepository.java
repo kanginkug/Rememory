@@ -44,7 +44,7 @@ public class ReviewRepository {
         }
     }
 
-    /** 특정 장소의 전체 후기 조회 (삭제 제외, member/place/memory fetch join) */
+    /** 특정 장소의 전체 후기 조회 (삭제 제외, member / place / memory fetch join) */
     public List<Review> findAllByPlaceId(Long placeId) {
             return queryFactory.selectFrom(QReview.review)
                             .join(QReview.review.member, QMember.member).fetchJoin()
