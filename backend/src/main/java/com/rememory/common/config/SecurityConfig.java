@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -27,6 +28,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2UserService oAuth2UserService;
+    private final Environment environment;
 
     @Value("${app.frontend-url}")
     private String frontendUrl;
@@ -50,11 +52,14 @@ public class SecurityConfig {
                         .failureHandler((req, res, ex) ->
                                 res.sendRedirect(frontendUrl + "/login/failed"))
                 )
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login/success", "/login/failed").permitAll()
-                        .requestMatchers("/api/auth/refresh").permitAll()
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers("/login/success", "/login/failed").permitAll();
+                    auth.requestMatchers("/api/auth/refresh").permitAll();
+                    if (!environment.matchesProfiles("prod")) {
+                        auth.requestMatchers("/api/auth/test-login").permitAll();
+                    }
+                    auth.anyRequest().authenticated();
+                })
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
