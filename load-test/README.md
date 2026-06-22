@@ -76,6 +76,8 @@ docker exec -it rememory-postgres psql -U inkug -d rememory -c "SELECT COUNT(*) 
 
 > 읽기 API는 50 VUs × 30초, p(95) < 500ms / 에러율 < 1% 기준.
 > `review-create.js`(쓰기, 비관적 락)는 동일 조건에 create p(95) < 1000ms, delete p(95) < 800ms 기준 추가.
+>
+> **목표치(500ms) 근거**: Google RAIL 모델 기준으로 사용자가 응답을 "느리다"고 인지하는 임계점이 약 1000ms이며, API 레이어 단독 응답은 그 절반인 500ms를 관용적 상한선으로 사용한다. 현재 실측치(읽기 25~39ms, 홈 183ms)가 목표치를 크게 밑돌기 때문에 이 값은 "회귀 감지"보다 "최소 안전망" 역할에 가깝다. CI에 k6를 붙이거나 실측 베이스라인이 확립되면 실측값의 2~3배 수준으로 타이트하게 조정할 것.
 
 ```powershell
 # JWT 발급 (PowerShell)
@@ -85,6 +87,7 @@ $TOKEN = $res.accessToken
 
 | 파일 | 대상 API | 설명 |
 |------|----------|------|
+| `home.js`          | GET /api/place/best + /api/memory + /api/review/recent (병렬) | **홈 화면** |
 | `memory-list.js`   | GET /api/memory | 추억 목록 |
 | `memory-detail.js` | GET /api/memory/{id} | 추억 상세 |
 | `place-list.js`    | GET /api/place/{memoryId} | 장소 목록 |
@@ -96,6 +99,9 @@ $TOKEN = $res.accessToken
 | `scenario-full.js`  | 위 5개 API 순차 호출 | 전체 사용자 플로우 |
 
 ```bash
+# 홈 화면 (3개 API 병렬)
+k6 run --env TOKEN=<토큰> load-test/home.js
+
 # 단일 API 테스트 (읽기)
 k6 run --env TOKEN=<토큰> load-test/memory-list.js
 k6 run --env TOKEN=<토큰> load-test/memory-detail.js
@@ -181,6 +187,21 @@ iterations.....................: 9001    150.01/s
 
 50명의 동시 사용자가 30초간 끊임없이 요청을 보냈을 때, 모든 읽기 API가 에러 없이 p(95) 40ms 이내로 응답했다. 목표 기준(p95 < 500ms)을 큰 폭으로 밑도는 수치다.
 
+### 홈 화면 — 3개 API 병렬 (home.js)
+
+홈 진입 시 브라우저가 동시에 호출하는 3개 API를 `http.batch()`로 병렬 실행.
+
+```
+http_req_duration (전체)............: avg=70.13ms  p(95)=182.66ms
+  { api:memory_list }...............: avg=90.75ms  p(95)=221.53ms  ← 병목
+  { api:place_best }................: avg=61.61ms  p(95)=149.64ms
+  { api:review_recent }.............: avg=58.03ms  p(95)=133.47ms
+http_req_failed......................: 0.12%  (초반 TCP 버스트 5건, 실질 0%)
+iterations...........................: 1382   44.95/s
+```
+
+단독 테스트에서 `memory-list.js`는 p(95) 38ms였지만, 홈에서는 221ms로 올라갔다. 3개 API가 동시에 DB 커넥션과 스레드를 경합하면서 발생하는 자연스러운 증가로, 홈 체감 로딩 속도는 가장 느린 `/api/memory` 응답이 결정한다. 그래도 목표치(500ms) 대비 충분한 여유가 있다.
+
 ### 전체 사용자 플로우 (scenario-full.js)
 
 추억 목록 → 추억 상세 → 장소 목록 → 장소 상세 → 후기 목록을 5단계 순차로 호출하는 시나리오.
@@ -214,6 +235,7 @@ http_reqs........................: 8166   263.84/s
 | 구분 | p(95) 범위 | 비고 |
 |---|---|---|
 | 단순 읽기 (목록/상세/베스트) | 25~39ms | 모두 목표치 대비 10배 이상 여유 |
+| 홈 화면 (3개 API 병렬) | 133~222ms | 병목은 /api/memory, 단독 38ms→병렬 221ms |
 | 순차 플로우 (5단계) | 135ms | 단계 누적에도 충분히 빠름 |
 | 비관적 락 쓰기 (create/delete) | 43~45ms | 락 경합 상황에서도 읽기와 유사한 수준 |
 
