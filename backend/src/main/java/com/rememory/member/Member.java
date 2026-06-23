@@ -44,6 +44,8 @@ public class Member {
 
     private String fcmToken;
 
+    private boolean notificationEnabled = true;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
@@ -96,5 +98,10 @@ public class Member {
     /** FCM 토큰 갱신 */
     public void updateFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    /** 알림 허용 여부 변경 */
+    public void updateNotificationEnabled(boolean notificationEnabled) {
+        this.notificationEnabled = notificationEnabled;
     }
 }
