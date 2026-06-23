@@ -18,6 +18,7 @@ function CallbackInner() {
     localStorage.setItem('accessToken', token);
     const refreshToken = searchParams.get('refreshToken');
     if (refreshToken) setRefreshToken(refreshToken);
+    window.dispatchEvent(new Event('auth-login'));
     const pendingInviteCode = localStorage.getItem('pendingInviteCode');
     if (pendingInviteCode) {
       localStorage.removeItem('pendingInviteCode');
