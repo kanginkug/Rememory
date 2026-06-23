@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchMemoryList, createInvitation, leaveMemory, deleteMemory, type Memory, type SortType } from '@/lib/api';
+import BellIcon from '@/components/BellIcon';
 
 const SORT_OPTIONS: { label: string; value: SortType }[] = [
   { label: '최신순',    value: 'DATE_DESC'   },
@@ -178,6 +179,7 @@ export default function MemoryListPage() {
           className="object-contain"
           style={{ height: 50, mixBlendMode: 'multiply' }}
         />
+        <BellIcon />
       </header>
 
       {/* Content */}
