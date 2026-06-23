@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import KakaoInit from "@/components/KakaoInit";
 import FcmInit from "@/components/FcmInit";
+import Toast from "@/components/Toast";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -44,6 +45,7 @@ export default function RootLayout({
         />
         <KakaoInit />
         <FcmInit />
+        <Toast />
       </body>
     </html>
   );
