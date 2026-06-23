@@ -55,6 +55,7 @@ public class ReviewService {
         }
 
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
+        com.rememory.memory.Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
         Review review = Review.create(creator, place, cuReviewRequestDTO.getRating(), cuReviewRequestDTO.getContent(), cuReviewRequestDTO.getVisitedAt());
         reviewRepository.save(review);
@@ -67,7 +68,7 @@ public class ReviewService {
         memoryRepository.recalculateRating(memoryId);
 
         String fcmTitle = "새 리뷰가 작성됐어요.";
-        String body = creator.getName() + "님이 리뷰를 작성했습니다.";
+        String body = creator.getName() + "님이 [" + memory.getName() + "] " + place.getName() + "에 리뷰를 작성했습니다.";
         // 추억 멤버 id 목록 조회
         List<MemberMemory> members = mmRepository.findActiveByMemoryId(memoryId);
         for(MemberMemory receiver : members){
