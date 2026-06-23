@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BellIcon from '@/components/BellIcon';
-import { fetchMe, updateNotificationSettings, type NotificationSettings } from '@/lib/api';
+import { fetchMe, updateNotificationSettings, registerFcmToken, type NotificationSettings } from '@/lib/api';
+import { requestAndGetFcmToken } from '@/lib/firebase';
 
 function Toggle({ on, onChange, disabled }: { on: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
@@ -88,8 +89,9 @@ export default function AlarmPage() {
   };
 
   const handleRequestPermission = async () => {
-    const result = await Notification.requestPermission();
-    setPermission(result);
+    const fcmToken = await requestAndGetFcmToken();
+    if (fcmToken) registerFcmToken(fcmToken).catch(() => {});
+    if ('Notification' in window) setPermission(Notification.permission);
   };
 
   if (loading) return null;

@@ -14,7 +14,35 @@ function getFirebaseApp() {
   return getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 }
 
+async function getTokenFromFirebase(): Promise<string | null> {
+  if (typeof window === 'undefined') return null;
+  if (!('Notification' in window)) return null;
+
+  const supported = await isSupported();
+  if (!supported) return null;
+
+  if (Notification.permission !== 'granted') return null;
+
+  const messaging = getMessaging(getFirebaseApp());
+  const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+
+  return getToken(messaging, {
+    vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+    serviceWorkerRegistration: swReg,
+  });
+}
+
+// 이미 권한이 granted인 경우에만 토큰 발급 (자동 실행용)
 export async function getFcmToken(): Promise<string | null> {
+  try {
+    return await getTokenFromFirebase();
+  } catch {
+    return null;
+  }
+}
+
+// 사용자 액션(버튼 클릭)에서 호출 — requestPermission 포함 (iOS 대응)
+export async function requestAndGetFcmToken(): Promise<string | null> {
   try {
     if (typeof window === 'undefined') return null;
     if (!('Notification' in window)) return null;
@@ -22,19 +50,10 @@ export async function getFcmToken(): Promise<string | null> {
     const supported = await isSupported();
     if (!supported) return null;
 
-    const messaging = getMessaging(getFirebaseApp());
-
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') return null;
 
-    const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-      scope: '/',
-    });
-
-    return await getToken(messaging, {
-      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: swReg,
-    });
+    return await getTokenFromFirebase();
   } catch {
     return null;
   }
