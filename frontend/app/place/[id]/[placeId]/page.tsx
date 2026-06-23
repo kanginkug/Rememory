@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import ImageLightbox from '@/components/ImageLightbox';
+import BellIcon from '@/components/BellIcon';
 import {
   fetchPlace,
   fetchPlaceReviewsSorted,
@@ -243,7 +244,7 @@ export default function PlaceDetailPage() {
           </svg>
         </button>
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
-        <img src="/images/bell_icon_transparent.png" alt="알림" className="bell-img" />
+        <BellIcon />
       </header>
 
       <div className="content">

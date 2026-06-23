@@ -23,6 +23,9 @@
 /public/workbox-*.js
 /public/workbox-*.js.map
 
+# firebase sw (auto-generated from env vars)
+/public/firebase-messaging-sw.js
+
 # production
 /build
 

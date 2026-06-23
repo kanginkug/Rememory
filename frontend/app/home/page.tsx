@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import OnboardingGuide from '@/components/OnboardingGuide';
+import BellIcon from '@/components/BellIcon';
 import {
   fetchBestPlaces,
   fetchRecentMemories,
@@ -119,7 +120,7 @@ export default function HomePage() {
       {/* 고정 헤더 */}
       <header ref={headerRef} className="app-header" id="appHeader">
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
-        <img src="/images/bell_icon_transparent.png" alt="알림" className="bell-img" />
+        <BellIcon />
       </header>
 
       {/* 고정 배너 */}
