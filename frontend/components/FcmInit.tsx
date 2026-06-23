@@ -8,13 +8,16 @@ import { addNotification } from '@/lib/notifications';
 
 export default function FcmInit() {
   useEffect(() => {
-    if (!getToken()) return;
-
-    let unsubscribe: (() => void) | null = null;
-
     // ===== DEBUG START (iOS FCM 디버깅용 임시 코드) =====
     const dbgToast = (msg: string) =>
       window.dispatchEvent(new CustomEvent('app-toast', { detail: { message: msg, type: 'notification' } }));
+
+    const jwt = getToken();
+    dbgToast(`[FCM 0] FcmInit 실행됨 / JWT: ${jwt ? '있음' : '없음(로그인 필요)'}`);
+
+    if (!jwt) return;
+
+    let unsubscribe: (() => void) | null = null;
 
     (async () => {
       // 1. 알림 권한 상태
