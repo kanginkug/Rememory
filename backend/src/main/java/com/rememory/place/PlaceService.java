@@ -5,6 +5,8 @@ import com.rememory.common.exception.ErrorCode;
 import com.rememory.common.s3.service.UploadService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
+import com.rememory.member.fcm.FcmService;
+import com.rememory.memory.MemberMemory;
 import com.rememory.memory.MemberMemoryRepository;
 import com.rememory.memory.Memory;
 import com.rememory.memory.MemoryRepository;
@@ -30,6 +32,7 @@ public class PlaceService {
     private final ReviewRepository reviewRepository;
     private final MemberMemoryRepository mmRepository;
     private final UploadService uploadService;
+    private final FcmService fcmService;
 
     /** 장소 생성 + 사진 업로드 + placeCount 갱신 */
     @Transactional
@@ -49,6 +52,15 @@ public class PlaceService {
 
         if(cpRequestDTO.getPhotoUrlList() != null && !cpRequestDTO.getPhotoUrlList().isEmpty()){
             savePlacePhoto(memoryId, creatorId, place.getId(), cpRequestDTO.getPhotoUrlList());
+        }
+
+        String fcmTitle = "새 장소가 추가됐어요.";
+        String body = creator.getName() + "님이 [" + memory.getName() + "]에 장소를 추가했습니다.";
+        // 추억 멤버 id 목록 조회
+        List<MemberMemory> members = mmRepository.findActiveByMemoryId(memory.getId());
+        for(MemberMemory receiver : members){
+            if (receiver.getMember().getId().equals(creatorId)) continue;
+            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body, "/place/" + memoryId + "/" + place.getId(), com.rememory.member.fcm.FcmNotificationType.PLACE);
         }
     }
 

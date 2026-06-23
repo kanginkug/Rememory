@@ -4,6 +4,7 @@ import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
+import com.rememory.member.fcm.FcmService;
 import com.rememory.memory.MemberMemory;
 import com.rememory.memory.MemberMemoryRepository;
 import com.rememory.memory.Memory;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class InvitationService {
     private final MemberRepository memberRepository;
     private final MemoryRepository memoryRepository;
     private final MemberMemoryRepository mmRepository;
+    private final FcmService fcmService;
 
     /** 초대 링크 생성 및 저장, 생성된 invite code 반환 */
     @Transactional
@@ -70,5 +73,14 @@ public class InvitationService {
                 );
         invitation.plusUsedCount();
         memory.plusMemberCount();
+
+        String fcmTitle = "새 멤버가 참여했어요";
+        String body = invitedMember.getName() + "님이 [" + memory.getName() + "]에 합류했습니다.";
+        // 추억 멤버 id 목록 조회
+        List<MemberMemory> members = mmRepository.findActiveByMemoryId(memory.getId());
+        for(MemberMemory receiver : members){
+            if (receiver.getMember().getId().equals(invitedMemberId)) continue;
+            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body, "/memory/" + memory.getId(), com.rememory.member.fcm.FcmNotificationType.INVITATION);
+        }
     }
 }

@@ -33,10 +33,10 @@ class InvitationServiceTest {
 
     @BeforeEach
     void setUp() {
-        invitor = Member.create("홍길동", "hong@gmail.com", "http://img/1", "KAKAO", "kakao_111");
+        invitor = Member.create("홍길동", "hong@gmail.com", "http://img/1", "KAKAO", "kakao_111", null, null);
         memberRepository.save(invitor);
 
-        invitedMember = Member.create("김철수", "kim@gmail.com", "http://img/2", "KAKAO", "kakao_222");
+        invitedMember = Member.create("김철수", "kim@gmail.com", "http://img/2", "KAKAO", "kakao_222", null, null);
         memberRepository.save(invitedMember);
 
         memory = Memory.create(invitor, "제주도 여행", "즐거운 여행",

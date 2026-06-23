@@ -45,10 +45,10 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.create("홍길동", "hong@gmail.com", "KAKAO", "kakao_111", "http://img/1");
+        member = Member.create("홍길동", "hong@gmail.com", "http://img/1", "KAKAO", "kakao_111", null, null);
         memberRepository.save(member);
 
-        otherMember = Member.create("김철수", "kim@gmail.com", "KAKAO", "kakao_222", "http://img/2");
+        otherMember = Member.create("김철수", "kim@gmail.com", "http://img/2", "KAKAO", "kakao_222", null, null);
         memberRepository.save(otherMember);
 
         memory = Memory.create(member, "제주도 여행", "즐거운 여행",

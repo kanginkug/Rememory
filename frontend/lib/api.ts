@@ -241,6 +241,10 @@ export interface Member {
   name: string;
   email: string | null;
   profileImageUrl: string;
+  notificationEnabled: boolean;
+  notificationPlaceEnabled: boolean;
+  notificationReviewEnabled: boolean;
+  notificationInvitationEnabled: boolean;
 }
 
 export interface CreateMemoryRequest {
@@ -551,6 +555,19 @@ export const fetchPresignedUrls = (folder: string, count: number) =>
     method: 'POST',
     body: JSON.stringify({ folder, count }),
   });
+
+export const registerFcmToken = (fcmToken: string) =>
+  apiFetch<void>('/fcm/token', { method: 'POST', body: JSON.stringify({ fcmToken }) });
+
+export interface NotificationSettings {
+  notificationEnabled: boolean;
+  notificationPlaceEnabled: boolean;
+  notificationReviewEnabled: boolean;
+  notificationInvitationEnabled: boolean;
+}
+
+export const updateNotificationSettings = (settings: NotificationSettings) =>
+  apiFetch<void>('/fcm/notification', { method: 'PUT', body: JSON.stringify(settings) });
 
 export async function uploadToS3(presignedUrl: string, file: File): Promise<void> {
   const res = await fetch(presignedUrl, {

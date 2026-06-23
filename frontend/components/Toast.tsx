@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react';
 
-type ToastItem = { id: number; message: string; type: 'error' | 'success' };
+import type { ToastType } from '@/lib/toast';
+
+type ToastItem = { id: number; message: string; type: ToastType };
 
 let nextId = 0;
 
@@ -11,10 +13,10 @@ export default function Toast() {
 
   useEffect(() => {
     const handler = (e: Event) => {
-      const { message, type } = (e as CustomEvent<{ message: string; type: 'error' | 'success' }>).detail;
+      const { message, type } = (e as CustomEvent<{ message: string; type: ToastType }>).detail;
       const id = nextId++;
       setToasts(prev => [...prev, { id, message, type }]);
-      setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 3000);
+      setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), type === 'notification' ? 5000 : 3000);
     };
     window.addEventListener('app-toast', handler);
     return () => window.removeEventListener('app-toast', handler);
@@ -41,7 +43,7 @@ export default function Toast() {
     }}>
       {toasts.map(t => (
         <div key={t.id} style={{
-          background: t.type === 'error' ? '#1e293b' : '#22c55e',
+          background: t.type === 'error' ? '#1e293b' : t.type === 'notification' ? '#7F77DD' : '#22c55e',
           color: 'white',
           padding: '11px 20px',
           borderRadius: 12,
@@ -50,6 +52,7 @@ export default function Toast() {
           boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
           maxWidth: '100%',
           textAlign: 'center',
+          whiteSpace: 'pre-line',
           wordBreak: 'keep-all',
           lineHeight: 1.5,
           pointerEvents: 'auto',

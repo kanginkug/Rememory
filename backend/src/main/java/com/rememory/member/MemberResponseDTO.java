@@ -11,6 +11,10 @@ public class MemberResponseDTO {
     private String email;
     private String profileImageUrl;
     private String oauthProvider;
+    private boolean notificationEnabled;
+    private boolean notificationPlaceEnabled;
+    private boolean notificationReviewEnabled;
+    private boolean notificationInvitationEnabled;
 
     public static MemberResponseDTO from(Member member) {
         return new MemberResponseDTO(
@@ -18,7 +22,11 @@ public class MemberResponseDTO {
                 member.getName(),
                 member.getEmail(),
                 member.getProfileImageUrl(),
-                member.getOauthProvider()
+                member.getOauthProvider(),
+                member.isNotificationEnabled(),
+                member.isNotificationPlaceEnabled(),
+                member.isNotificationReviewEnabled(),
+                member.isNotificationInvitationEnabled()
         );
     }
 }

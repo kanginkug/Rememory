@@ -42,6 +42,16 @@ public class Member {
 
     private LocalDateTime refreshTokenExpiresAt;
 
+    private String fcmToken;
+
+    private boolean notificationEnabled = true;
+
+    private boolean notificationPlaceEnabled = true;
+
+    private boolean notificationReviewEnabled = true;
+
+    private boolean notificationInvitationEnabled = true;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
@@ -89,5 +99,22 @@ public class Member {
     public void updateRefreshToken(String refreshToken, LocalDateTime refreshTokenExpiresAt){
         this.refreshToken = refreshToken;
         this.refreshTokenExpiresAt = refreshTokenExpiresAt;
+    }
+
+    /** FCM 토큰 갱신 */
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+
+    /** 알림 설정 변경 */
+    public void updateNotificationEnabled(boolean notificationEnabled) {
+        this.notificationEnabled = notificationEnabled;
+    }
+
+    public void updateNotificationSettings(boolean notificationEnabled, boolean notificationPlaceEnabled, boolean notificationReviewEnabled, boolean notificationInvitationEnabled) {
+        this.notificationEnabled = notificationEnabled;
+        this.notificationPlaceEnabled = notificationPlaceEnabled;
+        this.notificationReviewEnabled = notificationReviewEnabled;
+        this.notificationInvitationEnabled = notificationInvitationEnabled;
     }
 }

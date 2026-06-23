@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import BellIcon from '@/components/BellIcon';
 import { useRouter } from 'next/navigation';
 import { fetchMyReviews, deleteReview, CATEGORY_LABEL, type PlaceReview, type Category } from '@/lib/api';
 
@@ -111,7 +112,7 @@ export default function ReviewManagementPage() {
           </svg>
         </button>
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
-        <img src="/images/bell_icon_transparent.png" alt="알림" className="bell-img" />
+        <BellIcon />
       </header>
 
       <div className="app-container">
