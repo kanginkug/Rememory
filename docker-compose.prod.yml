@@ -24,4 +24,4 @@ services:
       UPLOAD_DIR: ${UPLOAD_DIR}
       FIREBASE_SERVICE_ACCOUNT_PATH: ${FIREBASE_SERVICE_ACCOUNT_PATH}
     volumes:
-      - /home/ubuntu/rememory-9d099-firebase-adminsdk-fbsvc-7dccbd480c.json:/home/ubuntu/rememory-9d099-firebase-adminsdk-fbsvc-7dccbd480c.json
+      - /home/ubuntu/rememory-9d099-firebase-adminsdk-fbsvc-7dccbd480c.json:/app/firebase.json
