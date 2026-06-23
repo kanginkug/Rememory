@@ -1,7 +1,9 @@
+/// <reference lib="webworker" />
+
 import { initializeApp, getApps } from 'firebase/app';
 import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
-declare const self: ServiceWorkerGlobalScope & typeof globalThis;
+declare const self: ServiceWorkerGlobalScope;
 
 const app = getApps().length === 0
   ? initializeApp({
