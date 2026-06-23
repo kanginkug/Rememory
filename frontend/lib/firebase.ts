@@ -26,6 +26,19 @@ async function getTokenFromFirebase(): Promise<string | null> {
   const messaging = getMessaging(getFirebaseApp());
   const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
 
+  // SW가 activated 상태가 될 때까지 대기 (iOS 타이밍 문제 대응)
+  if (swReg.installing || swReg.waiting) {
+    await new Promise<void>(resolve => {
+      const sw = swReg.installing ?? swReg.waiting!;
+      sw.addEventListener('statechange', function handler() {
+        if (sw.state === 'activated') {
+          sw.removeEventListener('statechange', handler);
+          resolve();
+        }
+      });
+    });
+  }
+
   return getToken(messaging, {
     vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
     serviceWorkerRegistration: swReg,
