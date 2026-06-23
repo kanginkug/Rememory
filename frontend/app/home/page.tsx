@@ -9,12 +9,14 @@ import {
   fetchBestPlaces,
   fetchRecentMemories,
   fetchRecentReviews,
+  registerFcmToken,
   CATEGORY_LABEL,
   type BestPlace,
   type Memory,
   type RecentReview,
   type Category,
 } from '@/lib/api';
+import { requestAndGetFcmToken } from '@/lib/firebase';
 
 const CATEGORY_TAG: Record<Category, string> = {
   RESTAURANT:    'tag-restaurant',
@@ -48,6 +50,7 @@ export default function HomePage() {
   const [reviews,    setReviews]    = useState<RecentReview[]>([]);
   const [loaded,     setLoaded]     = useState(false);
   const [showGuide,  setShowGuide]  = useState(false);
+  const [showNotifPrompt, setShowNotifPrompt] = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) {
@@ -58,6 +61,9 @@ export default function HomePage() {
     setMounted(true);
     window.scrollTo(0, 0);
     if (!localStorage.getItem('onboarded')) setShowGuide(true);
+    if ('Notification' in window && Notification.permission === 'default' && !localStorage.getItem('notif_prompted')) {
+      setShowNotifPrompt(true);
+    }
 
     Promise.allSettled([
       fetchBestPlaces(),
@@ -112,11 +118,64 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [mounted]);
 
+  const handleNotifAllow = async () => {
+    localStorage.setItem('notif_prompted', '1');
+    setShowNotifPrompt(false);
+    const fcmToken = await requestAndGetFcmToken();
+    if (fcmToken) registerFcmToken(fcmToken).catch(() => {});
+  };
+
+  const handleNotifDeny = () => {
+    localStorage.setItem('notif_prompted', '1');
+    setShowNotifPrompt(false);
+  };
+
   if (!mounted) return <div style={{ background: '#BFDBF3', minHeight: '100dvh' }} />;
 
   return (
     <>
       {showGuide && <OnboardingGuide onClose={() => setShowGuide(false)} />}
+      {showNotifPrompt && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.45)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        }}>
+          <div style={{
+            width: '100%', maxWidth: 450,
+            background: 'white', borderRadius: '24px 24px 0 0',
+            padding: '28px 24px 40px',
+          }}>
+            <div style={{ fontSize: 36, textAlign: 'center', marginBottom: 12 }}>🔔</div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: '#1e293b', textAlign: 'center', marginBottom: 8 }}>
+              알림을 허용하시겠어요?
+            </h2>
+            <p style={{ fontSize: 14, color: '#64748b', textAlign: 'center', lineHeight: 1.6, marginBottom: 28 }}>
+              친구가 장소를 추가하거나 리뷰를 남기면{'\n'}알림으로 바로 알려드려요.
+            </p>
+            <button
+              onClick={handleNotifAllow}
+              style={{
+                width: '100%', padding: '14px', borderRadius: 14, border: 'none',
+                background: '#7F77DD', color: 'white', fontSize: 16, fontWeight: 700,
+                cursor: 'pointer', marginBottom: 10,
+              }}
+            >
+              허용하기
+            </button>
+            <button
+              onClick={handleNotifDeny}
+              style={{
+                width: '100%', padding: '14px', borderRadius: 14, border: 'none',
+                background: '#f1f5f9', color: '#94a3b8', fontSize: 15, fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              나중에
+            </button>
+          </div>
+        </div>
+      )}
       {/* 고정 헤더 */}
       <header ref={headerRef} className="app-header" id="appHeader">
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
