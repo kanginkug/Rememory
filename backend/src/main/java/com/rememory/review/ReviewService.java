@@ -72,7 +72,7 @@ public class ReviewService {
         List<MemberMemory> members = mmRepository.findActiveByMemoryId(memoryId);
         for(MemberMemory receiver : members){
             if (receiver.getMember().getId().equals(creatorId)) continue;
-            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body, "/place/" + memoryId + "/" + placeId);
+            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body, "/place/" + memoryId + "/" + placeId, com.rememory.member.fcm.FcmNotificationType.REVIEW);
         }
     }
 
