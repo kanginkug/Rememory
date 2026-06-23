@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ImageLightbox from '@/components/ImageLightbox';
+import BellIcon from '@/components/BellIcon';
 import {
   fetchMemory,
   fetchMemoryPlaces,
@@ -232,7 +233,7 @@ export default function MemoryPlacePage() {
           </svg>
         </button>
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
-        <img src="/images/bell_icon_transparent.png" alt="알림" className="bell-img" />
+        <BellIcon />
       </header>
 
       <div className="app-container" style={{ paddingTop: 70, paddingBottom: 90 }}>

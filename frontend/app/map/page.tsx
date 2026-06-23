@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import BellIcon from '@/components/BellIcon';
 import { useRouter } from 'next/navigation';
 import {
   fetchAllPlaces,
@@ -185,7 +186,7 @@ export default function MapPage() {
           </svg>
         </button>
         <img src="/images/default_phrase.png" alt="Rememory" className="logo-img" />
-        <img src="/images/bell_icon_transparent.png" alt="알림" className="bell-img" />
+        <BellIcon />
       </header>
 
       {/* 추억 선택 셀렉트 */}
