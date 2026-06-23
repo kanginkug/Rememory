@@ -5,6 +5,8 @@ import com.rememory.common.exception.ErrorCode;
 import com.rememory.common.s3.service.UploadService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
+import com.rememory.member.fcm.FcmService;
+import com.rememory.memory.MemberMemory;
 import com.rememory.memory.MemberMemoryRepository;
 import com.rememory.memory.MemoryRepository;
 import com.rememory.place.Place;
@@ -31,6 +33,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final ReviewPhotoRepository rpRepository;
     private final UploadService uploadService;
+    private final FcmService fcmService;
 
     /**
      * 후기 작성
@@ -62,6 +65,15 @@ public class ReviewService {
 
         placeRepository.updateRatingOnCreate(placeId, cuReviewRequestDTO.getRating());
         memoryRepository.recalculateRating(memoryId);
+
+        String fcmTitle = "새 리뷰가 작성됐어요.";
+        String body = creator.getName() + "님이 리뷰를 작성했습니다.";
+        // 추억 멤버 id 목록 조회
+        List<MemberMemory> members = mmRepository.findActiveByMemoryId(memoryId);
+        for(MemberMemory receiver : members){
+            if (receiver.getMember().getId().equals(creatorId)) continue;
+            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body);
+        }
     }
 
     /** 특정 장소에 대한 내 후기 단건 조회 */

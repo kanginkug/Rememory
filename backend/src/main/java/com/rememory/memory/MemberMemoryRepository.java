@@ -1,6 +1,7 @@
 package com.rememory.memory;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.rememory.member.QMember;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -51,11 +52,11 @@ public class MemberMemoryRepository {
     }
 
     /** 특정 추억의 전체 활성 멤버 조회 */
-    public List<MemberMemory> findAll(Long memoryId) {
+    public List<MemberMemory> findActiveByMemoryId(Long memoryId) {
         return queryFactory
                 .selectFrom(QMemberMemory.memberMemory)
-                .join(QMemory.memory)
-                .on(QMemberMemory.memberMemory.memory.id.eq(QMemory.memory.id))
+                .join(QMemberMemory.memberMemory.memory, QMemory.memory).fetchJoin()
+                .join(QMemberMemory.memberMemory.member, QMember.member).fetchJoin()
                 .where(
                         QMemberMemory.memberMemory.memory.id.eq(memoryId),
                         QMemberMemory.memberMemory.leftAt.isNull()
@@ -76,13 +77,4 @@ public class MemberMemoryRepository {
         return count != null ? count.intValue() : 0;
     }
 
-    /** 특정 추억의 활성 멤버 목록 조회 */
-    public List<MemberMemory> findActiveByMemoryId(Long memoryId) {
-        return queryFactory
-                .selectFrom(QMemberMemory.memberMemory)
-                .where(
-                        QMemberMemory.memberMemory.memory.id.eq(memoryId),
-                        QMemberMemory.memberMemory.leftAt.isNull()
-                ).fetch();
-    }
 }

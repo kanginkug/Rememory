@@ -42,6 +42,8 @@ public class Member {
 
     private LocalDateTime refreshTokenExpiresAt;
 
+    private String fcmToken;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
@@ -89,5 +91,10 @@ public class Member {
     public void updateRefreshToken(String refreshToken, LocalDateTime refreshTokenExpiresAt){
         this.refreshToken = refreshToken;
         this.refreshTokenExpiresAt = refreshTokenExpiresAt;
+    }
+
+    /** FCM 토큰 갱신 */
+    public void updateFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }

@@ -50,6 +50,7 @@ CONVENTIONS.md
 todo.md
 BLOG.md
 firebase-service-account.json
+*firebase-adminsdk*.json
 
 ### QueryDSL Generated ###
 **/src/main/generated/
