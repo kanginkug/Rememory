@@ -42,10 +42,10 @@ class MemoryServiceTest {
 
     @BeforeEach
     void setUp() {
-        member = Member.create("홍길동", "hong@gmail.com", "http://img/1", "KAKAO", "kakao_111");
+        member = Member.create("홍길동", "hong@gmail.com", "http://img/1", "KAKAO", "kakao_111", null, null);
         memberRepository.save(member);
 
-        otherMember = Member.create("김철수", "kim@gmail.com", "http://img/2", "KAKAO", "kakao_222");
+        otherMember = Member.create("김철수", "kim@gmail.com", "http://img/2", "KAKAO", "kakao_222", null, null);
         memberRepository.save(otherMember);
     }
 
@@ -67,7 +67,7 @@ class MemoryServiceTest {
         memoryService.createMemory(member.getId(), createMemoryDto("제주도 여행", "즐거운 여행"));
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
 
-        List<MemberMemory> memberMemories = mmRepository.findAll(memory.getId());
+        List<MemberMemory> memberMemories = mmRepository.findActiveByMemoryId(memory.getId());
         assertThat(memberMemories).hasSize(1);
         assertThat(memberMemories.get(0).getMember().getId()).isEqualTo(member.getId());
     }

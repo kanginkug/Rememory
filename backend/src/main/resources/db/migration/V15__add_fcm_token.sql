@@ -1,0 +1,1 @@
+ALTER TABLE member ADD COLUMN fcm_token VARCHAR(255);
