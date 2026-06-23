@@ -24,15 +24,20 @@ async function getTokenFromFirebase(): Promise<string | null> {
   if (Notification.permission !== 'granted') return null;
 
   const messaging = getMessaging(getFirebaseApp());
-  const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+
+  // 이미 등록된 SW(next-pwa의 sw.js)가 있으면 재사용, 없으면 개발용 SW 등록
+  let swReg = await navigator.serviceWorker.getRegistration('/');
+  if (!swReg) {
+    swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+  }
 
   // SW가 activated 상태가 될 때까지 대기 (iOS 타이밍 문제 대응)
-  if (swReg.installing || swReg.waiting) {
+  const activating = swReg.installing ?? swReg.waiting;
+  if (activating) {
     await new Promise<void>(resolve => {
-      const sw = swReg.installing ?? swReg.waiting!;
-      sw.addEventListener('statechange', function handler() {
-        if (sw.state === 'activated') {
-          sw.removeEventListener('statechange', handler);
+      activating.addEventListener('statechange', function handler() {
+        if (activating.state === 'activated') {
+          activating.removeEventListener('statechange', handler);
           resolve();
         }
       });
