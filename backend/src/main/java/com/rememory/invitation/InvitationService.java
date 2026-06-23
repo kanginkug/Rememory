@@ -75,7 +75,7 @@ public class InvitationService {
         memory.plusMemberCount();
 
         String fcmTitle = "새 멤버가 참여했어요";
-        String body = invitedMember.getName() + "님이 추억에 합류했습니다.";
+        String body = invitedMember.getName() + "님이 [" + memory.getName() + "]에 합류했습니다.";
         // 추억 멤버 id 목록 조회
         List<MemberMemory> members = mmRepository.findActiveByMemoryId(memory.getId());
         for(MemberMemory receiver : members){

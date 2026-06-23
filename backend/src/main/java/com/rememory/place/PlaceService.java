@@ -55,7 +55,7 @@ public class PlaceService {
         }
 
         String fcmTitle = "새 장소가 추가됐어요.";
-        String body = creator.getName() + "님이 장소를 추가했습니다.";
+        String body = creator.getName() + "님이 [" + memory.getName() + "]에 장소를 추가했습니다.";
         // 추억 멤버 id 목록 조회
         List<MemberMemory> members = mmRepository.findActiveByMemoryId(memory.getId());
         for(MemberMemory receiver : members){
