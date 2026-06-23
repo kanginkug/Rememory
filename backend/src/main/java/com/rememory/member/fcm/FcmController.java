@@ -17,4 +17,10 @@ public class FcmController {
             fcmService.updateFcmToken(memberId, request.fcmToken());
             return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/notification")
+    public ResponseEntity<Void> updateNotificationEnabled(@RequestAttribute("memberId") Long memberId, @RequestBody NotificationSettingRequest request) {
+        fcmService.updateNotificationEnabled(memberId, request.notificationEnabled());
+        return ResponseEntity.ok().build();
+    }
 }

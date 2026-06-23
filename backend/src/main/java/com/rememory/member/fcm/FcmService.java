@@ -24,6 +24,12 @@ public class FcmService {
     private final MemberRepository memberRepository;
 
     @Transactional
+    public void updateNotificationEnabled(Long memberId, boolean notificationEnabled) {
+        Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+        member.updateNotificationEnabled(notificationEnabled);
+    }
+
+    @Transactional
     public void updateFcmToken(Long memberId, String fcmToken) {
             Member member = memberRepository.findOne(memberId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
             member.updateFcmToken(fcmToken);
