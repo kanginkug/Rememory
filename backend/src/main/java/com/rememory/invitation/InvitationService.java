@@ -80,7 +80,7 @@ public class InvitationService {
         List<MemberMemory> members = mmRepository.findActiveByMemoryId(memory.getId());
         for(MemberMemory receiver : members){
             if (receiver.getMember().getId().equals(invitedMemberId)) continue;
-            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body);
+            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body, "/memory/" + memory.getId());
         }
     }
 }

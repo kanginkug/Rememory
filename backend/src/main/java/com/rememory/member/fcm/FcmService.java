@@ -33,9 +33,9 @@ public class FcmService {
      * @param title ex) 새 멤버가 참여했어요
      * @param body ex) nickname + "님이 추억에 합류했습니다."
      */
-    public void sendNotification(Long receiverId, String title, String body) {
+    public void sendNotification(Long receiverId, String title, String body, String url) {
         Member receiver = memberRepository.findOne(receiverId).orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
-        if(receiver.getFcmToken() == null) return;
+        if(receiver.getFcmToken() == null || !receiver.isNotificationEnabled()) return;
 
         Message message = Message.builder()
                 .setToken(receiver.getFcmToken())
@@ -43,6 +43,7 @@ public class FcmService {
                         .setTitle(title)
                         .setBody(body)
                         .build())
+                .putData("url", url)
                 .build();
         try {
             FirebaseMessaging.getInstance().send(message);

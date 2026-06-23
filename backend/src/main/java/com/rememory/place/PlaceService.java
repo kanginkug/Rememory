@@ -60,7 +60,7 @@ public class PlaceService {
         List<MemberMemory> members = mmRepository.findActiveByMemoryId(memory.getId());
         for(MemberMemory receiver : members){
             if (receiver.getMember().getId().equals(creatorId)) continue;
-            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body);
+            fcmService.sendNotification(receiver.getMember().getId(), fcmTitle, body, "/place/" + memoryId + "/" + place.getId());
         }
     }
 
