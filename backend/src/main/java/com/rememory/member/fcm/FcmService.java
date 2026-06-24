@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -53,10 +52,8 @@ public class FcmService {
 
         Message message = Message.builder()
                 .setToken(receiver.getFcmToken())
-                .setNotification(Notification.builder()
-                        .setTitle(title)
-                        .setBody(body)
-                        .build())
+                .putData("title", title)
+                .putData("body", body)
                 .putData("url", url)
                 .build();
         try {
