@@ -32,6 +32,7 @@ export default function FcmInit() {
     initFcm(onMessage).then(unsub => { unsubscribe = unsub; });
 
     const handleLogin = () => {
+      unsubscribe?.();
       initFcm(onMessage).then(unsub => { unsubscribe = unsub; });
     };
     window.addEventListener('auth-login', handleLogin);
