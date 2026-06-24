@@ -19,7 +19,8 @@ const app = getApps().length === 0
 const messaging = getMessaging(app);
 
 onBackgroundMessage(messaging, payload => {
-  const { title = 'Rememory', body } = payload.notification ?? {};
+  const title = payload.data?.title ?? 'Rememory';
+  const body = payload.data?.body;
   self.registration.showNotification(title, {
     body,
     icon: '/icons/icon-192.png',
