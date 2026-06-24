@@ -37,10 +37,9 @@ firebase.initializeApp(${JSON.stringify(config, null, 2)});
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
-  var notification = payload.notification || {};
-  var title = notification.title || 'Rememory';
+  var title = (payload.data && payload.data.title) || 'Rememory';
   var options = {
-    body: notification.body,
+    body: payload.data && payload.data.body,
     icon: '/icons/icon-192.png',
     data: { url: (payload.data && payload.data.url) || '/' },
   };
