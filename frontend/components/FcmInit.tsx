@@ -21,6 +21,8 @@ async function initFcm(onMessage: (title: string, body: string, url?: string) =>
 export default function FcmInit() {
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
+    let destroyed = false;
+    let generation = 0;
 
     const onMessage = (title: string, body: string, url?: string) => {
       addNotification({ title, body, url, timestamp: Date.now() });
@@ -29,15 +31,25 @@ export default function FcmInit() {
       window.dispatchEvent(new CustomEvent('app-toast', { detail: { message, type: 'notification' } }));
     };
 
-    initFcm(onMessage).then(unsub => { unsubscribe = unsub; });
+    function startFcm() {
+      const gen = ++generation;
+      initFcm(onMessage).then(unsub => {
+        if (destroyed || gen !== generation) { unsub?.(); return; }
+        unsubscribe = unsub;
+      });
+    }
+
+    startFcm();
 
     const handleLogin = () => {
       unsubscribe?.();
-      initFcm(onMessage).then(unsub => { unsubscribe = unsub; });
+      unsubscribe = null;
+      startFcm();
     };
     window.addEventListener('auth-login', handleLogin);
 
     return () => {
+      destroyed = true;
       unsubscribe?.();
       window.removeEventListener('auth-login', handleLogin);
     };
