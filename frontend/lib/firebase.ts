@@ -89,8 +89,8 @@ export async function listenForegroundMessages(
     const messaging = getMessaging(getFirebaseApp());
     return onMessage(messaging, (payload) => {
       callback(
-        payload.notification?.title ?? 'Rememory',
-        payload.notification?.body ?? '',
+        payload.data?.title ?? 'Rememory',
+        payload.data?.body ?? '',
         payload.data?.url,
       );
     });
