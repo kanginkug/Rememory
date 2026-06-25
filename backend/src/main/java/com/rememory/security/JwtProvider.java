@@ -23,14 +23,14 @@ public class JwtProvider {
 
     public JwtProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration-ms:86400000}") long expirationsMs)
+            @Value("${jwt.expiration-ms:86400000}") long expirationMs)
     {
         // HS256 최소 키 길이(32바이트) 검증: 미달 시 앱 기동 실패로 잘못된 설정을 즉시 인지
         if (secret.getBytes().length < 32) {
             throw new IllegalArgumentException("JWT_SECRET은 32바이트 이상이어야 합니다. 현재: " + secret.getBytes().length + "바이트");
         }
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-        this.expirationMs = expirationsMs;
+        this.expirationMs = expirationMs;
     }
 
     /** Access Token 생성: subject=memberId, 만료시간 설정 후 HS256으로 서명한다 */
