@@ -2,7 +2,7 @@
 
 > 친구들과 함께 장소 기반 추억을 기록하고, 별점·후기를 공유하는 소셜 PWA
 
-**개발 기간**: 2026.05 ~ 2026.07 (12주) | **개발 인원**: 1인
+**개발 기간**: 2026.05 ~ 2026.07 (12주) | **개발 인원**: 1인 | **실사용자**: 19명
 
 ---
 
@@ -142,19 +142,23 @@ Member ────────────────────────�
 
 ## 핵심 구현
 
-### 1. 동시성 제어 — 비관적 락으로 평균 별점 정합성 보장
+### 1. 동시성 제어 — 단일 UPDATE로 평균 별점 정합성 보장
 
 후기 추가/수정/삭제 시 여러 사람이 동시에 별점을 남기면 avg_rating이 잘못 계산될 수 있습니다.
 
-```
-1. Place SELECT FOR UPDATE (비관적 락)
-2. Review INSERT / UPDATE / DELETE
-3. Place.avg_rating, review_count 재계산
-4. Memory.avg_rating 재계산 (락 없이 — 통계성 데이터, 약간의 불일치 허용)
-5. COMMIT
+avg_rating 갱신 공식이 이전 상태값(avg, count)만으로 새 값을 계산할 수 있는 형태임을 이용해, Java로 꺼내지 않고 단일 UPDATE 문 안에서 원자적으로 처리했습니다.
+
+```sql
+-- 후기 추가 시
+UPDATE place
+SET avg_rating = (avg_rating * review_count + :newRating) / (review_count + 1),
+    review_count = review_count + 1
+WHERE place_id = :placeId
 ```
 
-Place는 비관적 락으로 정확성을 보장하고, 상위 집계인 Memory는 락 범위를 최소화해 성능을 유지했습니다.
+PostgreSQL은 UPDATE 실행 시 자동으로 row-level lock을 획득하므로, SELECT FOR UPDATE 없이도 동시 요청이 직렬화됩니다. 락 보유 시간도 DB 내부 연산으로만 한정되어 SELECT FOR UPDATE 방식보다 짧습니다.
+
+통계성 상위 집계인 Memory의 avg_rating은 락 없이 UPDATE해 불필요한 락 범위를 최소화했습니다.
 
 ---
 
@@ -162,13 +166,20 @@ Place는 비관적 락으로 정확성을 보장하고, 상위 집계인 Memory�
 
 **장소 목록 대표이미지 조회**
 
-장소당 N개 사진 중 1장만 필요한 상황에서, 장소마다 개별 쿼리를 날리는 N+1 대신 PostgreSQL `DISTINCT ON`으로 쿼리 1번에 처리했습니다.
+장소당 N개 사진 중 1장만 필요한 상황에서, 장소마다 개별 쿼리를 날리는 N+1 대신 IN절로 전체 사진을 한 번에 조회 후 Java `Collectors.toMap()`으로 장소별 최신 1장만 추출했습니다.
 
-```sql
-SELECT DISTINCT ON (place_id) place_id, image_url
-FROM place_photo
-WHERE place_id IN (:placeIds) AND deleted_at IS NULL
-ORDER BY place_id, created_at ASC
+```java
+queryFactory.select(pp.place.id, pp)
+    .from(pp)
+    .where(pp.deletedAt.isNull(), pp.place.id.in(placeIdList))
+    .orderBy(pp.createdAt.desc())
+    .fetch()
+    .stream()
+    .collect(Collectors.toMap(
+        t -> t.get(pp.place.id),
+        t -> PlacePhotoResponseDTO.from(t.get(pp)),
+        (existing, replacement) -> existing  // 장소당 최신 1장 유지
+    ));
 ```
 
 **추억 상세 — 멤버 LAZY 로딩**
@@ -221,7 +232,12 @@ implementation 'org.springframework.boot:spring-boot-starter-flyway'
 implementation 'org.flywaydb:flyway-database-postgresql'
 ```
 
-또한 Hibernate 6+의 시퀀스 네이밍 규칙(`member_seq`)과 `BIGSERIAL` 자동 생성 이름(`member_member_id_seq`) 불일치로 인한 Schema validation 실패도 분석·해결했습니다.
+또한 Hibernate 6+의 시퀀스 네이밍 규칙(`review_photo_seq`)과 `BIGSERIAL` 자동 생성 이름(`review_photo_review_photo_id_seq`) 불일치로 인한 Schema validation 실패를 분석하고, Flyway 마이그레이션으로 Hibernate가 기대하는 이름의 시퀀스를 명시적으로 생성해 해결했습니다.
+
+```sql
+-- V5__add_review_photo_seq.sql
+CREATE SEQUENCE review_photo_seq START WITH 1 INCREMENT BY 50;
+```
 
 ---
 
