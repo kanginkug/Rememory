@@ -14,6 +14,7 @@
 - [주요 기능](#주요-기능)
 - [ERD](#erd)
 - [핵심 구현](#핵심-구현)
+- [부하테스트](#6-k6-부하테스트)
 - [로컬 실행](#로컬-실행)
 
 ---
@@ -238,6 +239,25 @@ implementation 'org.flywaydb:flyway-database-postgresql'
 -- V5__add_review_photo_seq.sql
 CREATE SEQUENCE review_photo_seq START WITH 1 INCREMENT BY 50;
 ```
+
+---
+
+### 6. k6 부하테스트
+
+50 VUs × 30초, p(95) < 500ms / 에러율 < 1% 기준으로 홈 화면 주요 API 및 동시 쓰기 시나리오를 테스트했습니다.
+
+**환경**: 로컬(localhost:8080), Docker Compose (Spring Boot + PostgreSQL 16), 더미데이터 추억 20개 / 장소 100개 / 후기 100개
+
+| 구분 | 대상 | p(95) | 에러율 |
+|---|---|---|---|
+| 단순 읽기 (목록/상세/베스트) | memory, place, review 각 API | 25~39ms | 0% |
+| 홈 화면 (3개 API 병렬) | place/best + memory + review/recent | 133~222ms | 0% |
+| 전체 플로우 (5단계 순차) | 추억→장소→후기 흐름 | 135ms | 0% |
+| 동시 쓰기 (50 VU 동일 장소) | POST /api/review | 45ms | 0% |
+
+홈 화면에서 `/api/memory`가 단독 38ms → 병렬 221ms로 올라가 병목 지점임을 확인했습니다. 동시 쓰기 테스트에서 50개 VU가 동일 Place 행을 동시에 타깃했음에도 p(95) 45ms로, avg_rating 갱신 트랜잭션이 짧게 끝나 락 대기 지연이 두드러지지 않았습니다.
+
+자세한 실행 방법과 결과 분석은 [`load-test/README.md`](load-test/README.md)를 참고하세요.
 
 ---
 
