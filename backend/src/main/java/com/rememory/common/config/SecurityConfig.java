@@ -72,6 +72,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /** CORS 설정: 프론트 도메인(www 포함)만 허용 */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
