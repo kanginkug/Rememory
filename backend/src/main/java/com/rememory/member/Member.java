@@ -111,6 +111,7 @@ public class Member {
         this.notificationEnabled = notificationEnabled;
     }
 
+    /** 알림 전체·카테고리별(장소/리뷰/초대) 설정 일괄 변경 */
     public void updateNotificationSettings(boolean notificationEnabled, boolean notificationPlaceEnabled, boolean notificationReviewEnabled, boolean notificationInvitationEnabled) {
         this.notificationEnabled = notificationEnabled;
         this.notificationPlaceEnabled = notificationPlaceEnabled;

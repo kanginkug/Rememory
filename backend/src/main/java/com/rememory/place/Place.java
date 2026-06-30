@@ -58,6 +58,7 @@ public class Place {
     // 별점 평균
     private BigDecimal avgRating;
 
+    // 리뷰 수
     private int reviewCount;
 
     // (시/도) ex : 서울
