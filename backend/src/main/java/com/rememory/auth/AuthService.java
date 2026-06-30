@@ -19,6 +19,7 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
 
+    /** Refresh Token 검증 후 새 Access Token 발급 */
     public Map<String, String> reissueToken(Map<String, String> map) {
         String refreshToken = map.get("refreshToken");
         if (refreshToken == null || refreshToken.isBlank()) {
