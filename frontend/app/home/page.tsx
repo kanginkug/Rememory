@@ -18,6 +18,7 @@ import {
 } from '@/lib/api';
 import { requestAndGetFcmToken } from '@/lib/firebase';
 
+/** 카테고리별 CSS 태그 클래스명 매핑 */
 const CATEGORY_TAG: Record<Category, string> = {
   RESTAURANT:    'tag-restaurant',
   CAFE:          'tag-cafe',
@@ -25,6 +26,7 @@ const CATEGORY_TAG: Record<Category, string> = {
   ACCOMMODATION: 'tag-accommodation',
 };
 
+/** 카테고리별 리뷰 이미지 없을 때 사용할 대체 이미지 경로 */
 const REVIEW_FALLBACK: Record<Category, string> = {
   RESTAURANT:    '/images/no_reveiw_restaurant.png',
   CAFE:          '/images/no_review_cafe.png',
@@ -32,6 +34,7 @@ const REVIEW_FALLBACK: Record<Category, string> = {
   ACCOMMODATION: '/images/no_review_accommodation.png',
 };
 
+/** 하단 네비게이션 탭 목록 */
 const NAV_ITEMS = [
   { label: '홈',        href: '/home',   active: true,  d: 'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z' },
   { label: '추억',      href: '/memory', active: false, d: 'M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4 2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z' },
@@ -44,14 +47,19 @@ export default function HomePage() {
   const headerRef = useRef<HTMLElement>(null);
   const bannerRef  = useRef<HTMLDivElement>(null);
   const spacerRef  = useRef<HTMLDivElement>(null);
+  /** 클라이언트 마운트 여부 (SSR hydration 오류 방지용) */
   const [mounted,    setMounted]    = useState(false);
   const [bestPlaces, setBestPlaces] = useState<BestPlace[]>([]);
   const [memories,   setMemories]   = useState<Memory[]>([]);
   const [reviews,    setReviews]    = useState<RecentReview[]>([]);
+  /** API 응답 완료 여부 (빈 상태 판단에 사용) */
   const [loaded,     setLoaded]     = useState(false);
+  /** 온보딩 가이드 표시 여부 */
   const [showGuide,  setShowGuide]  = useState(false);
+  /** 푸시 알림 허용 요청 프롬프트 표시 여부 */
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
 
+  /** 인증 확인, 초기 데이터 병렬 패칭, 온보딩/알림 프롬프트 조건 판단 */
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) {
       router.replace('/login');
@@ -77,6 +85,7 @@ export default function HomePage() {
     });
   }, [router]);
 
+  /** 헤더 높이 기준으로 배너 top 위치와 스페이서 높이를 동기화 */
   const syncLayout = useCallback(() => {
     const header = headerRef.current;
     const banner = bannerRef.current;
@@ -87,6 +96,7 @@ export default function HomePage() {
     spacer.style.height = (hh + banner.offsetHeight - 36) + 'px';
   }, []);
 
+  /** 리사이즈 및 배너 크기 변화 시 레이아웃 재계산 */
   useEffect(() => {
     if (!mounted) return;
     syncLayout();
@@ -100,6 +110,7 @@ export default function HomePage() {
     };
   }, [mounted, syncLayout]);
 
+  /** 스크롤에 따라 배너 페이드아웃 + 헤더 배경색을 하늘색→흰색으로 선형 보간 */
   useEffect(() => {
     if (!mounted) return;
     const from = { r: 191, g: 219, b: 243 };
@@ -118,6 +129,7 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [mounted]);
 
+  /** 알림 허용 시 FCM 토큰 발급 후 서버에 등록 */
   const handleNotifAllow = async () => {
     localStorage.setItem('notif_prompted', '1');
     setShowNotifPrompt(false);
@@ -125,6 +137,7 @@ export default function HomePage() {
     if (fcmToken) registerFcmToken(fcmToken).catch(() => {});
   };
 
+  /** 알림 거부 시 다시 묻지 않도록 플래그 저장 */
   const handleNotifDeny = () => {
     localStorage.setItem('notif_prompted', '1');
     setShowNotifPrompt(false);
