@@ -183,6 +183,11 @@ queryFactory.select(pp.place.id, pp)
     ));
 ```
 
+📌 **엔지니어링 트레이드오프 (Engineering Trade-off)**
+* **비즈니스 제약 조건을 고려한 리스크 관리:** 본 서비스는 도메인 규칙상 **'장소당 사진 최대 5장 제한'** 정책을 엄격히 적용하고 있습니다. 이에 따라 메모리 필터링 방식으로 발생할 수 있는 네트워크/인프라 부하 리스크가 매우 낮습니다 (최악의 경우도 `조회 장소 수 × 5행` 수준).
+* **타입 안정성 및 DB 포터빌리티 유지:** `DISTINCT ON`은 PostgreSQL 전용 구문으로 JPQL/QueryDSL에서 표준으로 지원하지 않습니다. 이를 DB 레이어에서 처리하려면 Native Query로 이탈해야 하며, 이로 인해 컴파일 시점의 타입 안정성 상실 및 특정 DB 벤더 종속성 발생이라는 리스크 비용이 따릅니다. 현재 비즈니스 규모에서는 이 비용이 이점보다 크다고 판단하여 **QueryDSL 기반 배치 조회 방식**을 선택했습니다.
+* **향후 확장성 확보:** 추후 대용량 미디어 서비스로 확장되거나 사진 등록 제한 정책이 해제될 경우, Native SQL의 `DISTINCT ON` 또는 창 함수(Window Function)로 전환하여 DB 레이어에서 place당 1행만 반환하도록 고도화할 아키텍처적 여지를 남겨두었습니다.
+
 **추억 상세 — 멤버 LAZY 로딩**
 
 `MemberMemory` 조회 후 `mm.getMember()` 접근 시 멤버 수(N)만큼 LAZY 로딩이 발생했습니다. `findActiveByMemoryId`에 `fetchJoin(QMember.member)` 추가로 해결했습니다.
