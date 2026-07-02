@@ -157,9 +157,10 @@ SET avg_rating = (avg_rating * review_count + :newRating) / (review_count + 1),
 WHERE place_id = :placeId
 ```
 
-PostgreSQL은 UPDATE 실행 시 자동으로 row-level lock을 획득하므로, SELECT FOR UPDATE 없이도 동시 요청이 직렬화됩니다. 락 보유 시간도 DB 내부 연산으로만 한정되어 SELECT FOR UPDATE 방식보다 짧습니다.
-
-통계성 상위 집계인 Memory의 avg_rating은 락 없이 UPDATE해 불필요한 락 범위를 최소화했습니다.
+📌 **아키텍처 포인트**
+- **SELECT FOR UPDATE 제거**: 초기에는 `Place` 행에 비관적 락(`SELECT FOR UPDATE`)을 걸었지만, PostgreSQL 기본 격리 수준(Read Committed)에서 UPDATE 실행 시 자동으로 획득하는 배타적 행 잠금(Row-level Lock)만으로도 동시 요청이 직렬화됨을 확인하고 단일 UPDATE로 전환했습니다.
+- **락 경합 최소화**: 엔티티를 Java 메모리로 꺼내 연산하는 방식 대비, DB 내부 연산 구간에서만 락을 유지해 트랜잭션 점유 시간을 최소화했습니다 (50 VUs 동시 쓰기 테스트 시 p(95) 45ms).
+- **락 범위 최소화**: 통계성 상위 집계인 Memory의 avg_rating은 락 없이 UPDATE해 불필요한 락 범위를 줄였습니다.
 
 ---
 
@@ -251,7 +252,7 @@ CREATE SEQUENCE review_photo_seq START WITH 1 INCREMENT BY 50;
 
 50 VUs × 30초, p(95) < 500ms / 에러율 < 1% 기준으로 홈 화면 주요 API 및 동시 쓰기 시나리오를 테스트했습니다.
 
-**환경**: 로컬(localhost:8080), Docker Compose (Spring Boot + PostgreSQL 16), 더미데이터 추억 20개 / 장소 100개 / 후기 100개
+**환경**: 로컬 단일 머신, Docker Compose (Spring Boot + PostgreSQL 16). k6는 동일 호스트에서 실행되어 테스트 도구의 리소스 사용이 측정치에 일부 영향을 줄 수 있음 — 절대 수치보다 API 간 상대적 병목 비교(병렬 vs 단독, 락 경합 유무) 목적의 측정으로 해석 권장. 더미데이터 추억 20개 / 장소 100개 / 후기 100개
 
 | 구분 | 대상 | p(95) | 에러율 |
 |---|---|---|---|
