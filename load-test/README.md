@@ -75,7 +75,7 @@ docker exec -it rememory-postgres psql -U inkug -d rememory -c "SELECT COUNT(*) 
 ## 실행 명령어
 
 > 읽기 API는 50 VUs × 30초, p(95) < 500ms / 에러율 < 1% 기준.
-> `review-create.js`(쓰기, 비관적 락)는 동일 조건에 create p(95) < 1000ms, delete p(95) < 800ms 기준 추가.
+> `review-create.js`(쓰기, 단일 UPDATE 락 경합)는 동일 조건에 create p(95) < 1000ms, delete p(95) < 800ms 기준 추가.
 >
 > **목표치(500ms) 근거**: Google RAIL 모델 기준으로 사용자가 응답을 "느리다"고 인지하는 임계점이 약 1000ms이며, API 레이어 단독 응답은 그 절반인 500ms를 관용적 상한선으로 사용한다. 현재 실측치(읽기 25~39ms, 홈 183ms)가 목표치를 크게 밑돌기 때문에 이 값은 "회귀 감지"보다 "최소 안전망" 역할에 가깝다. CI에 k6를 붙이거나 실측 베이스라인이 확립되면 실측값의 2~3배 수준으로 타이트하게 조정할 것.
 
@@ -95,7 +95,7 @@ $TOKEN = $res.accessToken
 | `place-best.js`    | GET /api/place/best | 베스트 장소 |
 | `review-all.js`    | GET /api/review/memory/{memoryId}/place/{placeId}/all | 장소 전체 후기 |
 | `review-recent.js`  | GET /api/review/recent | 최근 후기 |
-| `review-create.js`  | POST /api/review (create→get→delete) | **비관적 락 쓰기** |
+| `review-create.js`  | POST /api/review (create→get→delete) | **단일 UPDATE 락 경합 쓰기** |
 | `scenario-full.js`  | 위 5개 API 순차 호출 | 전체 사용자 플로우 |
 
 ```bash
@@ -111,7 +111,7 @@ k6 run --env TOKEN=<토큰> load-test/place-best.js
 k6 run --env TOKEN=<토큰> load-test/review-all.js
 k6 run --env TOKEN=<토큰> load-test/review-recent.js
 
-# 쓰기(비관적 락) 테스트 — k6-writer-1~50 계정을 setup에서 자동 발급
+# 쓰기(단일 UPDATE 락 경합) 테스트 — k6-writer-1~50 계정을 setup에서 자동 발급
 k6 run --env TOKEN=<토큰> load-test/review-create.js
 
 # 전체 플로우 시나리오 (추억→장소→후기 순차 조회)
@@ -165,7 +165,7 @@ iterations.....................: 9001    150.01/s
 ## 실제 테스트 결과
 
 ### 테스트 환경
-- 로컬(localhost:8080), Docker Compose로 띄운 Spring Boot + PostgreSQL 16
+- 로컬 단일 머신, Docker Compose로 띄운 Spring Boot + PostgreSQL 16 (k6는 CPU/Memory 제한이나 별도 네트워크 격리 없이 동일 호스트에서 직접 실행 — 도구 자체의 리소스 사용이 측정치에 일부 간섭했을 수 있어, 절대 수치보다 API 간 상대적 병목 비교 목적으로 해석 권장)
 - 읽기 테스트 계정: `k6-user-1` (테스트 전용 로그인 API로 생성)
 - 쓰기(락) 테스트 계정: `k6-writer-1 ~ k6-writer-50` (VU마다 전용 계정, UNIQUE 충돌 방지)
 - 더미데이터: `seed_k6_data.sql`로 생성
@@ -216,9 +216,9 @@ http_req_failed................: 0.00%
 
 단계별로 보면 `flow:memory`가 가장 느린데, 두 번의 조회(목록+상세)가 순차로 누적되는 구간이라 자연스러운 결과다. 전체 플로우 기준 p(95) 134.88ms로, 사용자가 앱에서 추억을 열어보는 일반적인 흐름에서 체감하는 지연은 충분히 낮은 수준이다.
 
-### POST /api/review — 비관적 락 쓰기 (review-create.js)
+### POST /api/review — 단일 UPDATE 락 경합 쓰기 (review-create.js)
 
-평균 별점 갱신 로직은 `Place` 행에 `SELECT FOR UPDATE`를 거는 비관적 락으로 구현되어 있다. 50개의 VU(각각 다른 계정)가 매 이터레이션마다 **동일한 Place 행을 동시에 타깃**하도록 설계해 락 경합을 의도적으로 유발했다.
+평균 별점 갱신 로직은 `Place` 행을 단일 UPDATE 문으로 원자적으로 갱신하며, PostgreSQL이 UPDATE 실행 시 자동으로 획득하는 row-level lock으로 동시 요청을 직렬화한다(`SELECT FOR UPDATE` 없음). 50개의 VU(각각 다른 계정)가 매 이터레이션마다 **동일한 Place 행을 동시에 타깃**하도록 설계해 락 경합을 의도적으로 유발했다.
 
 ```
 checks_succeeded................: 100.00% 5396 out of 5396
@@ -237,6 +237,6 @@ http_reqs........................: 8166   263.84/s
 | 단순 읽기 (목록/상세/베스트) | 25~39ms | 모두 목표치 대비 10배 이상 여유 |
 | 홈 화면 (3개 API 병렬) | 133~222ms | 병목은 /api/memory, 단독 38ms→병렬 221ms |
 | 순차 플로우 (5단계) | 135ms | 단계 누적에도 충분히 빠름 |
-| 비관적 락 쓰기 (create/delete) | 43~45ms | 락 경합 상황에서도 읽기와 유사한 수준 |
+| 단일 UPDATE 락 경합 쓰기 (create/delete) | 43~45ms | 락 경합 상황에서도 읽기와 유사한 수준 |
 
-현재 트래픽 규모(개인 프로젝트 MVP 단계)와 인스턴스 사양(t3.micro 수준)을 기준으로, 별도의 캐싱이나 인덱스 추가 작업 없이도 50명 동시 사용자 수준까지는 충분한 성능을 확보하고 있다고 판단했다. 특히 비관적 락을 사용한 쓰기 작업이 일반 읽기와 비슷한 응답속도를 유지한 점은, 트랜잭션 범위를 최소화한 설계(Place만 락을 걸고 Memory는 일반 UPDATE로 처리)가 의도대로 동작하고 있음을 보여준다.
+현재 트래픽 규모(개인 프로젝트 MVP 단계)와 인스턴스 사양(t3.micro 수준)을 기준으로, 별도의 캐싱이나 인덱스 추가 작업 없이도 50명 동시 사용자 수준까지는 충분한 성능을 확보하고 있다고 판단했다. 특히 단일 UPDATE로 락 경합을 유발한 쓰기 작업이 일반 읽기와 비슷한 응답속도를 유지한 점은, 트랜잭션 범위를 최소화한 설계(Place만 락을 걸고 Memory는 일반 UPDATE로 처리)가 의도대로 동작하고 있음을 보여준다.
