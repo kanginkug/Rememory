@@ -251,7 +251,7 @@ CREATE SEQUENCE review_photo_seq START WITH 1 INCREMENT BY 50;
 
 50 VUs × 30초, p(95) < 500ms / 에러율 < 1% 기준으로 홈 화면 주요 API 및 동시 쓰기 시나리오를 테스트했습니다.
 
-**환경**: 로컬(localhost:8080), Docker Compose (Spring Boot + PostgreSQL 16), 더미데이터 추억 20개 / 장소 100개 / 후기 100개
+**환경**: 로컬 단일 머신, Docker Compose (Spring Boot + PostgreSQL 16). k6는 동일 호스트에서 실행되어 테스트 도구의 리소스 사용이 측정치에 일부 영향을 줄 수 있음 — 절대 수치보다 API 간 상대적 병목 비교(병렬 vs 단독, 락 경합 유무) 목적의 측정으로 해석 권장. 더미데이터 추억 20개 / 장소 100개 / 후기 100개
 
 | 구분 | 대상 | p(95) | 에러율 |
 |---|---|---|---|

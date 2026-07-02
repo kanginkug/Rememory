@@ -165,7 +165,7 @@ iterations.....................: 9001    150.01/s
 ## 실제 테스트 결과
 
 ### 테스트 환경
-- 로컬(localhost:8080), Docker Compose로 띄운 Spring Boot + PostgreSQL 16
+- 로컬 단일 머신, Docker Compose로 띄운 Spring Boot + PostgreSQL 16 (k6는 CPU/Memory 제한이나 별도 네트워크 격리 없이 동일 호스트에서 직접 실행 — 도구 자체의 리소스 사용이 측정치에 일부 간섭했을 수 있어, 절대 수치보다 API 간 상대적 병목 비교 목적으로 해석 권장)
 - 읽기 테스트 계정: `k6-user-1` (테스트 전용 로그인 API로 생성)
 - 쓰기(락) 테스트 계정: `k6-writer-1 ~ k6-writer-50` (VU마다 전용 계정, UNIQUE 충돌 방지)
 - 더미데이터: `seed_k6_data.sql`로 생성
