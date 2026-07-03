@@ -68,7 +68,8 @@ public class MemoryRepository {
                 .from(QPlace.place)
                 .where(
                         QPlace.place.memory.id.eq(memoryId),
-                        QPlace.place.deletedAt.isNull()
+                        QPlace.place.deletedAt.isNull(),
+                        QPlace.place.reviewCount.gt(0)
                 )
                 .fetchOne();
 

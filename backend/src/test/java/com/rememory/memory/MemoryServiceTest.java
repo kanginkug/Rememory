@@ -2,6 +2,7 @@ package com.rememory.memory;
 
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
+import com.rememory.common.s3.service.UploadService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import com.rememory.memory.dto.CreateMemoryRequestDTO;
@@ -16,12 +17,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
@@ -32,6 +35,7 @@ class MemoryServiceTest {
     @Autowired MemberMemoryRepository mmRepository;
     @Autowired MemoryPhotoRepository mpRepository;
     @Autowired MemberRepository memberRepository;
+    @MockitoBean UploadService uploadService;
     @PersistenceContext EntityManager em;
 
     private Member member;
@@ -310,7 +314,7 @@ class MemoryServiceTest {
 
         assertThatThrownBy(() -> memoryService.findMemory(999999L, memory.getId()))
                 .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorCode.MEMBER_NOT_FOUND.getMessage());
+                .hasMessage(ErrorCode.MEMBER_MEMORY_NOT_FOUND.getMessage());
     }
 
     @Test
@@ -340,14 +344,18 @@ class MemoryServiceTest {
     }
 
     @Test
-    @DisplayName("사진이 이미 존재하면 BusinessException 발생")
-    void saveMemoryPhoto_이미존재_예외발생() {
+    @DisplayName("사진이 이미 존재하면 기존 사진을 삭제하고 새 사진으로 교체")
+    void saveMemoryPhoto_이미존재_교체() {
         memoryService.createMemory(member.getId(), createMemoryDtoWithPhoto("제주도 여행", "즐거운 여행", TEST_PHOTO_URL));
         Memory memory = memoryRepository.findAllByMemberId(member.getId(), SortTypeMemory.DATE_DESC, null).get(0);
+        MemoryPhoto oldPhoto = mpRepository.findOne(memory.getId()).get();
 
-        assertThatThrownBy(() -> memoryService.saveMemoryPhoto(new MemoryPhotoRequestDTO(TEST_PHOTO_URL_NEW), memory.getId(), member.getId()))
-                .isInstanceOf(BusinessException.class)
-                .hasMessage(ErrorCode.MEMORY_PHOTO_ALREADY_EXISTS.getMessage());
+        memoryService.saveMemoryPhoto(new MemoryPhotoRequestDTO(TEST_PHOTO_URL_NEW), memory.getId(), member.getId());
+
+        MemoryPhoto newPhoto = mpRepository.findOne(memory.getId()).get();
+        assertThat(newPhoto.getId()).isNotEqualTo(oldPhoto.getId());
+        assertThat(newPhoto.getImageUrl()).isEqualTo(TEST_PHOTO_URL_NEW);
+        verify(uploadService).delete(TEST_PHOTO_URL);
     }
 
     @Test

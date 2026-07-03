@@ -58,7 +58,7 @@ public class FcmService {
                 .build();
         try {
             FirebaseMessaging.getInstance().send(message);
-        } catch (FirebaseMessagingException e) {
+        } catch (FirebaseMessagingException | IllegalStateException e) {
             log.warn("FCM 전송 실패 receiverId={}: {}", receiverId, e.getMessage());
         }
     }
