@@ -58,7 +58,7 @@ class ReviewServiceTest {
         mmRepository.save(MemberMemory.create(member, memory));
 
         place = Place.create(memory, member, "흑돼지 맛집", null, Category.RESTAURANT,
-                "제주시 어딘가", "kakao_001",
+                "제주시 어딘가", null, "kakao_001", null,
                 BigDecimal.valueOf(33.4996), BigDecimal.valueOf(126.5312),
                 "제주", "제주시",
                 LocalDate.of(2026, 5, 2));
@@ -170,7 +170,7 @@ class ReviewServiceTest {
         reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(3.0), "보통이에요"));
         reviewService.save(otherMember.getId(), createReviewDto(BigDecimal.valueOf(5.0), "최고예요"));
 
-        List<ReviewDetailResponseDTO> reviews = reviewService.sortByReviewType(memory.getId(), member.getId(), place.getId(), SortTypeReview.RATING_DESC);
+        List<ReviewDetailResponseDTO> reviews = reviewService.sortByReviewType(member.getId(), memory.getId(), place.getId(), SortTypeReview.RATING_DESC);
 
         assertThat(reviews.get(0).getRating()).isEqualByComparingTo(BigDecimal.valueOf(5.0));
     }
@@ -183,7 +183,7 @@ class ReviewServiceTest {
         reviewService.save(member.getId(), createReviewDto(BigDecimal.valueOf(3.0), "보통이에요"));
         reviewService.save(otherMember.getId(), createReviewDto(BigDecimal.valueOf(5.0), "최고예요"));
 
-        List<ReviewDetailResponseDTO> reviews = reviewService.sortByReviewType(memory.getId(), member.getId(), place.getId(), SortTypeReview.RATING_ASC);
+        List<ReviewDetailResponseDTO> reviews = reviewService.sortByReviewType(member.getId(), memory.getId(), place.getId(), SortTypeReview.RATING_ASC);
 
         assertThat(reviews.get(0).getRating()).isEqualByComparingTo(BigDecimal.valueOf(3.0));
     }

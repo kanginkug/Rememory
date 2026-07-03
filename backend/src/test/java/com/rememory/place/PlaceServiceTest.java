@@ -2,6 +2,7 @@ package com.rememory.place;
 
 import com.rememory.common.exception.BusinessException;
 import com.rememory.common.exception.ErrorCode;
+import com.rememory.common.s3.service.UploadService;
 import com.rememory.member.Member;
 import com.rememory.member.MemberRepository;
 import com.rememory.memory.MemberMemory;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -31,6 +33,7 @@ class PlaceServiceTest {
     @Autowired MemberRepository memberRepository;
     @Autowired MemoryRepository memoryRepository;
     @Autowired MemberMemoryRepository mmRepository;
+    @MockitoBean UploadService uploadService;
 
     private Member member;
     private Member otherMember;
@@ -373,19 +376,19 @@ class PlaceServiceTest {
     // ===== 헬퍼 메서드 =====
 
     private CreatePlaceRequestDTO createPlaceDto(String name, Category category) {
-        return new CreatePlaceRequestDTO(name, category, "제주시 어딘가", null, null, "kakao_" + name,
+        return new CreatePlaceRequestDTO(name, category, "제주시 어딘가", null, null, null, "kakao_" + name, null,
                 BigDecimal.valueOf(33.4996), BigDecimal.valueOf(126.5312),
                 "제주", "제주시", LocalDate.of(2026, 5, 2));
     }
 
     private CreatePlaceRequestDTO createPlaceDto(String name, Category category, String depth1, String depth2) {
-        return new CreatePlaceRequestDTO(name, category, "제주시 어딘가", null, null, "kakao_" + name,
+        return new CreatePlaceRequestDTO(name, category, "제주시 어딘가", null, null, null, "kakao_" + name, null,
                 BigDecimal.valueOf(33.4996), BigDecimal.valueOf(126.5312),
                 depth1, depth2, LocalDate.of(2026, 5, 2));
     }
 
     private UpdatePlaceRequestDTO updatePlaceDto(String name, Category category) {
-        return new UpdatePlaceRequestDTO(name, category, "제주시 어딘가", null, "kakao_" + name,
+        return new UpdatePlaceRequestDTO(name, category, "제주시 어딘가", null, null, "kakao_" + name, null,
                 BigDecimal.valueOf(33.4996), BigDecimal.valueOf(126.5312),
                 "제주", "제주시", LocalDate.of(2026, 5, 2));
     }
