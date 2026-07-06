@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { MapPin, Users, Star } from "lucide-react";
 
+/** MemoryCard 컴포넌트 props */
 interface MemoryCardProps {
   image: string;
   title: string;
@@ -10,6 +11,7 @@ interface MemoryCardProps {
   date: string;
 }
 
+/** 추억 정보를 요약해서 보여주는 카드 (표지 이미지, 장소 수, 멤버 수, 평균 별점, 날짜) */
 export default function MemoryCard({
   image,
   title,
