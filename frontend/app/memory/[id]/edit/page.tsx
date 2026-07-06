@@ -13,6 +13,7 @@ import {
   type MemoryDetail,
 } from '@/lib/api';
 
+/** 추억 수정 페이지 (`/memory/[id]/edit`) — 기존 추억 정보를 불러와 MemoryForm으로 수정한다 */
 export default function EditMemoryPage() {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
@@ -33,6 +34,10 @@ export default function EditMemoryPage() {
       .finally(() => setLoading(false));
   }, [memoryId, router]);
 
+  /**
+   * 추억 정보를 수정하고, 표지 사진 변경 사항(새 업로드/제거)을 반영한 뒤
+   * 진입 경로(from)에 따라 장소 상세 또는 추억 목록으로 돌아간다
+   */
   const handleSubmit = async ({ name, description, startDate, endDate, showHistory, photoFile, photoRemoved }: MemoryFormValues) => {
     await updateMemory(memoryId, {
       memoryName: name,

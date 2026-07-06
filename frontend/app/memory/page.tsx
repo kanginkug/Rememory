@@ -22,6 +22,7 @@ const NAV_ITEMS = [
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
+/** ISO 날짜 문자열을 "YY.MM.DD (요일)" 형태로 변환한다 */
 function fmtDate(d: string) {
   const dt = new Date(d);
   const yy = String(dt.getFullYear()).slice(2);
@@ -30,6 +31,7 @@ function fmtDate(d: string) {
   return `${yy}.${mm}.${dd} (${DAYS[dt.getDay()]})`;
 }
 
+/** 추억의 시작일/종료일을 카드에 표시할 문자열로 변환한다 (둘 다 없으면 '진행중') */
 function formatDateRange(start: string | null, end: string | null): string {
   if (!start && !end) return '추억 진행중';
   if (!start) return `~ ${fmtDate(end!)}`;
@@ -57,6 +59,7 @@ const SHEET_ACTIONS = [
   },
 ];
 
+/** 추억 목록 페이지 (`/memory`) — 검색/정렬, 추억 카드 그리드, 초대·수정·나가기·삭제 바텀시트를 제공한다 */
 export default function MemoryListPage() {
   const router = useRouter();
   const [memories, setMemories] = useState<Memory[]>([]);
@@ -98,6 +101,7 @@ export default function MemoryListPage() {
     load(sort, '');
   };
 
+  /** 초대 코드를 발급받아 공유용 초대 링크를 생성하고 공유 시트를 연다 */
   const handleInvite = async (memoryId: number) => {
     setSheetId(null);
     try {
@@ -110,6 +114,7 @@ export default function MemoryListPage() {
     }
   };
 
+  /** 카카오톡 공유하기로 초대 링크를 전송한다 */
   const handleKakaoShare = () => {
     if (!shareData) return;
     window.Kakao.Share.sendDefault({
@@ -120,6 +125,7 @@ export default function MemoryListPage() {
     });
   };
 
+  /** 초대 링크를 클립보드에 복사한다 */
   const handleCopyShareLink = async () => {
     if (!shareData) return;
     try {
@@ -129,11 +135,13 @@ export default function MemoryListPage() {
     setShareData(null);
   };
 
+  /** 추억 수정 페이지로 이동한다 */
   const handleEdit = (memoryId: number) => {
     setSheetId(null);
     router.push(`/memory/${memoryId}/edit?from=memory`);
   };
 
+  /** 확인 후 현재 추억에서 나가고, 목록에서 즉시 제거한다 */
   const handleLeave = async (memoryId: number) => {
     setSheetId(null);
     if (!confirm('정말 이 추억에서 나가시겠어요?')) return;
@@ -145,6 +153,7 @@ export default function MemoryListPage() {
     }
   };
 
+  /** 확인 후 추억을 삭제하고, 목록에서 즉시 제거한다 */
   const handleDeleteMemory = async (memoryId: number) => {
     setSheetId(null);
     if (!confirm('추억을 삭제하시겠어요?')) return;
