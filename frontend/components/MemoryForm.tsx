@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+/** MemoryForm 제출 시 부모(생성/수정 페이지)로 전달되는 입력값 */
 export interface MemoryFormValues {
   name: string;
   description: string;
@@ -13,6 +14,7 @@ export interface MemoryFormValues {
   photoRemoved: boolean;
 }
 
+/** MemoryForm 컴포넌트 props. initialData가 있으면 수정 모드로 동작한다 */
 interface MemoryFormProps {
   title: string;
   submitLabel: string;
@@ -28,6 +30,7 @@ interface MemoryFormProps {
   onSubmit: (values: MemoryFormValues) => Promise<void>;
 }
 
+/** 추억 생성/수정 화면에서 공용으로 쓰는 폼 (표지 사진, 이름, 설명, 기간, 신규 멤버 공개 여부) */
 export default function MemoryForm({ title, submitLabel, submittingLabel, initialData, onSubmit }: MemoryFormProps) {
   const router = useRouter();
   const fileInputRef  = useRef<HTMLInputElement>(null);
@@ -54,6 +57,7 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
 
   const isActive = name.trim() !== '' && description.trim() !== '';
 
+  /** 표지 사진 파일 선택 시 미리보기 URL을 생성한다 */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -62,6 +66,7 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
     setPhotoRemoved(false);
   };
 
+  /** 표지 사진을 제거하고 삭제 여부 플래그를 세운다 (제출 시 서버에도 삭제 요청) */
   const handleRemovePhoto = () => {
     setPhotoFile(null);
     setPreviewUrl('');
@@ -69,16 +74,19 @@ export default function MemoryForm({ title, submitLabel, submittingLabel, initia
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  /** 시작일 변경 시, 종료일이 시작일보다 앞서면 종료일을 시작일에 맞춘다 */
   const handleStartDateChange = (val: string) => {
     setStartDate(val);
     if (endDate && endDate < val) setEndDate(val);
   };
 
+  /** 종료일 변경 시, 시작일이 종료일보다 뒤면 시작일을 종료일에 맞춘다 */
   const handleEndDateChange = (val: string) => {
     setEndDate(val);
     if (startDate && startDate > val) setStartDate(val);
   };
 
+  /** 이름/설명이 모두 입력된 경우에만 onSubmit을 호출한다 */
   const handleSubmit = async () => {
     if (!isActive || submitting) return;
     setSubmitting(true);

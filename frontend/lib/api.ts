@@ -182,8 +182,10 @@ export interface BestPlace {
   placePhotoList: PlacePhoto[];
 }
 
+/** 추억 목록 정렬 기준 (최신순/오래된순/별점높은순/별점낮은순) */
 export type SortType = 'DATE_DESC' | 'DATE_ASC' | 'RATING_DESC' | 'RATING_ASC';
 
+/** 추억 목록 조회(`GET /memory`) 응답에 포함되는 추억 요약 정보 */
 export interface Memory {
   id: number;
   name: string;
@@ -196,6 +198,7 @@ export interface Memory {
   imageUrl: string | null;
 }
 
+/** 추억 상세 조회(`GET /memory/{memoryId}`) 응답. 멤버 목록·공개 설정 등 상세 정보 포함 */
 export interface MemoryDetail {
   id: number;
   name: string;
@@ -211,6 +214,7 @@ export interface MemoryDetail {
   memberInfoDTOList?: Member[];
 }
 
+/** 추억 수정(`PUT /memory/{memoryId}`) 요청 바디 */
 export interface UpdateMemoryRequest {
   memoryName: string;
   description: string;
@@ -247,6 +251,7 @@ export interface Member {
   notificationInvitationEnabled: boolean;
 }
 
+/** 추억 생성(`POST /memory`) 요청 바디 */
 export interface CreateMemoryRequest {
   memoryName: string;
   description: string;
@@ -302,12 +307,14 @@ export interface PlaceMapItem {
 export const fetchAllPlaces = () =>
   apiFetch<PlaceMapItem[]>('/place/all');
 
+/** 정렬 기준과 검색어(선택)로 내 추억 목록을 조회한다 */
 export const fetchMemoryList = (sortType: SortType, keyword?: string) => {
   const params = new URLSearchParams({ sortType });
   if (keyword) params.set('keyword', keyword);
   return apiFetch<Memory[]>(`/memory?${params}`);
 };
 
+/** 홈 화면 등에서 사용하는, 최신순으로 정렬된 추억 목록 조회 */
 export const fetchRecentMemories = () => fetchMemoryList('DATE_DESC');
 
 export const fetchRecentReviews = () =>
@@ -402,30 +409,39 @@ export const deleteReviewPhotos = (memoryId: number, reviewId: number, reviewPho
     body: JSON.stringify({ reviewPhotoIdList }),
   });
 
+/** 새 추억을 생성한다 */
 export const createMemory = (body: CreateMemoryRequest) =>
   apiFetch<void>('/memory', { method: 'POST', body: JSON.stringify(body) });
 
+/** 추억 초대 링크에 쓰일 초대 코드를 발급받는다 */
 export const createInvitation = (memoryId: number) =>
   apiFetch<{ inviteCode: string }>(`/invitation/memory/${memoryId}`, { method: 'POST' });
 
+/** 초대 코드를 이용해 추억에 참여(초대 수락)한다 */
 export const agreeInvitation = (inviteCode: string) =>
   apiFetch<void>(`/invitation/agree/${inviteCode}`, { method: 'POST' });
 
+/** 현재 로그인한 멤버가 해당 추억에서 나간다 */
 export const leaveMemory = (memoryId: number) =>
   apiFetch<void>(`/memory/${memoryId}/left`, { method: 'DELETE' });
 
+/** 추억 ID로 상세 정보를 조회한다 (수정 화면 초기값 로딩 등에 사용) */
 export const fetchMemory = (memoryId: number) =>
   apiFetch<MemoryDetail>(`/memory/${memoryId}`);
 
+/** 추억의 이름/설명/기간/공개 설정을 수정한다 */
 export const updateMemory = (memoryId: number, body: UpdateMemoryRequest) =>
   apiFetch<void>(`/memory/${memoryId}`, { method: 'PUT', body: JSON.stringify(body) });
 
+/** 추억 표지 사진을 등록/교체한다 (S3 업로드 후 반환된 imageUrl을 전달) */
 export const addMemoryPhoto = (memoryId: number, imageUrl: string) =>
   apiFetch<void>(`/memory/${memoryId}/photo`, { method: 'POST', body: JSON.stringify({ imageUrl }) });
 
+/** 추억 표지 사진을 삭제한다 */
 export const deleteMemoryPhoto = (memoryId: number) =>
   apiFetch<void>(`/memory/${memoryId}/photo`, { method: 'DELETE' });
 
+/** 추억을 완전히 삭제한다 */
 export const deleteMemory = (memoryId: number) =>
   apiFetch<void>(`/memory/${memoryId}`, { method: 'DELETE' });
 
