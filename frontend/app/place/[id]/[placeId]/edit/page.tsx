@@ -13,6 +13,7 @@ import {
   type PlaceDetail,
 } from '@/lib/api';
 
+/** 장소 수정 페이지 (`/place/[id]/[placeId]/edit`) — 기존 장소 정보를 불러와 PlaceForm으로 수정한다 */
 export default function EditPlacePage() {
   const router = useRouter();
   const { id, placeId } = useParams<{ id: string; placeId: string }>();
@@ -29,6 +30,10 @@ export default function EditPlacePage() {
       .finally(() => setLoading(false));
   }, [memoryId, placeIdNum]);
 
+  /**
+   * 장소 기본 정보를 수정하고, 새로 추가된 사진 업로드와 삭제된 사진 반영을
+   * 병렬로 처리한 뒤 장소 상세 화면으로 돌아간다
+   */
   const handleSubmit = async ({
     name, category, description,
     locationTab, kakaoPlace, depth1, depth2, detailAddress,
