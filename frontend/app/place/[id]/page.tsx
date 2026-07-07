@@ -90,6 +90,7 @@ function AvatarFallback() {
   );
 }
 
+/** 추억의 장소 목록 페이지 (`/place/[id]`) — 검색/카테고리·지역 필터, 장소 카드 그리드, 추억 정보/멤버/공유 바텀시트를 제공한다 */
 export default function MemoryPlacePage() {
   const router = useRouter();
   const params = useParams();
@@ -166,6 +167,7 @@ export default function MemoryPlacePage() {
     setMemberSheet(true);
   };
 
+  /** 초대 코드를 발급받아 공유용 초대 링크를 생성하고 공유 시트를 연다 */
   const handleInvite = async () => {
     setMoreSheet(false);
     try {
@@ -208,6 +210,7 @@ export default function MemoryPlacePage() {
     catch (e) { alert((e as Error).message); }
   };
 
+  /** 확인 후 장소를 삭제하고, 목록에서 즉시 제거한다 */
   const handleDeletePlace = async (placeId: number) => {
     setPlaceMoreId(null);
     if (!confirm('장소를 삭제하시겠어요?')) return;

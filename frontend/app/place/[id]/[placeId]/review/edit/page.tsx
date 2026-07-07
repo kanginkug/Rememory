@@ -18,6 +18,7 @@ import {
 
 const STAR_PATH = "M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z";
 
+/** 0.5 단위로 별점을 선택하는 컴포넌트. 별의 좌/우 클릭 위치로 반개/한개 단위를 구분한다 */
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   const [hover, setHover] = useState(0);
   const display = hover || value;
@@ -76,6 +77,10 @@ function StarRating({ value, onChange }: { value: number; onChange: (v: number) 
   );
 }
 
+/**
+ * 후기 수정 페이지 (`/place/[id]/[placeId]/review/edit`) — 기존 내 후기를 불러와 수정한다.
+ * `from=my-reviews` 쿼리로 진입했다면 저장 후 마이페이지의 '내가 쓴 후기' 목록으로 돌아간다
+ */
 export default function EditReviewPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -144,6 +149,10 @@ export default function EditReviewPage() {
     setNewPreviews(p => p.filter((_, i) => i !== idx));
   };
 
+  /**
+   * 후기 내용을 수정하고, 삭제된 사진 반영과 새 사진 업로드를
+   * 병렬로 처리한 뒤 진입 경로(backTo)로 돌아간다
+   */
   const handleSubmit = async () => {
     if (!myReview || rating === 0 || submitting) return;
     setSubmitting(true);

@@ -33,6 +33,7 @@ const CATEGORY_CHIPS: { value: Category; label: string; icon: React.ReactNode }[
 
 export type KakaoPlace = PlaceSearchResult;
 
+/** PlaceForm 제출 시 부모(생성/수정 페이지)로 전달되는 입력값 */
 export interface PlaceFormValues {
   name: string;
   category: Category;
@@ -46,6 +47,7 @@ export interface PlaceFormValues {
   removedPhotoIds: number[];
 }
 
+/** PlaceForm 컴포넌트 props. initialData가 있으면 수정 모드로 동작한다 */
 interface PlaceFormProps {
   title: string;
   submitLabel: string;
@@ -72,6 +74,7 @@ declare global {
 }
 
 
+/** 장소 생성/수정 화면에서 공용으로 쓰는 폼 (이름, 카테고리, 설명, 카카오맵 검색 또는 수동 입력 위치, 사진) */
 export default function PlaceForm({
   title, submitLabel, submittingLabel, initialData, onSubmit,
 }: PlaceFormProps) {
@@ -133,6 +136,7 @@ export default function PlaceForm({
     return () => { document.body.style.overflow = ''; };
   }, [searchSheet]);
 
+  /** 검색어로 카카오맵 장소를 검색해 결과 목록을 채운다 */
   const handleSearch = async () => {
     if (!query.trim()) return;
     try {
@@ -153,6 +157,7 @@ export default function PlaceForm({
     e.target.value = '';
   };
 
+  /** 기존 사진을 화면에서 제거하고 삭제 대상 ID로 표시한다 (제출 시 서버에도 삭제 요청) */
   const handleRemoveExisting = (photoId: number) => {
     setRemovedPhotoIds(prev => [...prev, photoId]);
     setExistingPhotos(prev => prev.filter(p => p.placePhotoId !== photoId));
@@ -164,6 +169,7 @@ export default function PlaceForm({
     setNewPhotoUrls(prev => prev.filter((_, idx) => idx !== i));
   };
 
+  /** 장소 이름이 입력된 경우에만 onSubmit을 호출한다 */
   const handleSubmit = async () => {
     if (!name.trim() || submitting) return;
     setSubmitting(true);
