@@ -156,11 +156,13 @@ export const CATEGORY_EMOJI: Record<Category, string> = {
   CAFE: '☕',
 };
 
+/** 장소/후기에 첨부된 사진 한 장 */
 export interface PlacePhoto {
   placePhotoId: number;
   imageUrl: string;
 }
 
+/** 홈 화면 '베스트 장소' 목록(`GET /place/best`)에 포함되는 항목. 추억 정보까지 함께 내려온다 */
 export interface BestPlace {
   id: number;
   memoryId: number;
@@ -287,9 +289,11 @@ export const updateMePhoto = (imageUrl: string) =>
 
 export const deleteMe = () => apiFetch<void>('/members/me', { method: 'DELETE' });
 
+/** 홈 화면에 표시할 베스트 장소 목록을 조회한다 */
 export const fetchBestPlaces = () =>
   apiFetch<BestPlace[]>('/place/best');
 
+/** 지도탐색 화면(`/map`)에서 마커로 표시하기 위한 장소 요약 정보 */
 export interface PlaceMapItem {
   memoryId: number;
   memoryName: string;
@@ -304,6 +308,7 @@ export interface PlaceMapItem {
   visitedAt: string | null;
 }
 
+/** 내가 속한 모든 추억의 장소를 지도에 표시하기 위해 전체 조회한다 */
 export const fetchAllPlaces = () =>
   apiFetch<PlaceMapItem[]>('/place/all');
 
@@ -323,13 +328,16 @@ export const fetchRecentReviews = () =>
 export const fetchMyReviews = () =>
   apiFetch<PlaceReview[]>('/review/my');
 
+/** 장소 후기 목록 정렬 기준 (등록일/방문일/별점 각각 최신·높은순 또는 오래된·낮은순) */
 export type ReviewSortType = 'DATE_DESC' | 'DATE_ASC' | 'RATING_DESC' | 'RATING_ASC' | 'VISITED_DESC' | 'VISITED_ASC';
 
+/** 후기에 첨부된 사진 한 장 */
 export interface ReviewPhoto {
   reviewPhotoId: number;
   photoUrl: string;
 }
 
+/** 장소 후기 정보. 장소 상세 페이지와 마이페이지의 '내가 쓴 후기' 목록에서 공용으로 사용 */
 export interface PlaceReview {
   reviewId: number;
   memberId: number;
@@ -347,6 +355,7 @@ export interface PlaceReview {
   createdAt: string;
 }
 
+/** 후기 생성(`POST /review`) 요청 바디 */
 export interface CreateReviewRequest {
   placeId: number;
   memoryId: number;
@@ -356,6 +365,7 @@ export interface CreateReviewRequest {
   photoUrlList?: string[];
 }
 
+/** 후기 수정(`PUT /review/{reviewId}`) 요청 바디 */
 export interface UpdateReviewRequest {
   placeId: number;
   memoryId: number;
@@ -364,12 +374,15 @@ export interface UpdateReviewRequest {
   visitedAt?: string;
 }
 
+/** 특정 장소의 전체 후기를 정렬 없이 조회한다 */
 export const fetchPlaceReviews = (memoryId: number, placeId: number) =>
   apiFetch<PlaceReview[]>(`/review/memory/${memoryId}/place/${placeId}/all`);
 
+/** 특정 장소의 후기를 지정한 기준(등록일/방문일/별점)으로 정렬해 조회한다 */
 export const fetchPlaceReviewsSorted = (memoryId: number, placeId: number, sortType: ReviewSortType) =>
   apiFetch<PlaceReview[]>(`/review/memory/${memoryId}/place/${placeId}/sort?sortTypeReview=${sortType}`);
 
+/** 현재 로그인한 멤버가 해당 장소에 남긴 후기를 조회한다. 없으면 null (404를 에러로 던지지 않고 흡수) */
 export const fetchMyReview = async (memoryId: number, placeId: number): Promise<PlaceReview | null> => {
   const token = getToken();
   const res = await fetch(`${BASE_URL}/api/review/memory/${memoryId}/place/${placeId}`, {
@@ -382,27 +395,32 @@ export const fetchMyReview = async (memoryId: number, placeId: number): Promise<
   return res.json();
 };
 
+/** 새 후기를 작성한다 (멤버당 장소 하나에 후기 하나) */
 export const createReview = (body: CreateReviewRequest) =>
   apiFetch<void>('/review', {
     method: 'POST',
     body: JSON.stringify(body),
   });
 
+/** 기존 후기의 별점/내용/방문일을 수정한다 */
 export const updateReview = (reviewId: number, body: UpdateReviewRequest) =>
   apiFetch<void>(`/review/${reviewId}`, {
     method: 'PUT',
     body: JSON.stringify(body),
   });
 
+/** 후기를 삭제한다 */
 export const deleteReview = (memoryId: number, placeId: number, reviewId: number) =>
   apiFetch<void>(`/review/memory/${memoryId}/place/${placeId}/review/${reviewId}`, { method: 'DELETE' });
 
+/** 후기에 사진을 추가한다 (S3 업로드 후 반환된 imageUrl들을 전달) */
 export const addReviewPhotos = (memoryId: number, reviewId: number, photoUrlList: string[]) =>
   apiFetch<void>(`/review/${memoryId}/${reviewId}/photo`, {
     method: 'POST',
     body: JSON.stringify({ photoUrlList }),
   });
 
+/** 후기 사진 중 일부를 삭제한다 */
 export const deleteReviewPhotos = (memoryId: number, reviewId: number, reviewPhotoIdList: number[]) =>
   apiFetch<void>(`/review/${memoryId}/${reviewId}/photo`, {
     method: 'DELETE',
@@ -445,6 +463,7 @@ export const deleteMemoryPhoto = (memoryId: number) =>
 export const deleteMemory = (memoryId: number) =>
   apiFetch<void>(`/memory/${memoryId}`, { method: 'DELETE' });
 
+/** 추억의 장소 목록 조회(`GET /place/{memoryId}`) 응답에 포함되는 장소 요약 정보 */
 export interface MemoryPlace {
   id: number;
   name: string;
@@ -460,6 +479,7 @@ export interface MemoryPlace {
   placePhotoList: PlacePhoto[];
 }
 
+/** 장소 상세 조회(`GET /place/{memoryId}/{placeId}`) 응답 */
 export interface PlaceDetail {
   id: number;
   name: string;
@@ -479,9 +499,11 @@ export interface PlaceDetail {
   placePhotoList: PlacePhoto[];
 }
 
+/** 장소 ID로 상세 정보를 조회한다 */
 export const fetchPlace = (memoryId: number, placeId: number) =>
   apiFetch<PlaceDetail>(`/place/${memoryId}/${placeId}`);
 
+/** 장소 수정(`PUT /place/{memoryId}/{placeId}`) 요청 바디 */
 export interface UpdatePlaceRequest {
   name: string;
   category: Category;
@@ -497,24 +519,28 @@ export interface UpdatePlaceRequest {
   regionDepth2?: string;
 }
 
+/** 장소의 이름/카테고리/설명/위치 정보를 수정한다 (사진은 addPlacePhotos/deletePlacePhotos로 별도 관리) */
 export const updatePlace = (memoryId: number, placeId: number, req: UpdatePlaceRequest) =>
   apiFetch<void>(`/place/${memoryId}/${placeId}`, {
     method: 'PUT',
     body: JSON.stringify(req),
   });
 
+/** 장소에 사진을 추가한다 (S3 업로드 후 반환된 imageUrl들을 전달) */
 export const addPlacePhotos = (memoryId: number, placeId: number, imageUrlList: string[]) =>
   apiFetch<void>(`/place/${memoryId}/${placeId}/photo`, {
     method: 'POST',
     body: JSON.stringify({ photoUrlList: imageUrlList }),
   });
 
+/** 장소 사진 중 일부를 삭제한다 */
 export const deletePlacePhotos = (memoryId: number, placeId: number, placePhotoIdList: number[]) =>
   apiFetch<void>(`/place/${memoryId}/${placeId}/photo`, {
     method: 'DELETE',
     body: JSON.stringify({ placePhotoIdList }),
   });
 
+/** 카테고리/지역/검색어로 필터링해 추억 내 장소 목록을 조회한다 */
 export const fetchMemoryPlaces = (
   memoryId: number,
   params?: { category?: Category; regionDepth1?: string; regionDepth2?: string; keyword?: string },
@@ -528,9 +554,11 @@ export const fetchMemoryPlaces = (
   return apiFetch<MemoryPlace[]>(`/place/${memoryId}${qs ? `?${qs}` : ''}`);
 };
 
+/** 장소를 완전히 삭제한다 (딸린 후기도 함께 삭제됨) */
 export const deletePlace = (memoryId: number, placeId: number) =>
   apiFetch<void>(`/place/${memoryId}/${placeId}`, { method: 'DELETE' });
 
+/** 장소 생성(`POST /place/{memoryId}`) 요청 바디 */
 export interface CreatePlaceRequest {
   name: string;
   category: Category;
@@ -547,12 +575,14 @@ export interface CreatePlaceRequest {
   photoUrlList?: string[];
 }
 
+/** 추억에 새 장소를 등록한다 */
 export const createPlace = (memoryId: number, req: CreatePlaceRequest) =>
   apiFetch<{ id: number }>(`/place/${memoryId}`, {
     method: 'POST',
     body: JSON.stringify(req),
   });
 
+/** 카카오맵 장소 검색 결과 한 건 (PlaceForm에서 위치 선택 시 사용) */
 export interface PlaceSearchResult {
   kakaoPlaceId: string;
   kakaoPlaceName: string;
@@ -563,6 +593,7 @@ export interface PlaceSearchResult {
   regionDepth2: string;
 }
 
+/** 장소명/주소 검색어로 카카오맵 장소를 검색한다 */
 export const searchPlaces = (query: string) =>
   apiFetch<PlaceSearchResult[]>(`/place/search?query=${encodeURIComponent(query)}`);
 

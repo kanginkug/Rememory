@@ -4,11 +4,13 @@ import { useParams, useRouter } from 'next/navigation';
 import PlaceForm, { type PlaceFormValues } from '@/components/PlaceForm';
 import { createPlace, fetchPresignedUrls, uploadToS3 } from '@/lib/api';
 
+/** 새 장소 생성 페이지 (`/place/[id]/new`) — PlaceForm으로 입력받아 사진 업로드 후 장소를 생성한다 */
 export default function CreatePlacePage() {
   const router = useRouter();
   const params = useParams();
   const memoryId = Number(params.id);
 
+  /** 위치 입력 방식(카카오맵/직접 입력)에 맞게 위치 정보를 조립하고, 사진을 S3에 업로드한 뒤 장소를 생성한다 */
   const handleSubmit = async ({
     name, category, description,
     locationTab, kakaoPlace, depth1, depth2, detailAddress, newPhotos,

@@ -21,10 +21,12 @@ import { renderTextWithLinks } from '@/lib/renderTextWithLinks';
 type SortCategory = 'DATE' | 'VISITED' | 'RATING';
 type SortOrder = 'DESC' | 'ASC';
 
+/** 정렬 카테고리(등록일/방문일/별점)와 방향(내림/오름차순)을 API에서 쓰는 ReviewSortType으로 합친다 */
 function toReviewSortType(category: SortCategory, order: SortOrder): ReviewSortType {
   return `${category}_${order}` as ReviewSortType;
 }
 
+/** 클릭 시 옵션 목록을 펼치는 커스텀 드롭다운 (후기 정렬 기준/방향 선택에 사용) */
 function SortDropdown({ value, options, onChange }: {
   value: string;
   options: { value: string; label: string }[];
@@ -100,6 +102,7 @@ const NAV_ITEMS = [
 ];
 
 
+/** 후기 내용이 길면 2줄로 잘라 보여주고, '더보기'로 전체 내용을 펼쳐볼 수 있게 하는 텍스트 */
 function ReviewTextToggle({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
@@ -129,6 +132,7 @@ function ReviewTextToggle({ text }: { text: string }) {
 }
 
 
+/** 장소 상세 페이지 (`/place/[id]/[placeId]`) — 장소 정보, 내 후기와 전체 후기 목록(정렬 가능)을 보여준다 */
 export default function PlaceDetailPage() {
   const router = useRouter();
   const { id, placeId } = useParams<{ id: string; placeId: string }>();
@@ -182,6 +186,7 @@ export default function PlaceDetailPage() {
     return () => { document.body.style.overflow = ''; };
   }, [anySheet]);
 
+  /** 지정한 정렬 기준으로 후기 목록과 내 후기를 다시 불러온다 */
   const loadReviews = async (sort: ReviewSortType) => {
     const [r, m] = await Promise.allSettled([
       fetchPlaceReviewsSorted(memoryId, placeIdNum, sort),
@@ -201,6 +206,7 @@ export default function PlaceDetailPage() {
     loadReviews(toReviewSortType(sortCategory, order));
   };
 
+  /** 확인 후 내 후기를 삭제하고 목록을 다시 불러온다 */
   const handleDelete = async () => {
     if (!myReview || !confirm('후기를 삭제하시겠어요?')) return;
     try {
@@ -212,6 +218,7 @@ export default function PlaceDetailPage() {
     }
   };
 
+  /** 확인 후 장소를 삭제하고 장소 목록으로 돌아간다 */
   const handlePlaceDelete = async () => {
     if (!confirm('장소를 삭제하시겠어요?')) return;
     try {
