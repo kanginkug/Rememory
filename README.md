@@ -28,6 +28,8 @@
 - **장소(Place)**: 추억 안에 등록하는 방문 장소. 카카오맵으로 검색해 좌표·주소를 자동 입력합니다.
 - **후기(Review)**: 장소당 1인 1후기. 별점(0.5 단위), 사진, 텍스트로 구성됩니다.
 
+- 서비스 링크 : https://rememory.me
+
 <table>
   <tr>
     <td width="33%"><img width="100%" alt="홈" src="https://github.com/user-attachments/assets/0c2ce8b1-278b-488a-9cdb-50984b5f703e" /></td>
