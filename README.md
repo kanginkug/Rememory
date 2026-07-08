@@ -28,6 +28,14 @@
 - **장소(Place)**: 추억 안에 등록하는 방문 장소. 카카오맵으로 검색해 좌표·주소를 자동 입력합니다.
 - **후기(Review)**: 장소당 1인 1후기. 별점(0.5 단위), 사진, 텍스트로 구성됩니다.
 
+<table>
+  <tr>
+    <td width="33%"><img width="100%" alt="홈" src="https://github.com/user-attachments/assets/0c2ce8b1-278b-488a-9cdb-50984b5f703e" /></td>
+    <td width="33%"><img width="100%" alt="장소" src="https://github.com/user-attachments/assets/d105b534-58f9-443b-9fb5-dfeaef9402ae" /></td>
+    <td width="33%"><img width="100%" alt="지도탐색" src="https://github.com/user-attachments/assets/b740951d-9141-4807-96d8-e39b02a713ad" /></td>
+  </tr>
+</table>
+
 ---
 
 ## 기술 스택
@@ -93,7 +101,7 @@
 - 마커 범위에 맞게 지도 자동 줌/이동
 
 ### 후기 관리
-- 1인 1후기 (작성 후 UPDATE, 재작성 불가)
+- 1인 1후기 (작성 후 수정만 가능)
 - 별점 0.5 단위, 후기 사진 최대 3장
 - 정렬: 최신순 / 오래된순 / 별점 높은순 / 낮은순
 - 내 전체 후기 목록 조회
