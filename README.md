@@ -29,9 +29,9 @@
 - **후기(Review)**: 장소당 1인 1후기. 별점(0.5 단위), 사진, 텍스트로 구성됩니다.
 
 <p align="center">
-  <img width="260" height="183" alt="홈" src="https://github.com/user-attachments/assets/0c2ce8b1-278b-488a-9cdb-50984b5f703e" />
-  <img width="260" height="183" alt="장소" src="https://github.com/user-attachments/assets/d105b534-58f9-443b-9fb5-dfeaef9402ae" />
-  <img width="260" height="183" alt="지도탐색" src="https://github.com/user-attachments/assets/b740951d-9141-4807-96d8-e39b02a713ad" />
+  <img width="280" alt="홈" src="https://github.com/user-attachments/assets/0c2ce8b1-278b-488a-9cdb-50984b5f703e" />
+  <img width="280" alt="장소" src="https://github.com/user-attachments/assets/d105b534-58f9-443b-9fb5-dfeaef9402ae" />
+  <img width="280" alt="지도탐색" src="https://github.com/user-attachments/assets/b740951d-9141-4807-96d8-e39b02a713ad" />
 </p>
 
 ---
