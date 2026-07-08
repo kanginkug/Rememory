@@ -314,4 +314,4 @@ npm run dev
 
 ---
 
-**개발자**: 강인국 | rkddlsrnr1234@gmail.com
+**개발자**: 강인국 | rkddlsrnr12@naver.com
