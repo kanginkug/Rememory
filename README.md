@@ -167,7 +167,7 @@ SET avg_rating = (avg_rating * review_count + :newRating) / (review_count + 1),
 WHERE place_id = :placeId
 ```
 
-📌 **아키텍처 포인트**
+**아키텍처 포인트**
 - **SELECT FOR UPDATE 제거**: 초기에는 `Place` 행에 비관적 락(`SELECT FOR UPDATE`)을 걸었지만, PostgreSQL 기본 격리 수준(Read Committed)에서 UPDATE 실행 시 자동으로 획득하는 배타적 행 잠금(Row-level Lock)만으로도 동시 요청이 직렬화됨을 확인하고 단일 UPDATE로 전환했습니다.
 - **락 경합 최소화**: 엔티티를 Java 메모리로 꺼내 연산하는 방식 대비, DB 내부 연산 구간에서만 락을 유지해 트랜잭션 점유 시간을 최소화했습니다 (50 VUs 동시 쓰기 테스트 시 p(95) 45ms).
 - **락 범위 최소화**: 통계성 상위 집계인 Memory의 avg_rating은 락 없이 UPDATE해 불필요한 락 범위를 줄였습니다.
@@ -194,7 +194,7 @@ queryFactory.select(pp.place.id, pp)
     ));
 ```
 
-📌 엔지니어링 트레이드오프
+DISTINCT ON을 쓰지 않은 이유
 * **비즈니스 제약 조건을 고려한 리스크 관리:** 본 서비스는 도메인 규칙상 **'장소당 사진 최대 5장 제한'** 정책을 엄격히 적용하고 있습니다. 이에 따라 메모리 필터링 방식으로 발생할 수 있는 네트워크/인프라 부하 리스크가 매우 낮습니다 (최악의 경우도 `조회 장소 수 × 5행` 수준).
 * **타입 안정성 및 DB 포터빌리티 유지:** `DISTINCT ON`은 PostgreSQL 전용 구문으로 JPQL/QueryDSL에서 표준으로 지원하지 않습니다. 이를 DB 레이어에서 처리하려면 Native Query로 이탈해야 하며, 이로 인해 컴파일 시점의 타입 안정성 상실 및 특정 DB 벤더 종속성 발생이라는 리스크 비용이 따릅니다. 현재 비즈니스 규모에서는 이 비용이 이점보다 크다고 판단하여 **QueryDSL 기반 배치 조회 방식**을 선택했습니다.
 * **향후 확장성 확보:** 추후 대용량 미디어 서비스로 확장되거나 사진 등록 제한 정책이 해제될 경우, Native SQL의 `DISTINCT ON` 또는 창 함수(Window Function)로 전환하여 DB 레이어에서 place당 1행만 반환하도록 고도화할 아키텍처적 여지를 남겨두었습니다.
