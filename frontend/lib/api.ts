@@ -225,6 +225,7 @@ export interface UpdateMemoryRequest {
   showHistoryToNew: boolean;
 }
 
+/** 홈 화면의 '최근 리뷰' 섹션에서 사용하는, 추억·장소 정보가 포함된 최신 후기 */
 export interface RecentReview {
   reviewId: number;
   memberId: number;
