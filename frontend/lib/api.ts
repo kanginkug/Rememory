@@ -323,6 +323,7 @@ export const fetchMemoryList = (sortType: SortType, keyword?: string) => {
 /** 홈 화면 등에서 사용하는, 최신순으로 정렬된 추억 목록 조회 */
 export const fetchRecentMemories = () => fetchMemoryList('DATE_DESC');
 
+/** 홈 화면 '최근 리뷰' 섹션에 표시할 최신순 후기 목록을 조회한다 */
 export const fetchRecentReviews = () =>
   apiFetch<RecentReview[]>('/review/recent');
 
