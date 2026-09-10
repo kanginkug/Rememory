@@ -15,9 +15,11 @@ const nextConfig: NextConfig = {
         hostname: 'rememory-images-493746472739-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com',
       },
       {
-        // Oracle Object Storage 버킷 (컷오버 이후 신규/이관 이미지)
+        // Oracle Object Storage 버킷 (컷오버 이후 신규/이관 이미지). 네이티브 API는 namespace가
+        // 서브도메인이 아니라 경로(/n/{namespace}/b/{bucket}/o/...)에 들어감
         protocol: 'https',
-        hostname: 'nrwl044cs6nq.objectstorage.ap-tokyo-1.oraclecloud.com',
+        hostname: 'objectstorage.ap-tokyo-1.oraclecloud.com',
+        pathname: '/n/nrwl044cs6nq/b/rememory-images/o/**',
       },
     ],
   },

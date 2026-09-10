@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16
+    image: postgres:18
     container_name: rememory-postgres
     restart: always
     environment:
@@ -8,7 +8,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # postgres 18부터 데이터 디렉토리 구조가 바뀌어서(major-version 하위 디렉토리 사용) 마운트 지점도 변경됨
+      - postgres_data:/var/lib/postgresql
     logging:
       driver: "json-file"
       options:
