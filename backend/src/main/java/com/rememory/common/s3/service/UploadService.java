@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,10 @@ public class UploadService {
     // 이전엔 "amazonaws.com" 하드코딩 URL이었음. S3 호환 스토리지 전환 시에도 그대로 쓸 수 있도록 프로퍼티로 분리
     @Value("${cloud.aws.s3.public-base-url}")
     private String publicBaseUrl;
+    // Oracle Object Storage는 버킷 CORS를 지원하지 않아 브라우저가 직접 PUT 불가능.
+    // 값이 있으면 presigned PUT URL의 host를 이 프록시(nginx가 Oracle로 전달)로 치환. 비어있으면 기존 방식 그대로
+    @Value("${cloud.aws.s3.presigned-proxy-base-url:}")
+    private String presignedProxyBaseUrl;
     private final S3Client s3Client;
 
     /** S3 Presigned URL 일괄 생성 */
@@ -48,7 +53,17 @@ public class UploadService {
 
         String imageUrl = publicBaseUrl + "/" + key;
 
-        return new PresignedUrlResponseDTO(presigned.url().toString(), imageUrl);
+        return new PresignedUrlResponseDTO(applyPresignedProxy(presigned.url().toString()), imageUrl);
+    }
+
+    /** presignedProxyBaseUrl이 설정된 경우, path/query(서명 포함)는 그대로 두고 scheme/host만 프록시로 교체 */
+    private String applyPresignedProxy(String presignedUrl) {
+        if (presignedProxyBaseUrl.isBlank()) {
+            return presignedUrl;
+        }
+        URI original = URI.create(presignedUrl);
+        String query = original.getRawQuery();
+        return presignedProxyBaseUrl + original.getRawPath() + (query != null ? "?" + query : "");
     }
 
     /** S3 객체 삭제 (imageUrl에서 key 추출, publicBaseUrl 접두사를 잘라내는 방식이라 엔드포인트에 무관) */
