@@ -1,6 +1,5 @@
 package com.rememory.memory;
 
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Ops;
@@ -34,27 +33,27 @@ public class MemoryRepository {
 
     /**
      * 메모리 목록 조회
-     * @param sortTypeMemory "DATE_DESC" 최신순 / "DATE_ASC" 오래된순
+     * @param sortTypeMemory "DATE_DESC" 최신순(추억 생성일) / "DATE_ASC" 오래된순
      *                 "RATING_DESC" 별점높은순 / "RATING_ASC" 별점낮은순
+     *                 "ACTIVITY_DESC" 기본 정렬 — 추억 내 장소가 가장 최근에 등록된 순
      * @param keyword  키워드로 메모리명 검색
      */
     public List<Memory> findAllByMemberId(Long memberId, SortTypeMemory sortTypeMemory, String keyword){
-        // 추억 내 장소가 가장 최근에 등록된 시각(없으면 추억 생성일)을 "최신순" 기준으로 사용
-        // → 오래된 추억이라도 새 장소가 추가되면 목록 상단으로 올라옴
-        Expression<LocalDateTime> lastActivityAt = Expressions.dateTimeOperation(LocalDateTime.class, Ops.COALESCE,
-                JPAExpressions.select(QPlace.place.createdAt.max())
-                        .from(QPlace.place)
-                        .where(
-                                QPlace.place.memory.id.eq(QMemory.memory.id),
-                                QPlace.place.deletedAt.isNull()
-                        ),
-                QMemory.memory.createdAt);
-
         OrderSpecifier<?> orderSpecifier = switch (sortTypeMemory) {
-            case DATE_ASC -> new OrderSpecifier<>(Order.ASC, lastActivityAt);
-            case DATE_DESC -> new OrderSpecifier<>(Order.DESC, lastActivityAt);
+            case DATE_ASC -> QMemory.memory.createdAt.asc();
+            case DATE_DESC -> QMemory.memory.createdAt.desc();
             case RATING_ASC -> QMemory.memory.avgRating.asc();
             case RATING_DESC -> QMemory.memory.avgRating.desc();
+            // 추억 내 장소가 가장 최근에 등록된 시각(없으면 추억 생성일)을 기준으로 내림차순
+            // → 오래된 추억이라도 새 장소가 추가되면 목록 상단으로 올라옴
+            case ACTIVITY_DESC -> new OrderSpecifier<>(Order.DESC, Expressions.dateTimeOperation(LocalDateTime.class, Ops.COALESCE,
+                    JPAExpressions.select(QPlace.place.createdAt.max())
+                            .from(QPlace.place)
+                            .where(
+                                    QPlace.place.memory.id.eq(QMemory.memory.id),
+                                    QPlace.place.deletedAt.isNull()
+                            ),
+                    QMemory.memory.createdAt));
         };
 
         return queryFactory
