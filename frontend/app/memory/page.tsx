@@ -7,6 +7,7 @@ import { fetchMemoryList, createInvitation, leaveMemory, deleteMemory, type Memo
 import BellIcon from '@/components/BellIcon';
 
 const SORT_OPTIONS: { label: string; value: SortType }[] = [
+  { label: '기본 정렬', value: 'ACTIVITY_DESC' },
   { label: '최신순',    value: 'DATE_DESC'   },
   { label: '오래된순',  value: 'DATE_ASC'    },
   { label: '별점높은순', value: 'RATING_DESC' },
@@ -65,7 +66,7 @@ export default function MemoryListPage() {
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
   const [inputValue, setInputValue] = useState('');
-  const [sort, setSort] = useState<SortType>('DATE_DESC');
+  const [sort, setSort] = useState<SortType>('ACTIVITY_DESC');
   const [sheetId, setSheetId] = useState<number | null>(null);
   const [shareData, setShareData] = useState<{ inviteLink: string; memoryName: string } | null>(null);
   const currentKeyword = useRef('');
@@ -82,7 +83,7 @@ export default function MemoryListPage() {
       router.replace('/login');
       return;
     }
-    load('DATE_DESC', '');
+    load('ACTIVITY_DESC', '');
   }, [router, load]);
 
   const handleSortChange = (s: SortType) => {
@@ -239,7 +240,7 @@ export default function MemoryListPage() {
         <div className="flex gap-2.5 overflow-x-auto scrollbar-hide" style={{ padding: '14px 20px' }}>
           {SORT_OPTIONS.map(opt => (
             <button
-              key={opt.value}
+              key={opt.label}
               onClick={() => handleSortChange(opt.value)}
               className="shrink-0"
               style={{

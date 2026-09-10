@@ -55,12 +55,14 @@ function Stars({ rating, id }: { rating: number; id: number }) {
   );
 }
 
+/** 삭제 확인 팝업에 표시할, 삭제 대상 후기를 식별하기 위한 정보 */
 interface DeleteTarget {
   reviewId: number;
   memoryId: number;
   placeId: number;
 }
 
+/** 내가 쓴 후기 관리 페이지 (`/my/reviews`) — 후기 목록을 조회하고 수정/삭제할 수 있다 */
 export default function ReviewManagementPage() {
   const router = useRouter();
   const [reviews, setReviews] = useState<PlaceReview[]>([]);
@@ -82,6 +84,7 @@ export default function ReviewManagementPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  /** 후기 카드의 내용 더보기/말줄임 펼침 상태를 토글한다 */
   const toggleExpanded = (reviewId: number) => {
     setExpanded(prev => {
       const next = new Set(prev);
@@ -90,6 +93,7 @@ export default function ReviewManagementPage() {
     });
   };
 
+  /** 확인 팝업에서 선택한 후기를 삭제하고 목록에서 제거한다 */
   const handleDelete = async () => {
     if (!deleteTarget || deleting) return;
     setDeleting(true);

@@ -97,6 +97,7 @@ export default function CreateReviewPage() {
     fetchPlace(memoryId, placeIdNum).then(setPlace).catch(() => {});
   }, [memoryId, placeIdNum]);
 
+  /** 선택한 파일을 최대 3장까지 photos에 추가하고 미리보기 URL을 생성한다 */
   const handleAddPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).slice(0, 3 - photos.length);
     setPhotos(p => [...p, ...files]);
@@ -104,6 +105,7 @@ export default function CreateReviewPage() {
     e.target.value = '';
   };
 
+  /** 지정한 인덱스의 사진을 목록에서 제거하고 해당 미리보기 URL을 해제한다 */
   const handleRemovePhoto = (idx: number) => {
     URL.revokeObjectURL(previews[idx]);
     setPhotos(p => p.filter((_, i) => i !== idx));
