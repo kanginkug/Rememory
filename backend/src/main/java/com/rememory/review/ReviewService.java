@@ -8,6 +8,7 @@ import com.rememory.member.MemberRepository;
 import com.rememory.member.fcm.FcmService;
 import com.rememory.memory.MemberMemory;
 import com.rememory.memory.MemberMemoryRepository;
+import com.rememory.memory.Memory;
 import com.rememory.memory.MemoryRepository;
 import com.rememory.place.Place;
 import com.rememory.place.PlaceRepository;
@@ -55,7 +56,7 @@ public class ReviewService {
         }
 
         Place place = placeRepository.findOne(memoryId, placeId).orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
-        com.rememory.memory.Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
+        Memory memory = memoryRepository.findOne(memoryId).orElseThrow(() -> new BusinessException(ErrorCode.MEMORY_NOT_FOUND));
 
         Review review = Review.create(creator, place, cuReviewRequestDTO.getRating(), cuReviewRequestDTO.getContent(), cuReviewRequestDTO.getVisitedAt());
         reviewRepository.save(review);
