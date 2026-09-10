@@ -58,6 +58,9 @@ services:
     image: containrrr/watchtower
     container_name: watchtower
     restart: always
+    environment:
+      # Docker 데몬이 최소 지원 API 버전을 올려서, watchtower 기본 클라이언트(구버전) 접속이 거부됨 → 명시적으로 맞춰줌
+      DOCKER_API_VERSION: "1.44"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 300 --cleanup rememory-app
