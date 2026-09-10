@@ -184,8 +184,8 @@ export interface BestPlace {
   placePhotoList: PlacePhoto[];
 }
 
-/** 추억 목록 정렬 기준 (최신순/오래된순/별점높은순/별점낮은순) */
-export type SortType = 'DATE_DESC' | 'DATE_ASC' | 'RATING_DESC' | 'RATING_ASC';
+/** 추억 목록 정렬 기준 (기본 정렬/최신순/오래된순/별점높은순/별점낮은순) */
+export type SortType = 'ACTIVITY_DESC' | 'DATE_DESC' | 'DATE_ASC' | 'RATING_DESC' | 'RATING_ASC';
 
 /** 추억 목록 조회(`GET /memory`) 응답에 포함되는 추억 요약 정보 */
 export interface Memory {
@@ -327,6 +327,7 @@ export const fetchRecentMemories = () => fetchMemoryList('DATE_DESC');
 export const fetchRecentReviews = () =>
   apiFetch<RecentReview[]>('/review/recent');
 
+/** 마이페이지 '내가 쓴 후기' 목록(`/my/reviews`)에서 사용하는, 내가 작성한 전체 후기를 조회한다 */
 export const fetchMyReviews = () =>
   apiFetch<PlaceReview[]>('/review/my');
 
