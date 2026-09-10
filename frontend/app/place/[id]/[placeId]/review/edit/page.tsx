@@ -130,6 +130,7 @@ export default function EditReviewPage() {
     }).finally(() => setLoading(false));
   }, [memoryId, placeIdNum, router]);
 
+  /** 기존 사진과 새 사진을 합쳐 최대 3장이 되도록 선택한 파일을 newPhotos에 추가한다 */
   const handleAddPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const remaining = 3 - totalPhotos;
     if (remaining <= 0) return;
@@ -139,10 +140,12 @@ export default function EditReviewPage() {
     e.target.value = '';
   };
 
+  /** 기존 사진을 삭제 대상 ID 목록에 추가한다 (실제 삭제는 저장 시 일괄 처리) */
   const handleRemoveExisting = (photoId: number) => {
     setRemovedPhotoIds(ids => [...ids, photoId]);
   };
 
+  /** 새로 추가한 사진을 목록에서 제거하고 해당 미리보기 URL을 해제한다 */
   const handleRemoveNew = (idx: number) => {
     URL.revokeObjectURL(newPreviews[idx]);
     setNewPhotos(p => p.filter((_, i) => i !== idx));
