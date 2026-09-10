@@ -69,3 +69,11 @@ frontend/design/
 
 ### Seed Data ###
 backend/src/main/resources/db/seed/
+
+### Backups ###
+/backup/
+/backup.zip
+
+### Debug Screenshots ###
+backend/bug/
+/화면 캡처/

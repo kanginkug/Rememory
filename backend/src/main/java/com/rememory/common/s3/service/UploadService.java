@@ -21,8 +21,9 @@ public class UploadService {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    @Value("${cloud.aws.region.static}")
-    private String region;
+    // 이전엔 "amazonaws.com" 하드코딩 URL이었음. S3 호환 스토리지 전환 시에도 그대로 쓸 수 있도록 프로퍼티로 분리
+    @Value("${cloud.aws.s3.public-base-url}")
+    private String publicBaseUrl;
     private final S3Client s3Client;
 
     /** S3 Presigned URL 일괄 생성 */
@@ -45,14 +46,14 @@ public class UploadService {
                 .signatureDuration(Duration.ofMinutes(10))
                 .putObjectRequest(putRequest));
 
-        String imageUrl = "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
+        String imageUrl = publicBaseUrl + "/" + key;
 
         return new PresignedUrlResponseDTO(presigned.url().toString(), imageUrl);
     }
 
-    /** S3 객체 삭제 (imageUrl에서 key 추출) */
+    /** S3 객체 삭제 (imageUrl에서 key 추출, publicBaseUrl 접두사를 잘라내는 방식이라 엔드포인트에 무관) */
     public void delete(String imageUrl) {
-        String key = imageUrl.substring(imageUrl.indexOf(".amazonaws.com/") + ".amazonaws.com/".length());
+        String key = imageUrl.substring(publicBaseUrl.length() + 1);
 
         s3Client.deleteObject(r -> r
                 .bucket(bucket)
