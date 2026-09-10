@@ -1,17 +1,36 @@
 services:
+  postgres:
+    image: postgres:16
+    container_name: rememory-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   app:
     image: inkug/rememory-app:latest
     container_name: rememory-app
     restart: always
+    depends_on:
+      - postgres
     ports:
       - "8080:8080"
     env_file:
-      - backend/.env  
+      - backend/.env
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      RDS_URL: ${RDS_URL}
-      RDS_USER: ${RDS_USER}
-      RDS_PASSWORD: ${RDS_PASSWORD}
+      # postgres 컨테이너를 RDS 자리에 그대로 연결 (application-prod.properties의 RDS_* 프로퍼티명은 유지)
+      RDS_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      RDS_USER: ${POSTGRES_USER}
+      RDS_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
       KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
@@ -19,9 +38,20 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       S3_ACCESS_KEY: ${S3_ACCESS_KEY}
       S3_SECRET_KEY: ${S3_SECRET_KEY}
+      # Oracle Object Storage(S3 호환) 전환 시에만 값 채움. 비어있으면 기존 AWS S3 그대로 사용
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-}
       FRONTEND_URL: ${FRONTEND_URL}
       COOKIE_SECURE: ${COOKIE_SECURE}
       UPLOAD_DIR: ${UPLOAD_DIR}
       FIREBASE_SERVICE_ACCOUNT_PATH: ${FIREBASE_SERVICE_ACCOUNT_PATH}
     volumes:
       - /home/ubuntu/rememory-9d099-firebase-adminsdk-fbsvc-7dccbd480c.json:/app/firebase.json
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:
