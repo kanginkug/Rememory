@@ -1,6 +1,11 @@
 package com.rememory.memory;
 
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Ops;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.rememory.place.QPlace;
 import jakarta.persistence.EntityManager;
@@ -9,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,9 +39,20 @@ public class MemoryRepository {
      * @param keyword  키워드로 메모리명 검색
      */
     public List<Memory> findAllByMemberId(Long memberId, SortTypeMemory sortTypeMemory, String keyword){
+        // 추억 내 장소가 가장 최근에 등록된 시각(없으면 추억 생성일)을 "최신순" 기준으로 사용
+        // → 오래된 추억이라도 새 장소가 추가되면 목록 상단으로 올라옴
+        Expression<LocalDateTime> lastActivityAt = Expressions.dateTimeOperation(LocalDateTime.class, Ops.COALESCE,
+                JPAExpressions.select(QPlace.place.createdAt.max())
+                        .from(QPlace.place)
+                        .where(
+                                QPlace.place.memory.id.eq(QMemory.memory.id),
+                                QPlace.place.deletedAt.isNull()
+                        ),
+                QMemory.memory.createdAt);
+
         OrderSpecifier<?> orderSpecifier = switch (sortTypeMemory) {
-            case DATE_ASC -> QMemory.memory.createdAt.asc();
-            case DATE_DESC -> QMemory.memory.createdAt.desc();
+            case DATE_ASC -> new OrderSpecifier<>(Order.ASC, lastActivityAt);
+            case DATE_DESC -> new OrderSpecifier<>(Order.DESC, lastActivityAt);
             case RATING_ASC -> QMemory.memory.avgRating.asc();
             case RATING_DESC -> QMemory.memory.avgRating.desc();
         };
